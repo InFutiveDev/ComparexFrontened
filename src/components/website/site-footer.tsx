@@ -1,0 +1,124 @@
+import Image from "next/image";
+import Link from "next/link";
+import { FaFacebookF, FaLinkedinIn, FaYoutube } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+import { HiOutlineGlobeAlt } from "react-icons/hi2";
+
+import { FooterLegalBar } from "@/components/website/footer-legal-bar";
+
+const footerColumns = [
+  {
+    title: "Product",
+    links: [
+      { href: "/", label: "Categories" },
+      { href: "/", label: "Brands" },
+      { href: "/", label: "Compare" },
+      { href: "/", label: "Blog" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { href: "/", label: "Industry" },
+      { href: "/", label: "Ask Question" },
+      { href: "/", label: "Get Free Advice" },
+      { href: "/", label: "Login / Signup" },
+    ],
+  },
+  {
+    title: "Features",
+    links: [
+      { href: "/", label: "Compare" },
+      { href: "/", label: "Categories" },
+      { href: "/", label: "Brands" },
+      { href: "/", label: "Industry" },
+    ],
+  },
+  {
+    title: "Links",
+    links: [
+      { href: "/", label: "Ask Question" },
+      { href: "/", label: "Blog" },
+      { href: "/", label: "Get Free Advice" },
+      { href: "/", label: "Login / Signup" },
+    ],
+  },
+] as const;
+
+const socialLinks = [
+  { href: "#", label: "Facebook", icon: FaFacebookF },
+  { href: "#", label: "Twitter", icon: FaXTwitter },
+  { href: "#", label: "LinkedIn", icon: FaLinkedinIn },
+  { href: "#", label: "YouTube", icon: FaYoutube },
+] as const;
+
+export function SiteFooter() {
+  return (
+    <footer>
+      <section className="bg-slate-50">
+        <div className="relative mx-auto max-w-8xl overflow-hidden bg-neutral-100 px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.45]"
+            aria-hidden
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, transparent 0, transparent 26px, rgba(0, 0, 0, 0.04) 26px, rgba(0,0,0,0.045) 27px)",
+            }}
+          />
+          
+
+          <div className="relative flex flex-col gap-12 lg:flex-row lg:items-stretch lg:gap-0">
+            <div className="max-w-xl shrink-0 border-b border-neutral-200 pb-10 lg:max-w-[min(100%,33rem)] lg:border-b-0 lg:pb-0 lg:pr-10 xl:pr-14">
+              <Link href="/" className="inline-block">
+                <Image
+                  src="/images/logo.svg"
+                  alt="Comparex"
+                  width={160}
+                  height={40}
+                  className="h-11 w-auto object-contain object-left"
+                />
+              </Link>
+              <p className="mt-5 text-base font-medium leading-relaxed text-neutral-600">
+                Modern website and dashboard experience for growth teams—browse, compare, and choose software with
+                confidence.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                {socialLinks.map(({ href, label, icon: Icon }) => (
+                  <Link
+                    key={label}
+                    href={href}
+                    aria-label={label}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-sm transition hover:border-neutral-300 hover:text-neutral-950"
+                  >
+                    <Icon className="h-[1.05rem] w-[1.05rem]" aria-hidden />
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-6 gap-y-10 sm:gap-x-10 lg:grid-cols-4 lg:gap-x-0 lg:gap-y-0">
+              {footerColumns.map((column) => (
+                <div key={column.title} className="min-w-0 lg:px-6 xl:px-8">
+                  <h4 className="text-[22px] font-semibold tracking-tight text-neutral-700">{column.title}</h4>
+                  <ul className="mt-5 space-y-3.5">
+                    {column.links.map((item, index) => (
+                      <li key={`${column.title}-${index}-${item.label}`}>
+                        <Link
+                          href={item.href}
+                          className="text-base font-semibold text-neutral-950 transition hover:text-neutral-600 hover:!text-[#2D4CC8]"
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+      <FooterLegalBar />
+    </footer>
+  );
+}

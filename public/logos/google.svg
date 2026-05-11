@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="68" viewBox="0 0 240 68" fill="none">
+  <rect x="2" y="2" width="64" height="64" rx="18" fill="#ffffff" fill-opacity="0.14" stroke="#ffffff" stroke-opacity="0.25" stroke-width="4"/>
+  <path d="M50 34c0 9-7 16-16 16s-16-7-16-16 7-16 16-16c4.2 0 7.9 1.6 10.8 4.2" stroke="#ffffff" stroke-opacity="0.9" stroke-width="6" stroke-linecap="round"/>
+  <path d="M34 34h16" stroke="#ffffff" stroke-opacity="0.9" stroke-width="6" stroke-linecap="round"/>
+  <text x="82" y="43" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800" fill="#ffffff" fill-opacity="0.92">Google</text>
+</svg>
