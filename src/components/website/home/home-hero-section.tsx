@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { IoSearch } from "react-icons/io5";
+import { PiSparkleFill } from "react-icons/pi";
 import { HeroAdviceForm } from "@/components/website/home/hero-advice-form";
 import Link from "next/link";
 
@@ -69,7 +70,10 @@ export function HomeHeroSection() {
                       className="inline-flex shrink-0 items-center gap-10 text-xs font-medium tracking-wide text-white/95 sm:text-sm"
                     >
                       {message}
-                      <span className="size-1.5 shrink-0 rounded-full bg-[#40C3CF]" aria-hidden />
+                      <PiSparkleFill
+                        className="size-5.25 shrink-0 text-white"
+                        aria-hidden
+                      />
                     </span>
                   ))}
                 </div>
