@@ -1,432 +1,363 @@
 "use client";
 
-import Image from "next/image";
-import React, { useState } from "react";
-import { HiOutlineHeart, HiOutlineClipboardCopy } from "react-icons/hi";
-import { HiOutlineChevronUpDown } from "react-icons/hi2";
+import {
+  HiOutlineChevronUpDown,
+  HiOutlineHeart,
+} from "react-icons/hi2";
 
-/** Site accent — matches hero / features (blue + cyan), promos use orange */
-const ACCENT = "#2d4cc8";
-const ACCENT_MUTED = "#40c3cf";
-
-type Row = {
-  rank: number;
-  name: string;
-  likes: number;
-  rating: number;
-  reviews: number;
-  countryCode: string;
-  flag: string;
-  yearsLabel: string;
-  yearsProgress: number;
-  assets: string[];
-  platforms: { label: string; abbr: string }[];
-  maxAllocation: string;
-  allocationProgress: number;
-  promoTitle: string;
-  promoCode: string;
-};
-
-const rows: Row[] = [
+const firms = [
   {
-    rank: 1,
-    name: "Goat Funded Trader",
-    likes: 42346,
-    rating: 4.3,
-    reviews: 818,
-    countryCode: "HK",
-    flag: "🇭🇰",
-    yearsLabel: "2",
-    yearsProgress: 0.35,
-    assets: ["Crypto", "Energy", "FX", "Indices", "Metals"],
-    platforms: [
-      { label: "MetaTrader 4", abbr: "4" },
-      { label: "MetaTrader 5", abbr: "5" },
-      { label: "cTrader", abbr: "cT" },
-    ],
-    maxAllocation: "$400K",
-    allocationProgress: 0.72,
-    promoTitle: "40% OFF",
-    promoCode: "MATCH",
+    name: "FundingPips",
+    logo: "FP",
+    payoutMode: "Bi-Weekly",
+    settlement: "2 Days",
+    onboarding: "Instant",
+    providers: "Rise / Deel",
+    supported: "UPI, Bank",
+    offers: "20% OFF",
+    review: "4.8",
+    reviewCount: 868,
+    trust: "9.2",
+    apps: "Web + App",
+    rowClass: "bg-gradient-to-r from-[#eef3ff] via-white to-white",
   },
   {
-    rank: 2,
-    name: "Alpha Desk",
-    likes: 28901,
-    rating: 4.6,
-    reviews: 412,
-    countryCode: "AE",
-    flag: "🇦🇪",
-    yearsLabel: "10+",
-    yearsProgress: 1,
-    assets: ["FX", "Indices", "Metals"],
-    platforms: [
-      { label: "MetaTrader 5", abbr: "5" },
-      { label: "cTrader", abbr: "cT" },
-    ],
-    maxAllocation: "$250K",
-    allocationProgress: 0.55,
-    promoTitle: "BOGO",
-    promoCode: "ALPHA2026",
+    name: "The5ers",
+    logo: "T5",
+    payoutMode: "Weekly",
+    settlement: "1 Day",
+    onboarding: "Fast",
+    providers: "Wise",
+    supported: "Crypto",
+    offers: "10% OFF",
+    review: "4.7",
+    reviewCount: 1177,
+    trust: "9.0",
+    apps: "Web",
+    rowClass: "bg-gradient-to-r from-slate-50 via-white to-white",
   },
   {
-    rank: 3,
-    name: "Summit Markets",
-    likes: 15622,
-    rating: 4.1,
-    reviews: 205,
-    countryCode: "GB",
-    flag: "🇬🇧",
-    yearsLabel: "5",
-    yearsProgress: 0.55,
-    assets: ["Crypto", "FX", "Energy"],
-    platforms: [{ label: "MetaTrader 4", abbr: "4" }],
-    maxAllocation: "$600K",
-    allocationProgress: 0.88,
-    promoTitle: "25% OFF",
-    promoCode: "SUMMIT",
-  },
-  {
-    rank: 4,
-    name: "River Trade Co.",
-    likes: 8934,
-    rating: 3.9,
-    reviews: 156,
-    countryCode: "US",
-    flag: "🇺🇸",
-    yearsLabel: "3",
-    yearsProgress: 0.45,
-    assets: ["Indices", "Metals", "FX"],
-    platforms: [
-      { label: "MetaTrader 5", abbr: "5" },
-      { label: "cTrader", abbr: "cT" },
-    ],
-    maxAllocation: "$150K",
-    allocationProgress: 0.4,
-    promoTitle: "15% OFF",
-    promoCode: "RIVER15",
+    name: "Goat Funded",
+    logo: "GF",
+    payoutMode: "14 Days",
+    settlement: "3 Days",
+    onboarding: "Easy",
+    providers: "Rise",
+    supported: "UPI",
+    offers: "50% OFF",
+    review: "4.5",
+    reviewCount: 1060,
+    trust: "8.8",
+    apps: "Web + iOS",
+    rowClass: "bg-gradient-to-r from-[#ecfbfc] via-white to-white",
   },
 ];
 
-function SortLabel({
-  children,
+const paymentModes = [
+  "UPI",
+  "Debit Card",
+  "Credit Card",
+  "Net Banking",
+  "Wallet",
+  "GPay",
+  "PayLater",
+  "International",
+];
+
+const tableColumns = [
+  { label: "Firm", sortable: true },
+  { label: "Best for", sortable: true },
+  { label: "PG Mode", sortable: true },
+  { label: "Settlement Cycle", sortable: true },
+  { label: "Onboarding TAT", sortable: true },
+  { label: "Providers", sortable: true },
+  { label: "Supported Picker", sortable: false },
+  { label: "Offers", sortable: true },
+  { label: "Review", sortable: true },
+  { label: "T.T Score", sortable: true },
+  { label: "Apps", sortable: false },
+  
+] as const;
+
+const thClass =
+  "whitespace-nowrap px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500";
+
+const tdClass = "border-t border-slate-200 px-4 py-5 align-middle";
+
+function FirmReview({
+  rating,
+  reviewCount,
+}: {
+  rating: string;
+  reviewCount: number;
+}) {
+  const value = Number.parseFloat(rating);
+  const fullStars = Math.floor(value);
+  const fraction = Math.min(1, Math.max(0, value - fullStars));
+
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <div className="rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] p-px">
+        <div className="rounded-full bg-white px-4 py-0.5">
+          <span className="text-sm font-bold leading-none text-[#13203F]">{rating}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-0.5" aria-hidden>
+        {Array.from({ length: 5 }, (_, index) => {
+          const starIndex = index + 1;
+          if (starIndex <= fullStars) {
+            return (
+              <span key={starIndex} className="text-base leading-none text-[#2D4CC8]">
+                ★
+              </span>
+            );
+          }
+          if (starIndex === fullStars + 1 && fraction > 0) {
+            return (
+              <span key={starIndex} className="relative inline-block text-base leading-none">
+                <span className="text-slate-300">★</span>
+                <span
+                  className="absolute left-0 top-0 overflow-hidden text-[#2D4CC8]"
+                  style={{ width: `${fraction * 100}%` }}
+                >
+                  ★
+                </span>
+              </span>
+            );
+          }
+          return (
+            <span key={starIndex} className="text-base leading-none text-slate-300">
+              ★
+            </span>
+          );
+        })}
+      </div>
+
+      <p className="text-xs sm:text-sm">
+        <span className="font-semibold text-[#2D4CC8]">{reviewCount}</span>{" "}
+        <span className="text-slate-500">reviews</span>
+      </p>
+    </div>
+  );
+}
+
+function TableHeaderCell({
+  label,
   sortable,
 }: {
-  children: React.ReactNode;
-  sortable?: boolean;
+  label: string;
+  sortable: boolean;
 }) {
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-      {children}
-      {sortable ? (
-        <HiOutlineChevronUpDown className="size-3.5 shrink-0 text-slate-600" aria-hidden />
-      ) : null}
-    </span>
-  );
-}
-
-function RankBadge({ rank }: { rank: number }) {
-  if (rank === 1) {
-    return (
-      <span
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-amber-600 text-lg shadow-inner"
-        title="1st"
-      >
-        🏆
+    <th scope="col" className={thClass}>
+      <span className="inline-flex items-center gap-1">
+        {label}
+        {sortable && (
+          <HiOutlineChevronUpDown className="text-sm text-slate-400" aria-hidden />
+        )}
       </span>
-    );
-  }
-  if (rank === 2) {
-    return (
-      <span
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-300 to-slate-500 text-lg shadow-inner"
-        title="2nd"
-      >
-        🏆
-      </span>
-    );
-  }
-  if (rank === 3) {
-    return (
-      <span
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-700 to-amber-900 text-lg shadow-inner"
-        title="3rd"
-      >
-        🏆
-      </span>
-    );
-  }
-  return (
-    <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-sm font-semibold text-white">
-      {rank}
-    </span>
+    </th>
   );
 }
 
-function StarRow({ rating }: { rating: number }) {
-  const full = Math.min(5, Math.round(rating));
-  const empty = 5 - full;
+export function HomeComparisonTable() {
   return (
-    <div className="flex gap-0.5 text-[13px] leading-none" aria-hidden>
-      {Array.from({ length: full }).map((_, i) => (
-        <span key={`f-${i}`} style={{ color: ACCENT }}>
-          ★
-        </span>
-      ))}
-      {Array.from({ length: empty }).map((_, i) => (
-        <span key={`e-${i}`} className="text-slate-600">
-          ★
-        </span>
-      ))}
-    </div>
-  );
-}
+    <section className="mx-auto max-w-8xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+      <div className="mb-6 max-w-2xl">
+        <h2 className="text-2xl font-bold tracking-tight text-[#13203F] sm:text-3xl">
+          Compare payment & payout options
+        </h2>
+        <p className="mt-2 text-sm text-slate-600 sm:text-base">
+          Filter by payment mode and compare firms side by side.
+        </p>
+      </div>
 
-function YearsRing({ progress, label }: { progress: number; label: string }) {
-  const size = 44;
-  const stroke = 3;
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const dash = c * (1 - Math.min(progress, 1));
-  return (
-    <div className="relative flex size-11 items-center justify-center">
-      <svg width={size} height={size} className="-rotate-90">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke="rgb(51 65 85)"
-          strokeWidth={stroke}
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke={ACCENT}
-          strokeWidth={stroke}
-          strokeDasharray={c}
-          strokeDashoffset={dash}
-          strokeLinecap="round"
-          className="transition-[stroke-dashoffset]"
-        />
-      </svg>
-      <span className="absolute text-xs font-semibold text-white">{label}</span>
-    </div>
-  );
-}
+      <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        {/* Top filter — fixed, does not scroll */}
+        <div className="shrink-0 border-b border-slate-200 bg-white p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <h3 className="mr-2 text-base font-bold text-[#13203F]">Payment Mode</h3>
 
-export const HomeComparisonTable = () => {
-  const [copied, setCopied] = useState<string | null>(null);
+          {paymentModes.map((mode, index) => (
+            <button
+              key={mode}
+              type="button"
+              className={`rounded-xl border px-4 py-2 text-sm font-medium transition ${
+                index === 0
+                  ? "border-[#2D4CC8] bg-[#2D4CC8]/10 text-[#2D4CC8]"
+                  : "border-slate-200 bg-slate-50 text-slate-600 hover:border-[#2D4CC8] hover:text-[#2D4CC8]"
+              }`}
+            >
+              {mode}
+            </button>
+          ))}
 
-  const copyCode = async (code: string) => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(code);
-      setTimeout(() => setCopied(null), 1600);
-    } catch {
-      setCopied(null);
-    }
-  };
-
-  /** Sirf column beech — `border-r` (aakhri column par nahi) */
-  const colR = "border-r border-slate-600";
-
-  const rowCell =
-    "bg-[#eef2fa] backdrop-blur-2xl px-3 py-4 align-middle transition-colors group-hover:bg-slate-200/60";
-  const rowCellFirst = `${rowCell} ${colR} rounded-l-2xl`;
-  const rowCellMid = `${rowCell} ${colR}`;
-  const rowCellLast = `${rowCell} rounded-r-2xl`;
-
-  return (
-    <section className="mx-auto max-w-8xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="rounded-3xl bg-white px-4 py-6 shadow-xl shadow-slate-200/30 sm:px-6 sm:py-8">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
-            PG Comparison
-          </h2>
-          <button
-            type="button"
-            className="inline-flex w-fit items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
-            View All
-          </button>
+          <div className="ml-auto flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              className="rounded-xl border border-[#2D4CC8] bg-[#2D4CC8] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#2542b6]"
+            >
+              Compare Mode
+            </button>
+            <button
+              type="button"
+              className="rounded-xl border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-600 transition hover:border-[#2D4CC8] hover:text-[#2D4CC8]"
+            >
+              Sort By
+            </button>
+          </div>
+          </div>
         </div>
 
-        <div className="overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
-          <table className="w-full min-w-[1040px] border-separate border-spacing-x-0 border-spacing-y-3">
-            <caption className="sr-only">Prop firm comparison — firms, ratings, country, tenure, assets, platforms</caption>
-            <thead>
-              <tr>
-                <th scope="col" className={`min-w-[220px] pb-2 pe-3 text-start align-bottom ${colR}`}>
-                  <SortLabel sortable>Firm</SortLabel>
-                </th>
-                <th scope="col" className={`min-w-[130px] pb-2 pe-3 text-center align-bottom ${colR}`}>
-                  <SortLabel sortable>Rank / Reviews</SortLabel>
-                </th>
-                <th scope="col" className={`min-w-[72px] pb-2 pe-3 text-center align-bottom ${colR}`}>
-                  <SortLabel sortable>Country</SortLabel>
-                </th>
-                <th scope="col" className={`min-w-[88px] pb-2 pe-3 text-center align-bottom ${colR}`}>
-                  <SortLabel sortable>Years in operation</SortLabel>
-                </th>
-                <th scope="col" className={`min-w-[168px] pb-2 pe-3 text-center align-bottom ${colR}`}>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                    Assets
-                  </span>
-                </th>
-                <th scope="col" className={`min-w-[96px] pb-2 pe-3 text-center align-bottom ${colR}`}>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                    Platforms
-                  </span>
-                </th>
-                <th scope="col" className={`min-w-[112px] pb-2 pe-3 text-center align-bottom ${colR}`}>
-                  <SortLabel sortable>Max allocations</SortLabel>
-                </th>
-                <th scope="col" className={`min-w-[136px] pb-2 pe-3 text-start align-bottom ${colR}`}>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                    Promo
-                  </span>
-                </th>
-                <th scope="col" className="min-w-[88px] pb-2 pe-3 text-start align-bottom">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                    Actions
-                  </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.name} className="group">
-                  <td className={rowCellFirst}>
-                    <div className="flex min-w-0 items-center gap-3">
-                      <RankBadge rank={row.rank} />
-                      <div className="flex min-w-0 items-center gap-2.5">
-                        <div className="relative size-11 shrink-0 overflow-hidden rounded-lg border border-slate-600 bg-slate-800">
-                          <Image
-                            src="/images/brand-1.svg"
-                            alt=""
-                            fill
-                            className="object-contain p-1.5"
-                            sizes="44px"
-                          />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="truncate font-semibold text-slate-900">{row.name}</p>
-                          <p
-                            className="mt-0.5 flex items-center gap-1 text-xs font-medium"
-                            style={{ color: ACCENT }}
-                          >
-                            <HiOutlineHeart className="size-3.5 shrink-0" aria-hidden />
-                            {row.likes.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
+        {/* Table only — horizontal scroll */}
+        <div className="min-w-0 overflow-x-auto">
+        <table className="w-full min-w-[1200px] border-collapse text-left">
+          <thead className="border-b border-slate-200 bg-[#f4f6fc]">
+            <tr>
+              {tableColumns.map((col) => (
+                <TableHeaderCell
+                  key={col.label}
+                  label={col.label}
+                  sortable={col.sortable}
+                />
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {firms.map((firm) => (
+              <tr
+                key={firm.name}
+                className={`transition hover:bg-slate-50/50 ${firm.rowClass}`}
+              >
+                <td className={tdClass}>
+                  <div className="flex min-w-[200px] items-center gap-4">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border-2 border-[#2D4CC8] bg-[#13203F] text-lg font-bold text-white">
+                      {firm.logo}
                     </div>
-                  </td>
-                  <td className={rowCellMid}>
-                    <div className="flex flex-col items-start gap-1">
-                      <span
-                            className="rounded-full border px-2.5 py-0.5 text-sm font-semibold text-slate-900 shadow-[0_0_0_1px_rgba(45,76,200,0.35)]"
-                        style={{
-                          borderColor: `${ACCENT}66`,
-                          boxShadow: `0 0 12px ${ACCENT}22`,
-                        }}
-                      >
-                        {row.rating.toFixed(1)}
-                      </span>
-                      <StarRow rating={row.rating} />
-                      <span className="text-xs font-medium text-slate-500">
-                        {row.reviews} reviews
-                      </span>
-                    </div>
-                  </td>
-                  <td className={rowCellMid}>
-                    <div className="flex items-center gap-1.5 text-sm font-medium text-slate-900">
-                      <span className="text-lg leading-none" aria-hidden>
-                        {row.flag}
-                      </span>
-                      {row.countryCode}
-                    </div>
-                  </td>
-                  <td className={rowCellMid}>
-                    <YearsRing progress={row.yearsProgress} label={row.yearsLabel} />
-                  </td>
-                  <td className={rowCellMid}>
-                    <div className="flex flex-wrap gap-1">
-                      {row.assets.map((a) => (
-                        <span
-                          key={a}
-                          className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600"
-                        >
-                          {a}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className={rowCellMid}>
-                    <div className="flex flex-wrap gap-1.5">
-                      {row.platforms.map((p) => (
-                        <span
-                          key={p.label}
-                          title={p.label}
-                          className="flex size-8 items-center justify-center rounded-full border border-slate-600 bg-slate-800 text-[10px] font-bold text-slate-200"
-                        >
-                          {p.abbr}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className={rowCellMid}>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-slate-900">{row.maxAllocation}</p>
-                      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-slate-800">
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{
-                            width: `${Math.round(row.allocationProgress * 100)}%`,
-                            background: `linear-gradient(90deg, ${ACCENT}, ${ACCENT_MUTED})`,
-                          }}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-bold text-slate-900 sm:text-lg">
+                          {firm.name}
+                        </h3>
+                        <HiOutlineHeart
+                          className="text-lg text-[#2D4CC8]"
+                          aria-hidden
                         />
                       </div>
+                      <p className="mt-1 text-sm font-medium text-[#2D4CC8]">
+                        48K Likes
+                      </p>
                     </div>
-                  </td>
-                  <td className={rowCellMid}>
-                    <div className="flex max-w-[140px] flex-col overflow-hidden rounded-lg border border-slate-700/80">
-                      <div
-                        className="px-2 py-1.5 text-center text-[11px] font-bold uppercase tracking-wide text-slate-900"
-                        style={{
-                          background: `linear-gradient(135deg, #FF944D 0%, ${ACCENT} 100%)`,
-                        }}
-                      >
-                        {row.promoTitle}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => copyCode(row.promoCode)}
-                        className="flex items-center justify-center gap-1 bg-slate-100 px-2 py-1.5 text-[11px] font-semibold text-slate-900 transition hover:bg-slate-900"
-                      >
-                        {copied === row.promoCode ? "Copied" : row.promoCode}
-                        <HiOutlineClipboardCopy className="size-3.5 opacity-80" aria-hidden />
-                      </button>
+                  </div>
+                </td>
+
+                <td className={tdClass}>
+                  <span className="rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 sm:text-sm">
+                    {firm.payoutMode}
+                  </span>
+                </td>
+
+                <td className={tdClass}>
+                  <span className="text-sm font-semibold text-slate-900">
+                    {firm.settlement}
+                  </span>
+                </td>
+
+                <td className={tdClass}>
+                  <span className="text-sm font-semibold text-slate-900">
+                    {firm.onboarding}
+                  </span>
+                </td>
+
+                <td className={tdClass}>
+                  <span className="rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 sm:text-sm">
+                    {firm.providers}
+                  </span>
+                </td>
+
+                <td className={tdClass}>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full bg-[#222118] px-3 py-1.5 text-xs font-medium text-white/90">
+                      {firm.supported}
+                    </span>
+                  </div>
+                </td>
+
+                <td className={tdClass}>
+                  <div className="w-fit overflow-hidden rounded-xl border border-[#2D4CC8]/30">
+                    <div className="bg-[#2D4CC8] px-4 py-1 text-center text-xs font-bold text-white sm:text-sm">
+                      {firm.offers}
                     </div>
-                  </td>
-                  <td className={rowCellLast}>
-                    <button
-                      type="button"
-                      className="rounded-full border px-4 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-white/5"
-                      style={{ borderColor: `${ACCENT}99` }}
-                    >
-                      Firm
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <div className="bg-[#13203F] px-4 py-1 text-center text-xs font-semibold text-white">
+                      MATCH
+                    </div>
+                  </div>
+                </td>
+
+                <td className={`${tdClass} text-center`}>
+                  <FirmReview rating={firm.review} reviewCount={firm.reviewCount} />
+                </td>
+
+                <td className={tdClass}>
+                  <span className="text-base font-bold text-[#2D4CC8]">
+                    {firm.trust}
+                  </span>
+                </td>
+
+                <td className={tdClass}>
+                  <button
+                    type="button"
+                    className="whitespace-nowrap rounded-full border border-[#2D4CC8] px-5 py-2 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#2D4CC8] hover:text-white"
+                  >
+                    {firm.apps}
+                  </button>
+                </td>
+
+                <td className={tdClass}>
+                  <button
+                    type="button"
+                    className="whitespace-nowrap rounded-full border border-[#2D4CC8] px-5 py-2 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#2D4CC8] hover:text-white"
+                  >
+                    {firm.apps}
+                  </button>
+                </td>
+                
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        </div>
+
+        {/* Bottom compare bar — fixed, does not scroll */}
+        <div className="shrink-0 border-t border-slate-200 bg-white p-5">
+          <div className="flex flex-wrap items-center gap-4">
+            <h3 className="text-base font-bold text-[#13203F]">Comparing</h3>
+
+            {["PG1", "PG2", "PG3"].map((chip) => (
+              <span
+                key={chip}
+                className="rounded-full border border-[#2D4CC8] bg-[#2D4CC8]/5 px-6 py-2 text-sm font-semibold text-[#2D4CC8]"
+              >
+                {chip}
+              </span>
+            ))}
+
+            <button
+              type="button"
+              className="ml-auto rounded-xl border border-slate-200 px-5 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300"
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              className="rounded-xl bg-[#2D4CC8] px-5 py-2 text-sm font-bold text-white transition hover:bg-[#2542b6]"
+            >
+              Compare Now
+            </button>
+          </div>
         </div>
       </div>
     </section>
   );
-};
+}

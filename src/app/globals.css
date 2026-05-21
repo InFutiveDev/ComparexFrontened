@@ -51,6 +51,10 @@ a {
   animation-play-state: paused;
 }
 
+.cx-marquee--ticker .cx-marquee__track {
+  animation-duration: 28s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cx-marquee__track {
     animation: none;

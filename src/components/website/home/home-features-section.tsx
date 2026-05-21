@@ -1,36 +1,37 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const promoSlides = [
   {
     title: "List Your Software/Service to Expand Your Reach to Potential Buyers",
-    buttonText: "Register For Free",
+    buttonText: "Read More",
     bgImage: "/images/img-4.png",
   },
   {
     title: "Get More Qualified Leads by Showcasing Your Product to Buyers",
-    buttonText: "Start Listing",
+    buttonText: "Read More",
     bgImage: "/images/img-4.png",
   },
   {
     title: "Boost Visibility with Smart Promotion and High Intent Traffic",
-    buttonText: "Promote Now",
+    buttonText: "Read More",
     bgImage: "/images/img-4.png",
   },
 ];
 
 const features = [
   {
-   
+
     icon: "/images/img-1.jpeg",
   },
   {
-   
+
     icon: "/images/img-2.jpg",
   },
   {
-   
+
     icon: "/images/img-3.jpg",
   },
 ];
@@ -58,15 +59,13 @@ export function HomeFeaturesSection() {
           <h5 className="mb-6 max-w-[380px] text-3xl font-bold leading-[1.2] tracking-tight text-white">
             {promoSlides[activeSlide].title}
           </h5>
-          <a
-            href="#"
-            className="inline-flex items-center rounded-[10px] bg-[#FF944D] px-6 py-3 text-base font-semibold text-white transition hover:bg-[#ff8535]"
-          >
-            {promoSlides[activeSlide].buttonText}
-            <svg className="ms-2 h-4 w-4 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m0 0-4 4m4-4-4-4" />
-            </svg>
-          </a>
+          <Link href="/" className="relative inline-flex items-center px-10 py-2 overflow-hidden text-[14px] font-medium !text-white border-2 border-white rounded-full hover:text-white group hover:bg-white/10">
+            <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
+            <span className="absolute right-0 flex items-center justify-start w-6 h-6 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </span>
+            <span className="relative">{promoSlides[activeSlide].buttonText}</span>
+          </Link>
           <div className="mt-5 flex items-center gap-2">
             {promoSlides.map((slide, index) => (
               <button
@@ -90,7 +89,7 @@ export function HomeFeaturesSection() {
           }}
           aria-label={`Feature ${activeSlide + 1}`}
         />
-        
+
       </div>
     </section>
   );
