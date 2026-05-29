@@ -673,7 +673,7 @@ export function HomeComparisonTable() {
                     <td className={tdBase}>
                       <button
                         type="button"
-                        className="whitespace-nowrap cursor-pointer rounded-full bg-[#40C3CF] px-4 py-2 text-sm font-semibold text-[#13203F] transition-colors hover:bg-[#36b2bd]"
+                        className="whitespace-nowrap cursor-pointer rounded-full border-2 border-[#2D4CC8] px-4 py-2 text-sm font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white"
                       >
                         Signup / Get Started
                       </button>
