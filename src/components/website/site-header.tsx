@@ -6,13 +6,15 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const navItems = [
-  { href: "/", label: "Categories" },
-  { href: "/", label: "Brands" },
-  { href: "/", label: "Industry" },
-  { href: "/", label: "Compare" },
-  { href: "/", label: "Ask Question" },
-  { href: "/", label: "Blog" },
-  { href: "/", label: "Get Free Advice" },
+  
+  { href: "/", label: "About" },
+  { href: "/", label: "How it Works" },
+  { href: "/", label: "Why Comparex " },
+  { href: "/", label: "Compare PG " },
+  { href: "/", label: "Talk to Expert " },
+  { href: "/", label: "Tools" },
+  { href: "/", label: "Resources" },
+  
 ];
 
 export function SiteHeader() {

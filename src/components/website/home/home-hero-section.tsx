@@ -9,9 +9,9 @@ import { HeroAdviceForm } from "@/components/website/home/hero-advice-form";
 import Link from "next/link";
 
 const heroStats = [
-  { value: "20,000+", label: "Products" },
-  { value: "300+", label: "Trusted Brands" },
-  { value: "12M+", label: "Happy Customers" },
+  { label: "How it works", value: "How it works" },
+  { label: "Compare PG", value: "Compare PG" },
+  { label: "Talk to Expert", value: "Talk to Expert" },
 ] as const;
 
 const scrollTickerMessages = [
@@ -82,7 +82,7 @@ export function HomeHeroSection() {
           </div>
         </div>
 
-        <div className="relative z-10 mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
+        <div className="relative z-30 mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
 
           <div className="flex min-h-[560px] items-center py-1 sm:min-h-[560px] sm:py-1">
 
@@ -90,20 +90,23 @@ export function HomeHeroSection() {
 
               <div className="lg:col-span-7">
                 <div className="w-full max-w-xl text-white lg:max-w-2xl">
-                  <h1 className="text-2xl font-bold leading-tight sm:text-3xl lg:text-[40px]">
-                    Discover, Compare & Buy the Best Software for Your Business
+                  <p className="text-[16px] border border-white/50 rounded-full px-4 py-1.5 w-fit font-regular leading-tight text-white mb-2">
+                  India’s 1st PG Comparison Platform
+                  </p>
+                  <h1 className="text-[32px] font-medium leading-tight sm:text-[32px] lg:text-[32px] mt-4">
+                  Discover, compare & choose the right payment gateway for your business.
                   </h1>
 
                   <form
                     onSubmit={handleSearchSubmit}
-                    className="mt-6 flex h-12 items-center rounded-full border border-white/35 bg-white/95 px-4 text-sm text-slate-600 shadow-lg shadow-slate-950/10 sm:h-14"
+                    className="mt-6 w-[95%] flex h-12 items-center rounded-full border border-white/35 bg-white/95 px-4 text-sm text-slate-600 shadow-lg shadow-slate-950/10 sm:h-12"
                   >
                     <IoSearch className="mr-2 cursor-pointer text-2xl text-[#2d4cc8]" aria-hidden="true" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(event) => setSearchQuery(event.target.value)}
-                      placeholder="Search for software, category or brand..."
+                      placeholder="Search Payment Gateway"
                       className="h-full w-full border-0 bg-transparent text-[16px] text-slate-700 placeholder:text-slate-400 outline-none"
                       aria-label="Search software"
                     />
@@ -113,44 +116,44 @@ export function HomeHeroSection() {
                     {heroStats.map((stat, index) => (
                       <div
                         key={stat.label}
-                        className={`sm:px-4 ${index !== 0 ? "sm:border-l sm:border-white/30" : ""}`}
+                        className={`sm:px-2 ${index !== 0 ? "sm:border-l sm:border-white/50 text-center" : ""}`}
                       >
-                        <p className="text-3xl font-bold leading-none text-white">{stat.value}</p>
-                        <p className="mt-2 text-sm text-white/80">{stat.label}</p>
+                        <p className="text-[22px] font-medium leading-tight text-white">{stat.value}</p>
+                        
                       </div>
                     ))}
                   </div>
 
-                  <p className="mt-6 text-sm text-white/85">
-                    Search for software, category or brand and compare options quickly.
+                  <p className="mt-6 text-[18px] font-regular leading-tight text-white">
+                    Register as:
                   </p>
                   <div className="flex items-center gap-3 mt-4">
-                    <Link href="/" className="relative inline-flex items-center px-12 py-3 overflow-hidden text-lg font-medium text-indigo-600 border-2 border-white rounded-full hover:text-white group hover:bg-gray-50">
+                    <Link href="/" className="relative inline-flex items-center px-12 py-2 overflow-hidden text-lg font-medium text-indigo-600 border-2 border-white rounded-full hover:text-white group hover:bg-gray-50">
                       <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
                       <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                       </span>
                       <span className="relative">Merchant</span>
                     </Link>
-                    <Link href="/" className="relative inline-flex items-center px-12 py-3 overflow-hidden text-lg font-medium text-indigo-600 border-2 border-white rounded-full hover:text-white group hover:bg-gray-50">
+                    <Link href="/" className="relative inline-flex items-center px-12 py-2 overflow-hidden text-lg font-medium text-indigo-600 border-2 border-white rounded-full hover:text-white group hover:bg-gray-50">
                       <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
                       <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                       </span>
                       <span className="relative">Reseller</span>
                     </Link>
-                    <Link href="/" className="relative inline-flex items-center px-12 py-3 overflow-hidden text-lg font-medium text-indigo-600 border-2 border-white rounded-full hover:text-white group hover:bg-gray-50">
+                    <Link href="/" className="relative inline-flex items-center px-12 py-2 overflow-hidden text-lg font-medium text-indigo-600 border-2 border-white rounded-full hover:text-white group hover:bg-gray-50">
                       <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
                       <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                       </span>
-                      <span className="relative">Vendor PG</span>
+                      <span className="relative">AP - PG</span>
                     </Link>
                   </div>
                 </div>
               </div>
 
-              <div className="lg:col-span-5 lg:self-center">
+              <div className="relative z-40 lg:col-span-5 lg:self-center">
                 <HeroAdviceForm />
               </div>
             </div>

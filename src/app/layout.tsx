@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -32,7 +33,12 @@ export default function RootLayout({
         className="min-h-full bg-slate-50 text-slate-900"
         suppressHydrationWarning
       >
-        {children}
+        <Script id="strip-extension-attrs" strategy="beforeInteractive">
+          {`try{document.querySelectorAll("[bis_skin_checked]").forEach(function(el){el.removeAttribute("bis_skin_checked");});}catch(e){}`}
+        </Script>
+        <div className="contents" suppressHydrationWarning>
+          {children}
+        </div>
       </body>
     </html>
   );

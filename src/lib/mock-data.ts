@@ -117,76 +117,19 @@ export const heroFormStepOneFields: {
     label: "Industry",
     placeholder: "Select industry",
     options: [
-      { value: "saas", label: "SaaS / Technology" },
-      { value: "retail", label: "Retail / E-commerce" },
-      { value: "finance", label: "Finance" },
-      { value: "healthcare", label: "Healthcare" },
-      { value: "other", label: "Other" },
+      { value: "ecommerce-d2c", label: "Ecommerce / D2C" },
+      { value: "b2b-manufacturing", label: "B2B / Manufacturing Businesses" },
+      { value: "saas-subscription-platforms", label: "SaaS / Subscription Platforms" },
+      { value: "education-healthcare", label: "Education / Healthcare Services" },
+      { value: "travel-bill-payments", label: "Travel / Bill Payments" },
+      { value: "other-businesses", label: "Freelancers  / Other Businesses" },
     ],
   },
-  {
-    id: "hero-role",
-    name: "role",
-    label: "Your role",
-    placeholder: "Select role",
-    options: [
-      { value: "founder", label: "Founder / CEO" },
-      { value: "ops", label: "Operations" },
-      { value: "it", label: "IT / Engineering" },
-      { value: "finance", label: "Finance" },
-      { value: "hr", label: "HR" },
-    ],
-  },
-  {
-    id: "hero-department",
-    name: "department",
-    label: "Department",
-    placeholder: "Select department",
-    options: [
-      { value: "sales", label: "Sales" },
-      { value: "marketing", label: "Marketing" },
-      { value: "product", label: "Product" },
-      { value: "support", label: "Customer Support" },
-      { value: "procurement", label: "Procurement" },
-    ],
-  },
-  {
-    id: "hero-company-size",
-    name: "companySize",
-    label: "Company size",
-    placeholder: "Select company size",
-    options: [
-      { value: "1-10", label: "1–10 employees" },
-      { value: "11-50", label: "11–50 employees" },
-      { value: "51-200", label: "51–200 employees" },
-      { value: "200+", label: "200+ employees" },
-    ],
-  },
-  {
-    id: "hero-region",
-    name: "region",
-    label: "Region",
-    placeholder: "Select region",
-    options: [
-      { value: "in", label: "India" },
-      { value: "us", label: "United States" },
-      { value: "uk", label: "United Kingdom" },
-      { value: "me", label: "Middle East" },
-      { value: "apac", label: "APAC" },
-    ],
-  },
-  {
-    id: "hero-timeline",
-    name: "timeline",
-    label: "Purchase timeline",
-    placeholder: "Select timeline",
-    options: [
-      { value: "immediate", label: "Immediately" },
-      { value: "1-month", label: "Within 1 month" },
-      { value: "3-months", label: "Within 3 months" },
-      { value: "exploring", label: "Just exploring" },
-    ],
-  },
+  
+  
+  
+
+
 ];
 
 export const pricingPlans: PricingPlan[] = [

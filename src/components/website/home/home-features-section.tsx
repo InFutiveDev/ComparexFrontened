@@ -6,19 +6,19 @@ import { useEffect, useState } from "react";
 const promoSlides = [
   {
     id: "promo-list-software",
-    title: "List Your Software/Service to Expand Your Reach to Potential Buyers",
+    title: "Best Payment Gateways in India for Startups",
     buttonText: "Read More",
     bgImage: "/images/img-4.png",
   },
   {
     id: "promo-qualified-leads",
-    title: "Get More Qualified Leads by Showcasing Your Product to Buyers",
+    title: "Razorpay vs Cashfree vs PayU: Complete Comparison",
     buttonText: "Read More",
     bgImage: "/images/img-4.png",
   },
   {
     id: "promo-visibility",
-    title: "Boost Visibility with Smart Promotion and High Intent Traffic",
+    title: "How to Choose the Right Payment Gateway for Your Business",
     buttonText: "Read More",
     bgImage: "/images/img-4.png",
   },
