@@ -1,7 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { HiRocketLaunch, HiSparkles, HiUserPlus } from "react-icons/hi2";
+import {
+  HiBuildingOffice2,
+  HiBuildingStorefront,
+  HiChartBarSquare,
+  HiClipboardDocumentCheck,
+  HiClipboardDocumentList,
+  HiInboxArrowDown,
+  HiLifebuoy,
+  HiShare,
+  HiSquares2X2,
+} from "react-icons/hi2";
 
 type RoleKey = "merchant" | "reseller" | "vendor";
 
@@ -14,62 +24,62 @@ type Step = {
 const stepsByRole: Record<RoleKey, Step[]> = {
   merchant: [
     {
-      title: "Sign Up & Set Up",
+      title: "Tell Us About Your Business",
       description:
-        "Create your merchant account quickly and configure checkout preferences to match your business flow.",
-      Icon: HiUserPlus,
+        "Answer a few simple questions so CompareX can understand your business model, payment needs, and operational challenges.",
+      Icon: HiBuildingOffice2,
     },
     {
-      title: "Connect & Automate",
+      title: "Compare & Discover the Right Solutions",
       description:
-        "Integrate payment tools, import catalogs, and automate order or settlement workflows in a few clicks.",
-      Icon: HiSparkles,
+        "Explore side-by-side comparisons across pricing, onboarding, support, integrations, and merchant experience — all in one place.",
+      Icon: HiSquares2X2,
     },
     {
-      title: "Launch & Grow",
+      title: "Activate Faster with Expert Support",
       description:
-        "Go live confidently, track payment performance, and scale your business with real-time reporting.",
-      Icon: HiRocketLaunch,
+        "Connect with experts, get onboarding assistance, and move from discovery to activation with CompareX managing the journey end-to-end.",
+      Icon: HiLifebuoy,
     },
   ],
   reseller: [
     {
-      title: "Create Partner Profile",
+      title: "Register & Refer Businesses",
       description:
-        "Register as a reseller and set your partner profile with service regions and preferred categories.",
-      Icon: HiUserPlus,
+        "Submit merchant leads through CompareX without managing multiple provider relationships separately.",
+      Icon: HiShare,
     },
     {
-      title: "Add Clients & Tools",
+      title: "We Handle Qualification & Coordination",
       description:
-        "Onboard client accounts, connect the right software stack, and automate repeated setup tasks.",
-      Icon: HiSparkles,
+        "CompareX manages merchant qualification, provider coordination, onboarding support, and follow-ups for you.",
+      Icon: HiClipboardDocumentCheck,
     },
     {
-      title: "Manage & Scale",
+      title: "Track Growth & Earn Commissions",
       description:
-        "Monitor client outcomes from one dashboard and grow recurring revenue with smoother operations.",
-      Icon: HiRocketLaunch,
+        "Monitor lead progress, merchant activation, GMV, and payouts directly from your reseller dashboard.",
+      Icon: HiChartBarSquare,
     },
   ],
   vendor: [
     {
-      title: "List Your Product",
+      title: "List & Position Your Offering",
       description:
-        "Create your vendor profile, publish product details, and highlight key capabilities for buyers.",
-      Icon: HiUserPlus,
+        "Showcase your products, pricing, integrations, onboarding strengths, and smart tags through a structured marketplace profile.",
+      Icon: HiBuildingStorefront,
     },
     {
-      title: "Capture Qualified Leads",
+      title: "Receive Qualified Business Leads",
       description:
-        "Connect lead channels, automate follow-ups, and route prospects to the right sales workflows.",
-      Icon: HiSparkles,
+        "Get matched with businesses actively looking for solutions aligned to your ideal merchant segment.",
+      Icon: HiInboxArrowDown,
     },
     {
-      title: "Convert & Expand",
+      title: "Manage Leads & Build Trust",
       description:
-        "Close deals faster with better visibility and expand reach through consistent platform exposure.",
-      Icon: HiRocketLaunch,
+        "Track leads, respond to reviews, nominate experts, and strengthen merchant relationships through CompareX.",
+      Icon: HiClipboardDocumentList,
     },
   ],
 };
@@ -164,7 +174,7 @@ export const HowItWorksSection = () => {
               return (
             <article
               key={step.title}
-              className={`relative overflow-hidden rounded-2xl border border-slate-200 px-6 py-8 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-md ${style.cardBg}`}
+              className={`relative overflow-hidden rounded-2xl border border-slate-200 px-4 py-8 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-md ${style.cardBg}`}
             >
               <div className={`absolute left-0 right-0 top-0 h-1 ${style.accent}`} />
               <div className={`absolute right-5 top-5 inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-xs font-bold ${style.chipBg}`}>
@@ -173,7 +183,7 @@ export const HowItWorksSection = () => {
               <div className={`relative z-10 mx-auto flex size-14 items-center justify-center rounded-2xl border ${style.iconBg}`}>
                 <step.Icon className={`size-7 ${style.iconColor}`} aria-hidden />
               </div>
-              <h3 className="mt-6 text-2xl font-semibold leading-tight text-slate-900">
+              <h3 className="mt-6 text-[20px] font-semibold leading-tight text-slate-900">
                 {step.title}
               </h3>
               <p className="mt-4 text-base leading-relaxed text-slate-600">

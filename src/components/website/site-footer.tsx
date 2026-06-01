@@ -2,48 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { FaFacebookF, FaLinkedinIn, FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { HiOutlineGlobeAlt } from "react-icons/hi2";
 
 import { FooterLegalBar } from "@/components/website/footer-legal-bar";
-
-const footerColumns = [
-  {
-    title: "Product",
-    links: [
-      { href: "/", label: "Categories" },
-      { href: "/", label: "Brands" },
-      { href: "/", label: "Compare" },
-      { href: "/", label: "Blog" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { href: "/", label: "Industry" },
-      { href: "/", label: "Ask Question" },
-      { href: "/", label: "Get Free Advice" },
-      { href: "/", label: "Login / Signup" },
-    ],
-  },
-  {
-    title: "Features",
-    links: [
-      { href: "/", label: "Compare" },
-      { href: "/", label: "Categories" },
-      { href: "/", label: "Brands" },
-      { href: "/", label: "Industry" },
-    ],
-  },
-  {
-    title: "Links",
-    links: [
-      { href: "/", label: "Ask Question" },
-      { href: "/", label: "Blog" },
-      { href: "/", label: "Get Free Advice" },
-      { href: "/", label: "Login / Signup" },
-    ],
-  },
-] as const;
+import { footerColumns, routes } from "@/lib/site-navigation";
 
 const socialLinks = [
   { href: "#", label: "Facebook", icon: FaFacebookF },
@@ -65,11 +26,10 @@ export function SiteFooter() {
                 "repeating-linear-gradient(90deg, transparent 0, transparent 26px, rgba(0, 0, 0, 0.04) 26px, rgba(0,0,0,0.045) 27px)",
             }}
           />
-          
 
           <div className="relative flex flex-col gap-12 lg:flex-row lg:items-stretch lg:gap-0">
-            <div className="max-w-xl shrink-0 border-b border-neutral-200 pb-10 lg:max-w-[min(100%,33rem)] lg:border-b-0 lg:pb-0 lg:pr-10 xl:pr-14">
-              <Link href="/" className="inline-block">
+            <div className="max-w-xl shrink-0 border-b border-neutral-200 pb-10 lg:max-w-[min(100%,28rem)] lg:border-b-0 lg:pb-0 lg:pr-10 xl:pr-14">
+              <Link href={routes.home} className="inline-block">
                 <Image
                   src="/images/logo.svg"
                   alt="Comparex"
@@ -79,8 +39,8 @@ export function SiteFooter() {
                 />
               </Link>
               <p className="mt-5 text-base font-medium leading-relaxed text-neutral-600">
-                Modern website and dashboard experience for growth teams—browse, compare, and choose software with
-                confidence.
+                Compare payment gateways side by side, get expert guidance, and activate faster with CompareX managing
+                your journey end-to-end.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 {socialLinks.map(({ href, label, icon: Icon }) => (
@@ -96,16 +56,18 @@ export function SiteFooter() {
               </div>
             </div>
 
-            <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-6 gap-y-10 sm:gap-x-10 lg:grid-cols-4 lg:gap-x-0 lg:gap-y-0">
+            <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-6 gap-y-10 sm:gap-x-10 lg:grid-cols-5 lg:gap-x-0 lg:gap-y-0">
               {footerColumns.map((column) => (
-                <div key={column.title} className="min-w-0 lg:px-6 xl:px-8">
-                  <h4 className="text-[22px] font-semibold tracking-tight text-neutral-700">{column.title}</h4>
+                <div key={column.title} className="min-w-0 lg:px-4 xl:px-5">
+                  <h4 className="text-[18px] font-semibold tracking-tight text-neutral-700 sm:text-[20px]">
+                    {column.title}
+                  </h4>
                   <ul className="mt-5 space-y-3.5">
-                    {column.links.map((item, index) => (
-                      <li key={`${column.title}-${index}-${item.label}`}>
+                    {column.links.map((item) => (
+                      <li key={item.href}>
                         <Link
                           href={item.href}
-                          className="text-base font-semibold text-neutral-950 transition hover:text-neutral-600 hover:!text-[#2D4CC8]"
+                          className="text-sm font-semibold text-neutral-950 transition hover:!text-[#0a27c9] sm:text-base"
                         >
                           {item.label}
                         </Link>

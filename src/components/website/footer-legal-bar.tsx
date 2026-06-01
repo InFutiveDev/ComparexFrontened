@@ -1,6 +1,9 @@
 "use client";
 
-import { HiArrowUp, HiOutlineGlobeAlt } from "react-icons/hi2";
+import Link from "next/link";
+import { HiArrowUp } from "react-icons/hi2";
+
+import { footerLegalLinks } from "@/lib/site-navigation";
 
 export function FooterLegalBar() {
   const year = new Date().getFullYear();
@@ -20,23 +23,39 @@ export function FooterLegalBar() {
               "repeating-linear-gradient(90deg, transparent 0, transparent 26px, rgba(0,0,0,0.045) 26px, rgba(0,0,0,0.045) 27px)",
           }}
         />
-        
 
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-base font-normal text-neutral-600">
-            Comparex, {year} © All rights reserved
-          </p>
-          <button
-            type="button"
-            onClick={scrollToTop}
-            aria-label="Back to top"
-            className="group flex items-center gap-3 self-start sm:self-auto"
+        <div className="relative flex flex-col gap-5">
+          <nav
+            className="flex flex-wrap items-center gap-x-6 gap-y-2"
+            aria-label="Legal and site links"
           >
-            <span className="text-base font-normal text-neutral-800">Back to top</span>
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2D4CC8] text-white transition group-hover:bg-[#3B5BDB] cursor-pointer">
-              <HiArrowUp className="h-4 w-4" aria-hidden />
-            </span>
-          </button>
+            {footerLegalLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm font-medium text-neutral-700 transition hover:!text-[#0a27c9]"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-base font-normal text-neutral-600">
+              Comparex, {year} © All rights reserved
+            </p>
+            <button
+              type="button"
+              onClick={scrollToTop}
+              aria-label="Back to top"
+              className="group flex cursor-pointer items-center gap-3 self-start sm:self-auto"
+            >
+              <span className="text-base font-normal text-neutral-800">Back to top</span>
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2D4CC8] text-white transition group-hover:bg-[#3B5BDB]">
+                <HiArrowUp className="h-4 w-4" aria-hidden />
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

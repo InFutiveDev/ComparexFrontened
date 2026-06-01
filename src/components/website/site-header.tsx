@@ -5,17 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const navItems = [
-  
-  { href: "/", label: "About" },
-  { href: "/", label: "How it Works" },
-  { href: "/", label: "Why Comparex " },
-  { href: "/", label: "Compare PG " },
-  { href: "/", label: "Talk to Expert " },
-  { href: "/", label: "Tools" },
-  { href: "/", label: "Resources" },
-  
-];
+import { headerNavItems, routes } from "@/lib/site-navigation";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -70,15 +60,15 @@ export function SiteHeader() {
         }`}
     >
       <div className="mx-auto flex max-w-8xl items-center justify-between px-6 py-2.5 sm:px-6 lg:px-8">
-        <Link href="/" className={`text-lg font-bold ${isHome ? "text-white" : "text-slate-900"}`}>
+        <Link href={routes.home} className={`text-lg font-bold ${isHome ? "text-white" : "text-slate-900"}`}>
           <Image src="/images/logo.svg" alt="Logo" width={100} height={100} className="h-10 w-auto object-cover" />
 
         </Link>
 
         <nav className="hidden items-center gap-5 md:flex">
-          {navItems.map((item) => (
+          {headerNavItems.map((item) => (
             <Link
-              key={item.label}
+              key={item.href}
               href={item.href}
               className={`text-[16px] font-medium ${isHome ? "text-black hover:text-black" : "text-black hover:text-black"}`}
             >
@@ -88,18 +78,8 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-
-          {/* <span className={isHome ? "text-black" : "text-black"}>|</span> */}
-
-
-          {/* <Link
-            href="/"
-            className="cursor-pointer rounded-full bg-[#2D4CC8] px-4 py-2 text-[16px] font-semibold !text-white hover:bg-[#3B5BDB] hover:!text-white visited:!text-white"
-          >
-            Login / Signup
-          </Link> */}
           <Link
-            href="/"
+            href={routes.home}
             className="group relative inline-flex h-[calc(40px+6px)] items-center justify-center rounded-full bg-[#2D4CC8] py-1  pl-6 pr-14 font-medium text-white"
             style={{ color: "#fff" }}
           >
@@ -139,9 +119,9 @@ export function SiteHeader() {
       {open ? (
         <div className={`px-4 py-3 md:hidden ${isHome ? "border-t border-white/15 bg-slate-950/95" : "border-t border-slate-200 bg-white"}`}>
           <div className="flex flex-col gap-3">
-            {navItems.map((item) => (
+            {headerNavItems.map((item) => (
               <Link
-                key={item.label}
+                key={item.href}
                 href={item.href}
                 className={`text-sm ${isHome ? "text-slate-100" : "text-slate-700"}`}
                 onClick={() => setOpen(false)}
@@ -149,12 +129,53 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            <p className={`mt-2 text-xs font-semibold uppercase tracking-wide ${isHome ? "text-slate-400" : "text-slate-500"}`}>
+              Tools
+            </p>
             <Link
-              href="/"
+              href={routes.tools.pgMdrCalculator}
+              className={`text-sm ${isHome ? "text-slate-100" : "text-slate-700"}`}
+              onClick={() => setOpen(false)}
+            >
+              PG Cost (MDR) Calculator
+            </Link>
+            <Link
+              href={routes.tools.pgAssessment}
+              className={`text-sm ${isHome ? "text-slate-100" : "text-slate-700"}`}
+              onClick={() => setOpen(false)}
+            >
+              PG Assessment
+            </Link>
+            <p className={`mt-2 text-xs font-semibold uppercase tracking-wide ${isHome ? "text-slate-400" : "text-slate-500"}`}>
+              Resources
+            </p>
+            <Link
+              href={routes.resources.blogs}
+              className={`text-sm ${isHome ? "text-slate-100" : "text-slate-700"}`}
+              onClick={() => setOpen(false)}
+            >
+              Blogs
+            </Link>
+            <Link
+              href={routes.resources.learningCenter}
+              className={`text-sm ${isHome ? "text-slate-100" : "text-slate-700"}`}
+              onClick={() => setOpen(false)}
+            >
+              Learning Center
+            </Link>
+            <Link
+              href={routes.resources.news}
+              className={`text-sm ${isHome ? "text-slate-100" : "text-slate-700"}`}
+              onClick={() => setOpen(false)}
+            >
+              News
+            </Link>
+            <Link
+              href={routes.talkToExpert}
               className="mt-2 rounded-full bg-[#2D4CC8] px-4 py-2 text-center text-sm font-semibold text-white hover:bg-[#3B5BDB]"
               onClick={() => setOpen(false)}
             >
-              Get Free Advice
+              Talk to Expert
             </Link>
           </div>
         </div>
