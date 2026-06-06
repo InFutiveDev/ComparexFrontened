@@ -1,8 +1,4 @@
-type NavbarProps = {
-  onOpenMenu: () => void;
-};
-
-export function DashboardNavbar({ onOpenMenu }: NavbarProps) {
+export function DashboardNavbar({ onOpenMenu }) {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
       <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">

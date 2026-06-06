@@ -4,11 +4,7 @@ import { useState } from "react";
 import { DashboardNavbar } from "@/components/dashboard/navbar";
 import { Sidebar } from "@/components/dashboard/sidebar";
 
-type DashboardShellProps = {
-  children: React.ReactNode;
-};
-
-export function DashboardShell({ children }: DashboardShellProps) {
+export function DashboardShell({ children }) {
   const [open, setOpen] = useState(false);
 
   return (

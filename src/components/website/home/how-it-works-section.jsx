@@ -13,15 +13,7 @@ import {
   HiSquares2X2,
 } from "react-icons/hi2";
 
-type RoleKey = "merchant" | "reseller" | "vendor";
-
-type Step = {
-  title: string;
-  description: string;
-  Icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
-};
-
-const stepsByRole: Record<RoleKey, Step[]> = {
+const stepsByRole = {
   merchant: [
     {
       title: "Tell Us About Your Business",
@@ -86,30 +78,30 @@ const stepsByRole: Record<RoleKey, Step[]> = {
 
 const cardStyles = [
   {
-    cardBg: "bg-gradient-to-b from-blue-50 to-white",
+    cardBg: "bg-gradient-to-b from-[#EEF2FC] to-white",
     accent: "bg-blue-500",
     chipBg: "bg-blue-100 text-blue-700",
     iconBg: "bg-blue-100 border-blue-200",
     iconColor: "text-blue-700",
   },
   {
-    cardBg: "bg-gradient-to-b from-violet-50 to-white",
-    accent: "bg-violet-500",
-    chipBg: "bg-violet-100 text-violet-700",
-    iconBg: "bg-violet-100 border-violet-200",
-    iconColor: "text-violet-700",
+    cardBg: "bg-gradient-to-b from-[#E8FAFC] to-white",
+    accent: "bg-[#40C3CF]",
+    chipBg: "bg-[#E8FAFC] text-[#0f766e]",
+    iconBg: "bg-[#E8FAFC] border-[#40C3CF]/35",
+    iconColor: "text-[#0f766e]",
   },
   {
-    cardBg: "bg-gradient-to-b from-emerald-50 to-white",
+    cardBg: "bg-gradient-to-b from-[#E8FAFC] to-white",
     accent: "bg-emerald-500",
     chipBg: "bg-emerald-100 text-emerald-700",
     iconBg: "bg-emerald-100 border-emerald-200",
     iconColor: "text-emerald-700",
   },
-] as const;
+];
 
 export const HowItWorksSection = () => {
-  const [activeRole, setActiveRole] = useState<RoleKey>("merchant");
+  const [activeRole, setActiveRole] = useState("merchant");
   const steps = stepsByRole[activeRole];
 
   return (
@@ -127,11 +119,11 @@ export const HowItWorksSection = () => {
           </p>
         </div>
 
-        <div className="mx-auto mt-9 flex w-fit flex-wrap items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+        <div className="mx-auto mt-9 flex w-full max-w-xl flex-wrap items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
           <button
             type="button"
             onClick={() => setActiveRole("merchant")}
-            className={`inline-flex min-w-[118px] items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold transition ${
+            className={`inline-flex flex-1 min-w-[118px] items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition sm:px-5 ${
               activeRole === "merchant"
                 ? "bg-[#2D4CC8] text-white shadow-sm"
                 : "text-slate-700 hover:bg-slate-50"
@@ -142,7 +134,7 @@ export const HowItWorksSection = () => {
           <button
             type="button"
             onClick={() => setActiveRole("reseller")}
-            className={`inline-flex min-w-[118px] items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold transition ${
+            className={`inline-flex flex-1 min-w-[118px] items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition sm:px-5 ${
               activeRole === "reseller"
                 ? "bg-[#2D4CC8] text-white shadow-sm"
                 : "text-slate-700 hover:bg-slate-50"
@@ -153,7 +145,7 @@ export const HowItWorksSection = () => {
           <button
             type="button"
             onClick={() => setActiveRole("vendor")}
-            className={`inline-flex min-w-[118px] items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold transition ${
+            className={`inline-flex flex-1 min-w-[118px] items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition sm:px-5 ${
               activeRole === "vendor"
                 ? "bg-[#2D4CC8] text-white shadow-sm"
                 : "text-slate-700 hover:bg-slate-50"

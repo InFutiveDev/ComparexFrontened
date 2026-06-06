@@ -11,7 +11,7 @@ const socialLinks = [
   { href: "#", label: "Twitter", icon: FaXTwitter },
   { href: "#", label: "LinkedIn", icon: FaLinkedinIn },
   { href: "#", label: "YouTube", icon: FaYoutube },
-] as const;
+];
 
 export function SiteFooter() {
   return (

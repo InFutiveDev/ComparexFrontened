@@ -1,14 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useState, type ReactNode } from "react";
+import React, { useState } from "react";
 import {
   HiOutlineChevronUpDown,
   HiOutlineClipboardDocument,
-  HiOutlineStar,
-  HiStar,
 } from "react-icons/hi2";
-
 const firms = [
   {
     name: "Razorpay",
@@ -19,12 +16,12 @@ const firms = [
     pricing: "1.9%",
     settlement: "T+2",
     onboarding: "24 Hours",
-    products: "UPI, Cards, Subscription Billing",
+    products: ["UPI", "Cards", "Subscription Billing"],
     platforms: [
-      { icon: "/logos/shopy.webp", alt: "Shopify", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Google", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" as const },
+      { icon: "/logos/shopy.webp", alt: "Shopify", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Google", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
     ],
     platformsExtra: 1,
     offer: { headline: "Zero Setup", code: "RAZFREE" },
@@ -42,12 +39,12 @@ const firms = [
     pricing: "1.75%",
     settlement: "Instant",
     onboarding: "12 Hours",
-    products: "Payouts, Smart Routing",
+    products: ["Payouts", "Smart Routing"],
     platforms: [
-      { icon: "/logos/shopy.webp", alt: "Microsoft", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Google", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Filmora", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Swipe", tone: "light" as const },
+      { icon: "/logos/shopy.webp", alt: "Microsoft", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Google", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Filmora", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Swipe", tone: "light" },
     ],
     platformsExtra: 0,
     offer: { headline: "Startup Offer", code: "CFSTART" },
@@ -59,17 +56,17 @@ const firms = [
   {
     name: "PhonePe PG",
     logo: "PP",
-    bestForTags: ["🇮🇳 UPI Strong", "💸 Fast Checkout", "💸 Enterprise Ready"],
+    bestForTags: ["🇮🇳 UPI Strong", "💸 Fast Checkout", "💸 Enterprise Ready","💸 Low Failure Rate"],
     businessAge: "7 Years",
     location: "Bangalore",
     pricing: "1.8%",
     settlement: "Instant",
     onboarding: "18 Hours",
-    products: "UPI, QR, Payment Links",
+    products: ["UPI", "QR", "Payment Links"],
     platforms: [
-      { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" as const },
+      { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
     ],
     platformsExtra: 1,
     offer: { headline: "Special Pricing", code: "PPDEAL" },
@@ -87,11 +84,11 @@ const firms = [
     pricing: "1.8%",
     settlement: "Instant",
     onboarding: "18 Hours",
-    products: "UPI, QR, Payment Links",
+    products: ["UPI", "QR", "Payment Links"],
     platforms: [
-      { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" as const },
+      { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
     ],
     platformsExtra: 1,
     offer: { headline: "Special Pricing", code: "PPDEAL" },
@@ -109,11 +106,11 @@ const firms = [
     pricing: "1.8%",
     settlement: "Instant",
     onboarding: "18 Hours",
-    products: "UPI, QR, Payment Links",
+    products: ["UPI", "QR", "Payment Links"],
     platforms: [
-      { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" as const },
+      { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
     ],
     platformsExtra: 1,
     offer: { headline: "Special Pricing", code: "PPDEAL" },
@@ -131,11 +128,11 @@ const firms = [
     pricing: "1.8%",
     settlement: "Instant",
     onboarding: "18 Hours",
-    products: "UPI, QR, Payment Links",
+    products: ["UPI", "QR", "Payment Links"],
     platforms: [
-      { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" as const },
-      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" as const },
+      { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
     ],
     platformsExtra: 1,
     offer: { headline: "Special Pricing", code: "PPDEAL" },
@@ -157,16 +154,96 @@ const paymentModes = [
   "Subscription Billing",
 ];
 
+const firmModePricing = {
+  Razorpay: {
+    "UPI Payments": "0%",
+    "Credit Card": "1.9%",
+    "Debit Card": "1.5%",
+    "Net Banking": "1.5%",
+    "Wallet Payments": "1.8%",
+    "QR Payments": "0%",
+    "International": "3%",
+    "Subscription Billing": "2.2%",
+  },
+  Cashfree: {
+    "UPI Payments": "0%",
+    "Credit Card": "1.75%",
+    "Debit Card": "1.4%",
+    "Net Banking": "1.45%",
+    "Wallet Payments": "1.7%",
+    "QR Payments": "0%",
+    "International": "2.9%",
+    "Subscription Billing": "2%",
+  },
+  "PhonePe PG": {
+    "UPI Payments": "0%",
+    "Credit Card": "1.8%",
+    "Debit Card": "1.45%",
+    "Net Banking": "1.5%",
+    "Wallet Payments": "1.75%",
+    "QR Payments": "0%",
+    "International": "2.95%",
+    "Subscription Billing": "2.1%",
+  },
+  "PayU PG": {
+    "UPI Payments": "0%",
+    "Credit Card": "1.85%",
+    "Debit Card": "1.5%",
+    "Net Banking": "1.55%",
+    "Wallet Payments": "1.8%",
+    "QR Payments": "0%",
+    "International": "3.1%",
+    "Subscription Billing": "2.15%",
+  },
+  "Paytm PG": {
+    "UPI Payments": "0%",
+    "Credit Card": "1.7%",
+    "Debit Card": "1.35%",
+    "Net Banking": "1.4%",
+    "Wallet Payments": "1.65%",
+    "QR Payments": "0%",
+    "International": "2.85%",
+    "Subscription Billing": "1.95%",
+  },
+  "GPay PG": {
+    "UPI Payments": "0%",
+    "Credit Card": "1.82%",
+    "Debit Card": "1.48%",
+    "Net Banking": "1.52%",
+    "Wallet Payments": "1.72%",
+    "QR Payments": "0%",
+    "International": "3%",
+    "Subscription Billing": "2.05%",
+  },
+};
+
+function getPricingForMode(firm, modeIndex) {
+  const mode = paymentModes[modeIndex];
+  return firmModePricing[firm.name]?.[mode] ?? firm.pricing;
+}
+
 const sortOptions = [
+  { value: "all", label: "All" },
   { value: "emerging", label: "Emerging PG" },
   { value: "papgApproved", label: "PAPG Approved" },
   { value: "instantSettlement", label: "Instant Settlement" },
   { value: "bestForStartup", label: "Best for Startup" },
   { value: "dedicatedSupport", label: "Dedicated Support" },
   { value: "fastOnboarding", label: "Fast onboarding" },
-] as const;
+];
 
-type SortOption = (typeof sortOptions)[number]["value"];
+const compareOptions = [
+  { value: "all", label: "Select PG" },
+  { value: "pg1", label: "PG1" },
+  { value: "pg2", label: "PG2" },
+  { value: "pg3", label: "PG3" },
+];
+
+const compareSlots = [
+  { value: "pg1", label: "PG 1" },
+  { value: "pg2", label: "PG 2" },
+  { value: "pg3", label: "PG 3" },
+];
 
 const tableColumns = [
   { label: "PG Name", sortable: true, sticky: true },
@@ -181,9 +258,9 @@ const tableColumns = [
   { label: "Offers", sortable: true },
   { label: "Review Link", sortable: true },
   { label: "Talk to Expert", sortable: false },
-  { label: "Signup / Get Started CTA", sortable: false },
+  { label: "Signup", sortable: false },
   { label: "Personalised Quote", sortable: false },
-] as const;
+];
 
 const colDivider =
   "relative [&:not(:last-child)]:after:pointer-events-none [&:not(:last-child)]:after:absolute [&:not(:last-child)]:after:right-0 [&:not(:last-child)]:after:top-1/2 [&:not(:last-child)]:after:h-[58%] [&:not(:last-child)]:after:w-px [&:not(:last-child)]:after:-translate-y-1/2 [&:not(:last-child)]:after:bg-[#2D4CC8]/20 [&:not(:last-child)]:after:content-['']";
@@ -195,73 +272,123 @@ const tdBase = `border-t border-slate-100 px-4 py-4 align-middle text-sm text-sl
 const stickyCellShadow =
   "shadow-[4px_0_12px_-4px_rgba(19,32,63,0.12)]";
 
-function FirmPgName({
-  name,
-  logo,
-  rating,
-  reviewCount,
-}: {
-  name: string;
-  logo: string;
-  rating: string;
-  reviewCount: number;
-}) {
-  const numericRating = Number.parseFloat(rating);
-
+function FirmPgName({ name, logo }) {
   return (
-    <div className="flex min-w-[220px] items-center gap-3">
+    <div className="flex w-[155px] max-w-[155px] items-center gap-2">
       <div className="relative shrink-0">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-[#2D4CC8] bg-[#13203F] text-lg font-bold text-white">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-[#2D4CC8] bg-white/80 text-sm font-bold text-black">
           {logo}
         </div>
-        {/* <span
-          className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-[#2D4CC8] bg-[#40C3CF] text-[10px] leading-none text-[#13203F]"
-          aria-hidden
-        >
-          ★
-        </span> */}
       </div>
 
-      <div>
-        <div className="flex items-center gap-2">
-          <h3 className="text-[15px] leading-tight font-bold text-[#13203F]">{name}</h3>
-        </div>
-        <div className="mt-1.5">
-          <div className="flex items-center gap-2">
-            <div className="w-fit rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] p-px">
-              <div className="rounded-full bg-[#13203F] px-2.5 py-0.5">
-                <span className="text-[13px] font-bold text-white">{rating}</span>
-              </div>
-            </div>
-            <StarRating rating={numericRating} />
-          </div>
-          <p className="mt-1 text-sm font-medium text-[#2D4CC8]">
-            {reviewCount.toLocaleString()}{" "}
-            <span className="text-slate-500">reviews</span>
-          </p>
-        </div>
+      <div className="min-w-0">
+        <h3 className="truncate text-[13px] font-bold leading-tight text-[#13203F]">{name}</h3>
       </div>
     </div>
   );
 }
-
-function SmartTags({ labels }: { labels: string[] }) {
+function SmartTags({ labels }) {
   return (
     <div className="flex w-fit mx-auto justify-center gap-x-2 gap-y-1 flex-wrap items-center">
       {labels.map((label) => (
         <span
           key={label}
-          className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[#13203F] px-3 py-1 text-xs font-semibold text-white shadow-sm"
+          className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[#2D4CC8] bg-white/80 px-3 py-1 text-xs font-semibold text-black"
         >
-          
           {label}
-        </span>
-      ))}
+        </span>      ))}
     </div>
   );
 }
 
-function SettlementBadge({ value }: { value: string }) {
+const MDR_SEGMENT_COUNT = 10;
+const MDR_RING_SIZE = 64;
+const MDR_RING_STROKE = 12;
+const MDR_RING_ACTIVE = "#2D4CC8";
+const MDR_RING_INACTIVE = "#D1D5DB";
+
+const MDR_RING_PATHS = [
+  "M 59.76 16.15 A 32 32 0 0 0 44 12",
+  "M 73.12 30.73 A 32 32 0 0 0 62.81 18.11",
+  "M 75.36 50.38 A 32 32 0 0 0 74.43 34.11",
+  "M 65.62 67.59 A 32 32 0 0 0 74.43 53.89",
+  "M 47.62 75.79 A 32 32 0 0 0 62.81 69.89",
+  "M 28.24 71.85 A 32 32 0 0 0 44 76",
+  "M 14.88 57.27 A 32 32 0 0 0 25.19 69.89",
+  "M 12.64 37.62 A 32 32 0 0 0 13.57 53.89",
+  "M 22.38 20.41 A 32 32 0 0 0 13.57 34.11",
+  "M 40.38 12.21 A 32 32 0 0 0 25.19 18.11",
+];
+
+function parseMdrPercent(pricing) {
+  return Number.parseFloat(pricing.replace("%", ""));
+}
+
+function mdrToActiveSegments(pricing) {
+  const mdr = parseMdrPercent(pricing);
+  const min = 1.5;
+  const max = 2.5;
+  const normalized = (max - mdr) / (max - min);
+
+  return Math.min(
+    MDR_SEGMENT_COUNT,
+    Math.max(1, Math.round(normalized * MDR_SEGMENT_COUNT)),
+  );
+}
+
+function formatMdrValue(pricing) {
+  const mdr = parseMdrPercent(pricing);
+  return Number.isInteger(mdr)
+    ? String(mdr)
+    : mdr.toFixed(2).replace(/0$/, "");
+}
+
+function MdrPricingRing({ pricing }) {
+  const activeSegments = mdrToActiveSegments(pricing);
+  const mdrValue = formatMdrValue(pricing);
+
+  return (
+    <div
+      className="relative mx-auto shrink-0"
+      style={{
+        width: MDR_RING_SIZE,
+        height: MDR_RING_SIZE,
+      }}
+      aria-label={`MDR ${pricing}, ${activeSegments} out of ${MDR_SEGMENT_COUNT}`}
+      title={pricing}
+    >
+      <svg
+        width={MDR_RING_SIZE}
+        height={MDR_RING_SIZE}
+        viewBox="0 0 88 88"
+        fill="none"
+        aria-hidden
+      >
+        {MDR_RING_PATHS.map((path, index) => (
+          <path
+            key={index}
+            d={path}
+            stroke={index < activeSegments ? MDR_RING_ACTIVE : MDR_RING_INACTIVE}
+            strokeWidth={MDR_RING_STROKE}
+            strokeLinecap="round"
+          />
+        ))}
+      </svg>
+
+      <div className="pointer-events-none absolute inset-0 grid place-items-center">
+        <span
+          className={`font-bold leading-none text-[#2D4CC8] tabular-nums ${
+            mdrValue.length > 3 ? "text-[10px]" : "text-[11px]"
+          }`}
+        >
+          {mdrValue}%
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function SettlementBadge({ value }) {
   const isInstant = value.toLowerCase().includes("instant");
   return (
     <span
@@ -276,16 +403,13 @@ function SettlementBadge({ value }: { value: string }) {
   );
 }
 
-function maskCouponCode(code: string) {
+function maskCouponCode(code) {
   return `${code.charAt(0)}${"*".repeat(6)}`;
 }
 
 function OfferCoupon({
   headline,
   code,
-}: {
-  headline: string;
-  code: string;
 }) {
   const masked = maskCouponCode(code);
 
@@ -294,8 +418,8 @@ function OfferCoupon({
   };
 
   return (
-    <div className="w-[7.5rem] overflow-hidden rounded-xl bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] p-1 shadow-sm">
-      <p className="px-1 py-2 text-center text-[11px] font-bold uppercase leading-tight text-white">
+    <div className="w-[7.5rem] overflow-hidden rounded-xl border border-[#2D4CC8]/15 bg-gradient-to-r from-[#EEF2FC] to-[#E8FAFC] p-1 shadow-sm">
+      <p className="px-1 py-2 text-center text-[11px] font-bold uppercase leading-tight text-[#13203F]">
         {headline}
       </p>
       <div className="flex items-center justify-between gap-1 rounded-lg bg-[#13203F] px-2 py-2">
@@ -315,68 +439,12 @@ function OfferCoupon({
   );
 }
 
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex items-center gap-0.5" aria-hidden>
-      {Array.from({ length: 5 }, (_, i) => {
-        const starIndex = i + 1;
-        const fill = Math.min(1, Math.max(0, rating - (starIndex - 1)));
-
-        if (fill <= 0) {
-          return (
-            <HiOutlineStar key={starIndex} className="size-4 text-slate-300" />
-          );
-        }
-
-        if (fill >= 1) {
-          return <HiStar key={starIndex} className="size-4 text-[#40C3CF]" />;
-        }
-
-        return (
-          <span key={starIndex} className="relative inline-block size-4">
-            <HiOutlineStar className="size-4 text-slate-300" />
-            <span
-              className="absolute inset-0 overflow-hidden"
-              style={{ width: `${fill * 100}%` }}
-            >
-              <HiStar className="size-4 text-[#40C3CF]" />
-            </span>
-          </span>
-        );
-      })}
-    </div>
-  );
-}
-
-function FirmReview({
-  rating,
-  reviewCount,
-}: {
-  rating: string;
-  reviewCount: number;
-}) {
-  const numericRating = parseFloat(rating);
-
+function FirmReview({ rating, reviewCount }) {
   return (
     <div
       className="flex flex-col items-center gap-1.5"
       aria-label={`${rating} out of 5, ${reviewCount} reviews`}
     >
-      {/* <div className="rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] p-px">
-        <div className="rounded-full bg-[#13203F] px-4 py-0.5">
-          <span className="text-sm font-bold text-white">{rating}</span>
-        </div>
-      </div>
-
-      <StarRating rating={numericRating} />
-
-      <p className="text-xs">
-        <span className="font-semibold text-[#2D4CC8]">
-          {reviewCount.toLocaleString()}
-        </span>{" "}
-        <span className="text-slate-500">reviews</span>
-      </p> */}
-
       <button
         type="button"
         className="mt-1 cursor-pointer rounded-full border border-[#2D4CC8] px-3 py-1 text-sm font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white"
@@ -387,20 +455,14 @@ function FirmReview({
   );
 }
 
-type PlatformIcon = {
-  icon: string;
-  alt: string;
-  tone: "dark" | "light";
-};
-
-function PlatformCircle({ icon, alt, tone }: PlatformIcon) {
+function PlatformCircle({ icon, alt, tone }) {
   const isDark = tone === "dark";
   return (
     <span
-      className={`flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full ring-2 ring-white ${
+      className={`flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full ring-2 ring-white/80 ${
         isDark
-          ? "bg-[#13203F]"
-          : "border border-[#2D4CC8]/40 bg-[#1b2d57]"
+          ? "bg-white/80"
+          : "border border-gray-200 bg-white/80"
       }`}
       title={alt}
     >
@@ -418,17 +480,14 @@ function PlatformCircle({ icon, alt, tone }: PlatformIcon) {
 function SupportedPlatforms({
   platforms,
   extra = 0,
-}: {
-  platforms: PlatformIcon[];
-  extra?: number;
 }) {
   const items = [
     ...platforms.map((platform, index) => ({
-      type: "platform" as const,
+      type: "platform",
       platform,
       index,
     })),
-    ...(extra > 0 ? [{ type: "extra" as const, extra }] : []),
+    ...(extra > 0 ? [{ type: "extra", extra }] : []),
   ];
 
   return (
@@ -472,10 +531,6 @@ function TableHeaderCell({
   label,
   sortable,
   sticky,
-}: {
-  label: ReactNode;
-  sortable: boolean;
-  sticky?: boolean;
 }) {
   return (
     <th
@@ -495,18 +550,109 @@ function TableHeaderCell({
   );
 }
 
-function rowBg(featured: boolean) {
+function rowBg(featured) {
   if (featured) return "bg-gradient-to-r from-[#eef3ff]/80 via-white to-white";
   return "bg-white";
 }
 
-function parseHours(value: string) {
+function parseHours(value) {
   return Number.parseInt(value, 10) || 0;
+}
+
+function MobileFirmCard({ firm, activeFilter }) {
+  return (
+    <article
+      className={`relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm ${
+        firm.featured ? "ring-1 ring-[#2D4CC8]/25" : ""
+      }`}
+    >
+      {firm.featured ? (
+        <div className="absolute inset-x-0 top-0 h-1 bg-[#2D4CC8]" aria-hidden />
+      ) : null}
+
+      <div className="flex items-start justify-between gap-3">
+        <FirmPgName name={firm.name} logo={firm.logo} />
+        <div className="pt-1">
+          <MdrPricingRing pricing={getPricingForMode(firm, activeFilter)} />
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+          {firm.location}
+        </span>
+        <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+          {firm.businessAge}
+        </span>
+        <SettlementBadge value={firm.settlement} />
+      </div>
+
+      <div className="mt-4">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+          Best For
+        </p>
+        <SmartTags labels={firm.bestForTags} />
+      </div>
+
+      <div className="mt-4">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+          Products
+        </p>
+        <SmartTags labels={firm.products} />
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:items-center">
+        <div className="sm:order-2">
+          <OfferCoupon headline={firm.offer.headline} code={firm.offer.code} />
+        </div>
+        <div className="sm:order-1">
+          <FirmReview rating={firm.review} reviewCount={firm.reviewCount} />
+        </div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <button
+          type="button"
+          className="cursor-pointer rounded-xl border border-[#2D4CC8]/40 bg-white px-3 py-2 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#2D4CC8] hover:text-white"
+        >
+          Talk to Expert
+        </button>
+        <button
+          type="button"
+          className="cursor-pointer rounded-xl border border-[#2D4CC8]/40 bg-white px-3 py-2 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#2D4CC8] hover:text-white"
+        >
+          Signup
+        </button>
+        <button
+          type="button"
+          className="col-span-2 cursor-pointer rounded-xl bg-[#2D4CC8] px-3 py-2 text-sm font-semibold text-white shadow-md shadow-[#2D4CC8]/20 transition hover:bg-[#2542b6] sm:col-span-1"
+        >
+          Request Quote
+        </button>
+      </div>
+    </article>
+  );
 }
 
 export function HomeComparisonTable() {
   const [activeFilter, setActiveFilter] = useState(0);
-  const [sortBy, setSortBy] = useState<SortOption>("emerging");
+  const [selectedCompareSlots, setSelectedCompareSlots] = useState([]);
+  const [compareDropdown, setCompareDropdown] = useState("all");
+  const [sortBy, setSortBy] = useState("emerging");
+
+  function addCompareSlot(slot) {
+    if (slot === "all") return;
+
+    setSelectedCompareSlots((prev) =>
+      prev.includes(slot) ? prev : [...prev, slot],
+    );
+    setCompareDropdown("all");
+  }
+
+  function clearCompareSlots() {
+    setSelectedCompareSlots([]);
+    setCompareDropdown("all");
+  }
   const sortedFirms = [...firms].sort((a, b) => {
     switch (sortBy) {
       case "emerging":
@@ -555,10 +701,10 @@ export function HomeComparisonTable() {
                     key={mode}
                     type="button"
                     onClick={() => setActiveFilter(index)}
-                    className={`shrink-0 h-9 cursor-pointer rounded-full px-4 text-sm font-medium transition-colors ${
+                    className={`shrink-0 h-9 cursor-pointer rounded-full px-3 text-sm font-medium transition-colors ${
                       activeFilter === index
                         ? "bg-[#2D4CC8] text-white shadow-md shadow-[#2D4CC8]/25"
-                        : "border border-slate-200 bg-white text-slate-600 hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8]"
+                        : "border text-[12px] font-semibold border-slate-200 bg-white text-slate-600 hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8]"
                     }`}
                   >
                     {mode}
@@ -566,27 +712,56 @@ export function HomeComparisonTable() {
                 ))}
               </div>
             </div>
+            <div className="flex flex-wrap items-center justify-end gap-3 sm:gap-4">
+              <label className="flex items-center gap-2 whitespace-nowrap text-xs font-bold uppercase tracking-wider text-slate-500">
+                <span>Compare:</span>
+                <select
+                  value={compareDropdown}
+                  onChange={(event) => addCompareSlot(event.target.value)}
+                  className="h-9 cursor-pointer rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-[#13203F] outline-none ring-[#2D4CC8]/30 focus:ring"
+                >
+                  {compareOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-            <label className="flex items-center justify-end gap-2 whitespace-nowrap text-xs font-bold uppercase tracking-wider text-slate-500">
-              <span>Sort by:</span>
-              <select
-                value={sortBy}
-                onChange={(event) => setSortBy(event.target.value as SortOption)}
-                className="h-9 cursor-pointer rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-[#13203F] outline-none ring-[#2D4CC8]/30 focus:ring"
-              >
-                {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <label className="flex items-center gap-2 whitespace-nowrap text-xs font-bold uppercase tracking-wider text-slate-500">
+                <span>Sort by:</span>
+                <select
+                  value={sortBy}
+                  onChange={(event) => setSortBy(event.target.value)}
+                  className="h-9 cursor-pointer rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-[#13203F] outline-none ring-[#2D4CC8]/30 focus:ring"
+                >
+                  {sortOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
           </div>
         </div>
 
-        {/* Table — scrollable */}
-        <div className="min-h-0 flex-1 overflow-auto">
-          <table className="w-full min-w-[2200px] border-collapse">
+        {/* Mobile cards */}
+        <div className="min-h-0 flex-1 overflow-auto lg:hidden">
+          <div className="grid gap-4 p-4 sm:p-5">
+            {sortedFirms.map((firm) => (
+              <MobileFirmCard
+                key={firm.name}
+                firm={firm}
+                activeFilter={activeFilter}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop table — scrollable */}
+        <div className="min-h-0 flex-1 overflow-auto hidden lg:block">
+          <table className="w-full min-w-[2135px] border-collapse">
             <thead className="sticky top-0 z-10 bg-[#f4f6fc] shadow-sm">
               <tr>
                 {tableColumns.map((col, index) => (
@@ -594,7 +769,7 @@ export function HomeComparisonTable() {
                     key={typeof col.label === "string" ? col.label : `col-${index}`}
                     label={col.label}
                     sortable={col.sortable}
-                    sticky={"sticky" in col ? col.sticky : false}
+                    sticky={Boolean(col.sticky)}
                   />
                 ))}
               </tr>
@@ -612,12 +787,7 @@ export function HomeComparisonTable() {
                     <td
                       className={`sticky left-0 z-[5] ${tdBase} ${bg} group-hover:bg-[#f8fafc] ${stickyCellShadow} ${firm.featured ? "border-l-4 border-l-[#2D4CC8]" : ""}`}
                     >
-                      <FirmPgName
-                        name={firm.name}
-                        logo={firm.logo}
-                        rating={firm.review}
-                        reviewCount={firm.reviewCount}
-                      />
+                      <FirmPgName name={firm.name} logo={firm.logo} />
                     </td>
 
                     <td className={tdBase}>
@@ -628,9 +798,9 @@ export function HomeComparisonTable() {
                     </td>
                     <td className={tdBase}>{firm.location}</td>
                     <td className={tdBase}>
-                      <span className="text-lg font-bold text-[#13203F]">
-                        {firm.pricing}
-                      </span>
+                      <MdrPricingRing
+                        pricing={getPricingForMode(firm, activeFilter)}
+                      />
                     </td>
                     <td className={tdBase}>
                       <SettlementBadge value={firm.settlement} />
@@ -638,8 +808,8 @@ export function HomeComparisonTable() {
                     <td className={`${tdBase} font-medium text-[#13203F]`}>
                       {firm.onboarding}
                     </td>
-                    <td className={`${tdBase} max-w-[220px] leading-snug text-slate-600`}>
-                      {firm.products}
+                    <td className={tdBase}>
+                      <SmartTags labels={firm.products} />
                     </td>
                     <td className={tdBase}>
                       <SupportedPlatforms
@@ -675,7 +845,7 @@ export function HomeComparisonTable() {
                         type="button"
                         className="whitespace-nowrap cursor-pointer rounded-full border-2 border-[#2D4CC8] px-4 py-2 text-sm font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white"
                       >
-                        Signup / Get Started
+                        Signup
                       </button>
                     </td>
 
@@ -694,49 +864,39 @@ export function HomeComparisonTable() {
           </table>
         </div>
 
-        {/* Bottom bar — fixed */}
-        <div className="flex shrink-0 flex-col gap-3 border-t border-slate-200 bg-[#f8fafc] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-          <div className="flex items-center justify-between gap-4">
-            <h3 className="font-bold text-[#13203F]">
-              Comparing 
-            </h3>
-            <button
-            type="button"
-            className="cursor-pointer rounded-xl bg-[#2D4CC8] px-6 py-2 font-medium text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
-          >
-            PG 1 
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer rounded-xl bg-[#2D4CC8] px-6 py-2 font-medium text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
-          >
-            PG 2
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer rounded-xl bg-[#2D4CC8] px-6 py-2 font-medium text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
-          >
-            PG 3
-          </button>
+        {selectedCompareSlots.length > 0 && (
+          <div className="flex shrink-0 flex-col gap-3 border-t border-slate-200 bg-[#f8fafc] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div className="flex items-center gap-4">
+              <h3 className="font-bold text-[#13203F]">Comparing</h3>
+              {compareSlots
+                .filter((slot) => selectedCompareSlots.includes(slot.value))
+                .map((slot) => (
+                  <button
+                    key={slot.value}
+                    type="button"
+                    className="cursor-pointer rounded-xl bg-[#2D4CC8] px-6 py-2 font-medium text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6]"
+                  >
+                    {slot.label}
+                  </button>
+                ))}
+            </div>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={clearCompareSlots}
+                className="cursor-pointer rounded-xl bg-[#2D4CC8] px-6 py-2 font-medium text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6]"
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                className="cursor-pointer rounded-xl bg-[#2D4CC8] px-6 py-2 font-medium text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6]"
+              >
+                Compare Side by Side
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-2 justify-end">
-          <button
-            type="button"
-            className="cursor-pointer rounded-xl bg-[#2D4CC8] px-6 py-2 font-medium text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
-          >
-            Clear
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer rounded-xl bg-[#2D4CC8] px-6 py-2 font-medium text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
-          >
-            Compare Side by Side
-          </button>
-        </div>
-          
-        </div>
-        
-
+        )}
       </div>
     </section>
   );

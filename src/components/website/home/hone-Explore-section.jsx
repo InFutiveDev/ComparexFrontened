@@ -44,10 +44,10 @@ const cards = [
 
 export function HoneExploreSection() {
   const [activeCard, setActiveCard] = useState(0);
-  const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const contentRefs = useRef([]);
 
   useEffect(() => {
-    const nodes = contentRefs.current.filter(Boolean) as HTMLDivElement[];
+    const nodes = contentRefs.current.filter(Boolean);
     if (!nodes.length) return;
 
     const observer = new IntersectionObserver(
@@ -57,7 +57,7 @@ export function HoneExploreSection() {
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
 
         if (!visible) return;
-        const index = Number((visible.target as HTMLElement).dataset.index);
+        const index = Number((visible.target).dataset.index);
         if (!Number.isNaN(index)) {
           setActiveCard(index);
         }

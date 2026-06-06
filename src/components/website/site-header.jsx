@@ -59,9 +59,9 @@ export function SiteHeader() {
           : "translate-y-0 opacity-100"
         }`}
     >
-      <div className="mx-auto flex max-w-8xl items-center justify-between px-6 py-2.5 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-8xl items-center justify-between px-6 py-3.5 sm:px-6 lg:px-8">
         <Link href={routes.home} className={`text-lg font-bold ${isHome ? "text-white" : "text-slate-900"}`}>
-          <Image src="/images/logo.svg" alt="Logo" width={100} height={100} className="h-10 w-auto object-cover" />
+          <Image src="/images/logo.svg" alt="Logo" width={100} height={100} className="h-14 w-auto object-cover" />
 
         </Link>
 

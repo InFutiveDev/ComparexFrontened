@@ -18,7 +18,7 @@ const faqs = [
     {
         question: "Which software vendors are listed?",
         answer:
-            "We list vendors across popular business categories—from CRM and billing to HR, security, and industry-specific tools. The catalog grows over time as new providers join.",
+            "We list vendors across popular business categories—from CRM and billing to HR, security, and industry-specific tools. The catalog grows over time providers join.",
     },
     {
         question: "How do I verify software details before signing up?",
@@ -33,9 +33,9 @@ const faqs = [
 ];
 
 export const FrequentlyAskedSection = () => {
-    const [openIndex, setOpenIndex] = useState<number>(0);
+    const [openIndex, setOpenIndex] = useState(0);
 
-    function toggle(idx: number) {
+    function toggle(idx) {
         setOpenIndex((prev) => (prev === idx ? -1 : idx));
     }
 

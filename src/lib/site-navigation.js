@@ -29,7 +29,7 @@ export const routes = {
   contact: "/contact",
   merchantSupportCenter: "/merchant-support-center",
   careers: "/careers",
-} as const;
+};
 
 /** Primary header navigation */
 export const headerNavItems = [
@@ -41,7 +41,7 @@ export const headerNavItems = [
   { href: routes.tools.root, label: "Tools" },
   { href: routes.resources.root, label: "Resources" },
   { href: routes.merchantSupportCenter, label: "Merchant Support" },
-] as const;
+];
 
 export const footerColumns = [
   {
@@ -86,11 +86,11 @@ export const footerColumns = [
       { href: routes.testimonials.caseStudies, label: "Case Studies" },
     ],
   },
-] as const;
+];
 
 export const footerLegalLinks = [
   { href: routes.privacyPolicy, label: "Privacy Policy" },
   { href: routes.termsAndConditions, label: "Terms & Conditions" },
   { href: routes.contact, label: "Contact Us" },
   { href: routes.careers, label: "Careers" },
-] as const;
+];

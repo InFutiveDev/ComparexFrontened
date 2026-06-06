@@ -1,39 +1,11 @@
-export type StatItem = {
-  label: string;
-  value: string;
-  trend: string;
-};
-
-export type Lead = {
-  id: string;
-  name: string;
-  company: string;
-  email: string;
-  status: "New" | "Qualified" | "Proposal" | "Won";
-  source: string;
-  score: number;
-};
-
-export type FeatureItem = {
-  title: string;
-  description: string;
-};
-
-export type PricingPlan = {
-  name: string;
-  price: string;
-  description: string;
-  features: string[];
-};
-
-export const dashboardStats: StatItem[] = [
+export const dashboardStats = [
   { label: "Total Leads", value: "1,248", trend: "+12.4%" },
   { label: "Qualified Leads", value: "326", trend: "+8.1%" },
   { label: "Conversion Rate", value: "26.1%", trend: "+2.8%" },
   { label: "Revenue", value: "$82,400", trend: "+14.2%" },
 ];
 
-export const leads: Lead[] = [
+export const leads = [
   {
     id: "LD-101",
     name: "Aarav Sharma",
@@ -81,7 +53,7 @@ export const leads: Lead[] = [
   },
 ];
 
-export const websiteFeatures: FeatureItem[] = [
+export const websiteFeatures = [
   {
     title: "Smart Lead Tracking",
     description: "Track every lead stage with clean visual pipelines and filters.",
@@ -94,23 +66,7 @@ export const websiteFeatures: FeatureItem[] = [
  
 ];
 
-export type HeroFormOption = { value: string; label: string };
-
-export type HeroStepOneFieldName =
-  | "industry"
-  | "role"
-  | "department"
-  | "companySize"
-  | "region"
-  | "timeline";
-
-export const heroFormStepOneFields: {
-  id: string;
-  name: HeroStepOneFieldName;
-  label: string;
-  placeholder: string;
-  options: HeroFormOption[];
-}[] = [
+export const heroFormStepOneFields = [
   {
     id: "hero-industry",
     name: "industry",
@@ -132,7 +88,7 @@ export const heroFormStepOneFields: {
 
 ];
 
-export const pricingPlans: PricingPlan[] = [
+export const pricingPlans = [
   {
     name: "Starter",
     price: "$29/mo",

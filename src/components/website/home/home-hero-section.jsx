@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { IoSearch } from "react-icons/io5";
@@ -12,7 +12,7 @@ const heroStats = [
   { label: "How it works", value: "How it works" },
   { label: "Compare PG", value: "Compare PG" },
   { label: "Talk to Expert", value: "Talk to Expert" },
-] as const;
+];
 
 const scrollTickerMessages = [
   "Compare 20,000+ software products in one place",
@@ -20,7 +20,7 @@ const scrollTickerMessages = [
   "Trusted by 300+ brands and 12M+ happy customers",
   "Find the right CRM, billing, HR & more for your business",
   "Side-by-side comparisons to buy with confidence",
-] as const;
+];
 
 export function HomeHeroSection() {
   const router = useRouter();
@@ -46,7 +46,7 @@ export function HomeHeroSection() {
   const tickerItems = [...scrollTickerMessages, ...scrollTickerMessages];
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSearchSubmit = (event) => {
     event.preventDefault();
     const query = searchQuery.trim();
     if (!query) return;
@@ -59,7 +59,7 @@ export function HomeHeroSection() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#13203F] via-[#2D4CC8] to-[#40C3CF]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.16),transparent_35%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.14),transparent_32%)]" />
 
-        <div className="relative z-20 mt-17 w-full border-b border-white/15 bg-[#0a1428]/80 backdrop-blur-md">
+        <div className="relative z-20 mt-21 w-full border-b border-white/15 bg-[#0025bb] backdrop-blur-md">
           <div className="cx-marquee cx-marquee--ticker py-2.5" aria-label="Latest updates">
             <div className="cx-marquee__track items-center gap-10 px-4">
               <Link href="/">
@@ -84,7 +84,7 @@ export function HomeHeroSection() {
 
         <div className="relative z-30 mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
 
-          <div className="flex min-h-[560px] items-center py-1 sm:min-h-[560px] sm:py-1">
+          <div className="flex min-h-[520px] items-center py-6 sm:min-h-[560px] sm:py-8">
 
             <div className="grid w-full grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:items-center">
 
@@ -94,12 +94,12 @@ export function HomeHeroSection() {
                   India’s 1st PG Comparison Platform
                   </p>
                   <h1 className="text-[32px] font-medium leading-tight sm:text-[32px] lg:text-[32px] mt-4">
-                  Discover, compare & choose the right payment gateway for your business.
+                  Discover, Compare & Choose the Right Payment Gateway for Your Business.
                   </h1>
 
                   <form
                     onSubmit={handleSearchSubmit}
-                    className="mt-6 w-[95%] flex h-12 items-center rounded-full border border-white/35 bg-white/95 px-4 text-sm text-slate-600 shadow-lg shadow-slate-950/10 sm:h-12"
+                    className="mt-6 flex h-12 w-full items-center rounded-full border border-white/35 bg-white/95 px-4 text-sm text-slate-600 shadow-lg shadow-slate-950/10 sm:h-12 sm:max-w-[520px]"
                   >
                     <IoSearch className="mr-2 cursor-pointer text-2xl text-[#2d4cc8]" aria-hidden="true" />
                     <input
@@ -127,27 +127,36 @@ export function HomeHeroSection() {
                   <p className="mt-6 text-[18px] font-regular leading-tight text-white">
                     Register as:
                   </p>
-                  <div className="flex items-center gap-3 mt-4">
-                    <Link href="/" className="relative inline-flex items-center px-12 py-2 overflow-hidden text-lg font-medium text-indigo-600 border-2 border-white rounded-full hover:text-white group hover:bg-gray-50">
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <Link
+                      href="/"
+                      className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
+                    >
                       <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
                       <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                       </span>
                       <span className="relative">Merchant</span>
                     </Link>
-                    <Link href="/" className="relative inline-flex items-center px-12 py-2 overflow-hidden text-lg font-medium text-indigo-600 border-2 border-white rounded-full hover:text-white group hover:bg-gray-50">
+                    <Link
+                      href="/"
+                      className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
+                    >
                       <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
                       <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                       </span>
                       <span className="relative">Reseller</span>
                     </Link>
-                    <Link href="/" className="relative inline-flex items-center px-12 py-2 overflow-hidden text-lg font-medium text-indigo-600 border-2 border-white rounded-full hover:text-white group hover:bg-gray-50">
+                    <Link
+                      href="/"
+                      className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
+                    >
                       <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
                       <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                       </span>
-                      <span className="relative">AP - PG</span>
+                      <span className="relative">PA - PG</span>
                     </Link>
                   </div>
                 </div>

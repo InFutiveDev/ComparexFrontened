@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { HiArrowLeft, HiArrowRight, HiCheck } from "react-icons/hi2";
 import { heroFormStepOneFields } from "@/lib/mock-data";
 import Image from "next/image";
@@ -10,14 +10,9 @@ const steps = [
   { id: 1, label: "Your details" },
   { id: 2, label: "Business info" },
   { id: 3, label: "Software needs" },
-] as const;
+];
 
-type DropdownOption = {
-  value: string;
-  label: string;
-};
-
-const businessPriorityOptions: DropdownOption[] = [
+const businessPriorityOptions = [
   { value: "lower-transaction-fees", label: "Lower Transaction Fees" },
   { value: "faster-settlements", label: "Faster Settlements" },
   { value: "easy-onboarding-approval", label: "Easy Onboarding & Approval" },
@@ -28,29 +23,7 @@ const businessPriorityOptions: DropdownOption[] = [
   { value: "easy-website-app-integration", label: "Easy Website / App Integration" },
 ];
 
-type FormData = {
-  fullName: string;
-  email: string;
-  phone: string;
-  company: string;
-  business: string;
-  businessName: string;
-  industry: string;
-  role: string;
-  department: string;
-  companySize: string;
-  region: string;
-  timeline: string;
-  teamSize: string;
-  category: string;
-  budget: string;
-  message: string;
-  marketing: boolean;
-  termsAndConditions: boolean;
-  privacyPolicy: boolean;
-};
-
-const initialForm: FormData = {
+const initialForm = {
   fullName: "",
   email: "",
   phone: "",
@@ -105,10 +78,6 @@ function IconToggle({
   checked,
   onToggle,
   children,
-}: {
-  checked: boolean;
-  onToggle: () => void;
-  children: ReactNode;
 }) {
   return (
     <button
@@ -128,11 +97,6 @@ function OptionButtons({
   value,
   options,
   onChange,
-}: {
-  name: string;
-  value: string;
-  options: DropdownOption[];
-  onChange: (value: string) => void;
 }) {
   return (
     <div>
@@ -162,14 +126,14 @@ function OptionButtons({
 
 export function HeroAdviceForm() {
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState<FormData>(initialForm);
+  const [form, setForm] = useState(initialForm);
   const [submitted, setSubmitted] = useState(false);
 
-  function updateField<K extends keyof FormData>(key: K, value: FormData[K]) {
+  function updateField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function canGoNext(): boolean {
+  function canGoNext() {
     if (step === 1) {
       return heroFormStepOneFields.every((field) => Boolean(form[field.name]));
     }
@@ -192,7 +156,7 @@ export function HeroAdviceForm() {
     setStep((s) => Math.max(s - 1, 1));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event) {
     event.preventDefault();
     if (!canGoNext()) return;
     setSubmitted(true);
@@ -204,7 +168,7 @@ export function HeroAdviceForm() {
       setSubmitted(false);
       setForm(initialForm);
       setStep(1);
-    }, 8000);
+    }, 30000);
     return () => window.clearTimeout(timer);
   }, [submitted]);
 
@@ -221,11 +185,11 @@ export function HeroAdviceForm() {
         <p className="mt-2 text-sm leading-relaxed text-slate-600">
          Our team is reviewing the best-fit payment gateway options based on your business needs. Our team will connect with you shortly to help with comparisons, onboarding guidance, and activation support.
         </p>
-        <p className="mt-2 text-[16px] font-semibold leading-relaxed text-slate-600">Meanwhile, explore:</p>
+        <p className="mt-2 text-[16px] font-semibold leading-relaxed text-slate-600">Meanwhile, Explore:</p>
         <div className="flex items-center justify-center gap-2">
-        <Link href="/" className="mt-4 inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-[14px] font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">PG comparison tools</Link>
-        <Link href="/" className="mt-4 inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-[14px] font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">Merchant reviews</Link>
-        <Link href="/" className="mt-4 inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-[14px] font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">Payment cost calculator</Link>
+        <Link href="/" className="mt-4 inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-[14px] font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">PG Comparison Tools</Link>
+        <Link href="/" className="mt-4 inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-[14px] font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">Merchant Reviews</Link>
+        <Link href="/" className="mt-4 inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-[14px] font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">Payment Cost Calculator</Link>
         </div>
       </div>
     );

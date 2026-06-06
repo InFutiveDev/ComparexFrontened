@@ -10,12 +10,7 @@ const items = [
   { href: "/dashboard/settings", label: "Settings" },
 ];
 
-type SidebarProps = {
-  open: boolean;
-  onClose: () => void;
-};
-
-export function Sidebar({ open, onClose }: SidebarProps) {
+export function Sidebar({ open, onClose }) {
   const pathname = usePathname();
 
   return (

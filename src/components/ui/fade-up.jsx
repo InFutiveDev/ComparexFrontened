@@ -2,19 +2,6 @@
 
 import React, { useEffect, useId, useRef, useState } from "react";
 
-type FadeUpProps = {
-  children: React.ReactNode;
-  className?: string;
-  /** IntersectionObserver threshold */
-  threshold?: number;
-  /** Root margin (e.g. "0px 0px -10% 0px") */
-  rootMargin?: string;
-  /** Delay in ms for staggering */
-  delayMs?: number;
-  /** If true, animate only once */
-  once?: boolean;
-};
-
 export function FadeUp({
   children,
   className,
@@ -22,9 +9,9 @@ export function FadeUp({
   rootMargin = "0px 0px -10% 0px",
   delayMs = 0,
   once = true,
-}: FadeUpProps) {
+}) {
   const id = useId();
-  const ref = useRef<HTMLDivElement | null>(null);
+  const ref = useRef(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {

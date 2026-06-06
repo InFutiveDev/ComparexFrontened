@@ -9,18 +9,7 @@ import Image from "next/image";
 const NAVY = "#13203f";
 const NAVY_SOFT = "#1e3a6e";
 
-type Testimonial = {
-    name: string;
-    role: string;
-    rating: string;
-    excerpt: string;
-    initials: string;
-    avatarBg: string;
-    /** Dark gradient avatars → white initials */
-    avatarLightText?: boolean;
-};
-
-const testimonials: Testimonial[] = [
+const testimonials = [
     {
         name: "Niklas Weisz",
         role: "Marketing Coordinator",
@@ -41,18 +30,7 @@ const testimonials: Testimonial[] = [
     },
 ];
 
-type ReviewedCard = {
-    id: string;
-    name: string;
-    role: string;
-    title: string;
-    body: string;
-    avatarClass: string;
-    logoLabel: string;
-};
-
-/** Each slide = two cards side by side */
-const sliderSlides: [ReviewedCard, ReviewedCard][] = [
+const sliderSlides = [
     [
         {
             id: "svetlana",
@@ -143,7 +121,7 @@ const sliderSlides: [ReviewedCard, ReviewedCard][] = [
     ],
 ];
 
-function DarkLogoMark({ label }: { label: string }) {
+function DarkLogoMark({ label }) {
     return (
         <div className="flex size-[52px] shrink-0 items-center justify-center rounded-lg bg-slate-950 px-1 text-center shadow-inner">
             <span className="text-[10px] font-bold leading-[1.15] tracking-tight text-white">{label}</span>
@@ -151,7 +129,7 @@ function DarkLogoMark({ label }: { label: string }) {
     );
 }
 
-function ReviewedSoftwareCard({ item }: { item: ReviewedCard }) {
+function ReviewedSoftwareCard({ item }) {
     return (
         <article className="overflow-hidden h-[280px] rounded-2xl bg-white shadow-[0_8px_30px_-12px_rgba(15,23,42,0.28)]">
             <div className="flex items-center justify-between gap-4 bg-[#f2f6fb] px-5 py-4">
@@ -227,9 +205,6 @@ function TopReviewedSlider() {
 function TestimonialCard({
     t,
     className,
-}: {
-    t: Testimonial;
-    className?: string;
 }) {
     return (
         <article
