@@ -55,7 +55,7 @@ export function HomeHeroSection() {
 
   return (
     <section>
-      <div className="relative overflow-hidden pt-16">
+      <div className="relative overflow-hidden pt-21">
         <div className="absolute inset-0 bg-gradient-to-r from-[#13203F] via-[#2D4CC8] to-[#40C3CF]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.16),transparent_35%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.14),transparent_32%)]" />
 
