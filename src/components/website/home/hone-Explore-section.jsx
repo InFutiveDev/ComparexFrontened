@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 const cards = [
   {
     id: 1,
-    image: "/images/explore-1.png",
+    image: "/images/hero-slide-1.svg",
     title: (
       <>
         Explore and Compare <br /> Software
@@ -20,7 +20,7 @@ const cards = [
   },
   {
     id: 2,
-    image: "/images/explore-2.png",
+    image: "/images/hero-slide-2.svg",
     title: (
       <>
         Get Expert <br /> Software Advice
@@ -33,7 +33,7 @@ const cards = [
   },
   {
     id: 3,
-    image: "/images/explore-3.png",
+    image: "/images/hero-slide-3.svg",
     title: "Secure Payments & Transactions",
     description:
       "Get transparent and low pricing options across all software with secure and trusted payment methods. For easier investment, EMI options are available.",

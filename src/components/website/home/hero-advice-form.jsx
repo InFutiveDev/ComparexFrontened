@@ -221,7 +221,7 @@ export function HeroAdviceForm() {
                   <h2 className="text-left text-[22px] font-bold text-[#13203F]">What Kind of Business Are You Running?</h2>
                 </div>
               </div>
-              <h3 className="mb-4 text-left text-[16px] font-regular text-slate-600">We’ll recommend PGs best suited for your business model.</h3>
+              <h3 className="mb-4 text-left text-[16px] font-normal text-slate-600">We’ll recommend PGs best suited for your business model.</h3>
               <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-1">
                 {heroFormStepOneFields.map((field) => (
                   <div key={field.id}>
@@ -248,7 +248,7 @@ export function HeroAdviceForm() {
                   <h2 className="text-left text-[22px] font-bold text-[#13203F]">What Matters Most to Your Business Right Now?</h2>
                 </div>
               </div>
-              <h3 className="mb-4 text-left text-[16px] font-regular text-slate-600">Choose the key factor influencing your decision.</h3>
+              <h3 className="mb-4 text-left text-[16px] font-normal text-slate-600">Choose the key factor influencing your decision.</h3>
               <div className="mb-4">
                 {/* <label className={labelClass}>What matters most</label> */}
                 <OptionButtons
@@ -268,7 +268,7 @@ export function HeroAdviceForm() {
                   <h2 className="text-left text-[22px] font-bold text-[#13203F]">Almost Done</h2>
                 </div>
               </div>
-              <h3 className="mb-4 text-left text-[16px] font-regular text-slate-600">Let’s connect you with the right Payment Gateway.</h3>
+              <h3 className="mb-4 text-left text-[16px] font-normal text-slate-600">Let’s connect you with the right Payment Gateway.</h3>
               <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="hero-category" className={labelClass}>

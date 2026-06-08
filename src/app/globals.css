@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@source "../../src/**/*.{js,jsx}";
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
@@ -10,6 +12,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --spacing-21: 5.25rem;
+  --max-width-8xl: 90rem;
 }
 
 body {

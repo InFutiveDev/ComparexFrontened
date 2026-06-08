@@ -25,18 +25,18 @@ const scrollTickerMessages = [
 export function HomeHeroSection() {
   const router = useRouter();
   const brandLogos = [
-    { name: "", src: "/images/brand-1.svg" },
-    { name: "", src: "/images/brand-2.svg" },
     { name: "", src: "/images/brand-3.svg" },
     { name: "", src: "/images/brand-4.svg" },
     { name: "", src: "/images/brand-5.svg" },
-    { name: "", src: "/images/brand-1.svg" },
-    { name: "", src: "/images/brand-2.svg" },
     { name: "", src: "/images/brand-3.svg" },
     { name: "", src: "/images/brand-4.svg" },
     { name: "", src: "/images/brand-5.svg" },
-    { name: "", src: "/images/brand-1.svg" },
-    { name: "", src: "/images/brand-2.svg" },
+    { name: "", src: "/images/brand-3.svg" },
+    { name: "", src: "/images/brand-4.svg" },
+    { name: "", src: "/images/brand-5.svg" },
+    { name: "", src: "/images/brand-3.svg" },
+    { name: "", src: "/images/brand-4.svg" },
+    { name: "", src: "/images/brand-5.svg" },
     { name: "", src: "/images/brand-3.svg" },
     { name: "", src: "/images/brand-4.svg" },
     { name: "", src: "/images/brand-5.svg" },
@@ -55,11 +55,11 @@ export function HomeHeroSection() {
 
   return (
     <section>
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden pt-16">
         <div className="absolute inset-0 bg-gradient-to-r from-[#13203F] via-[#2D4CC8] to-[#40C3CF]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.16),transparent_35%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.14),transparent_32%)]" />
 
-        <div className="relative z-20 mt-21 w-full border-b border-white/15 bg-[#0025bb] backdrop-blur-md">
+        <div className="relative z-20 w-full border-b border-white/15 bg-[#0025bb] backdrop-blur-md">
           <div className="cx-marquee cx-marquee--ticker py-2.5" aria-label="Latest updates">
             <div className="cx-marquee__track items-center gap-10 px-4">
               <Link href="/">
@@ -71,7 +71,7 @@ export function HomeHeroSection() {
                     >
                       {message}
                       <PiSparkleFill
-                        className="size-5.25 shrink-0 text-white"
+                        className="size-5 shrink-0 text-white"
                         aria-hidden
                       />
                     </span>
@@ -90,7 +90,7 @@ export function HomeHeroSection() {
 
               <div className="lg:col-span-7">
                 <div className="w-full max-w-xl text-white lg:max-w-2xl">
-                  <p className="text-[16px] border border-white/50 rounded-full px-4 py-1.5 w-fit font-regular leading-tight text-white mb-2">
+                  <p className="text-[16px] border border-white/50 rounded-full px-4 py-1.5 w-fit font-normal leading-tight text-white mb-2">
                   India’s 1st PG Comparison Platform
                   </p>
                   <h1 className="text-[32px] font-medium leading-tight sm:text-[32px] lg:text-[32px] mt-4">
@@ -124,7 +124,7 @@ export function HomeHeroSection() {
                     ))}
                   </div>
 
-                  <p className="mt-6 text-[18px] font-regular leading-tight text-white">
+                  <p className="mt-6 text-[18px] font-normal leading-tight text-white">
                     Register as:
                   </p>
                   <div className="mt-4 flex flex-wrap items-center gap-3">

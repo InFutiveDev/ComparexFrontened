@@ -8,34 +8,31 @@ const promoSlides = [
     id: "promo-list-software",
     title: "Best Payment Gateways in India for Startups",
     buttonText: "Read More",
-    bgImage: "/images/img-4.png",
+    bgImage: "/images/hero-slide-1.svg",
   },
   {
     id: "promo-qualified-leads",
     title: "Razorpay vs Cashfree vs PayU: Complete Comparison",
     buttonText: "Read More",
-    bgImage: "/images/img-4.png",
+    bgImage: "/images/hero-slide-2.svg",
   },
   {
     id: "promo-visibility",
     title: "How to Choose the Right Payment Gateway for Your Business",
     buttonText: "Read More",
-    bgImage: "/images/img-4.png",
+    bgImage: "/images/hero-slide-3.svg",
   },
 ];
 
 const features = [
   {
-
-    icon: "/images/img-1.jpeg",
+    icon: "/images/hero-slide-1.svg",
   },
   {
-
-    icon: "/images/img-2.jpg",
+    icon: "/images/hero-slide-2.svg",
   },
   {
-
-    icon: "/images/img-3.jpg",
+    icon: "/images/hero-slide-3.svg",
   },
 ];
 export function HomeFeaturesSection() {

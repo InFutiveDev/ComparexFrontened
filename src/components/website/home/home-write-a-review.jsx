@@ -260,7 +260,7 @@ export const HomeWriteAReview = () => {
             {/* —— Write a Review —— */}
             <section className="mx-auto max-w-8xl px-4 pt-10 pb-5 sm:px-6 lg:px-8">
                 <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-                    <Image src="/images/review.webp" alt="Write a Review" width={500} height={500} className="w-full h-full object-cover" />
+                    <Image src="/images/hero-image-1.svg" alt="Write a Review" width={500} height={500} className="h-full w-full object-cover" />
 
                     <div className="text-center lg:text-start">
                         <h2
