@@ -164,68 +164,147 @@ const firmModePricing = {
   Razorpay: {
     "UPI Payments": "0%",
     "Credit Card": "1.9%",
+    Visa: "1.9%",
+    Mastercard: "1.95%",
+    Rupay: "1.75%",
+    Amex: "2.5%",
     "Debit Card": "1.5%",
+    "Visa Debit": "1.5%",
+    "Mastercard Debit": "1.52%",
+    "Rupay Debit": "1.35%",
     "Net Banking": "1.5%",
+    "HDFC Bank": "1.45%",
+    "ICICI Bank": "1.48%",
+    "SBI": "1.5%",
+    "Axis Bank": "1.52%",
+    "Kotak Bank": "1.55%",
     "Wallet Payments": "1.8%",
     "QR Payments": "0%",
-    "International": "3%",
+    International: "3%",
     "Subscription Billing": "2.2%",
   },
   Cashfree: {
     "UPI Payments": "0%",
     "Credit Card": "1.75%",
+    Visa: "1.75%",
+    Mastercard: "1.78%",
+    Rupay: "1.6%",
+    Amex: "2.4%",
     "Debit Card": "1.4%",
+    "Visa Debit": "1.4%",
+    "Mastercard Debit": "1.42%",
+    "Rupay Debit": "1.25%",
     "Net Banking": "1.45%",
+    "HDFC Bank": "1.4%",
+    "ICICI Bank": "1.43%",
+    "SBI": "1.45%",
+    "Axis Bank": "1.47%",
+    "Kotak Bank": "1.5%",
     "Wallet Payments": "1.7%",
     "QR Payments": "0%",
-    "International": "2.9%",
+    International: "2.9%",
     "Subscription Billing": "2%",
   },
   "PhonePe PG": {
     "UPI Payments": "0%",
     "Credit Card": "1.8%",
+    Visa: "1.8%",
+    Mastercard: "1.82%",
+    Rupay: "1.65%",
+    Amex: "2.45%",
     "Debit Card": "1.45%",
+    "Visa Debit": "1.45%",
+    "Mastercard Debit": "1.47%",
+    "Rupay Debit": "1.3%",
     "Net Banking": "1.5%",
+    "HDFC Bank": "1.45%",
+    "ICICI Bank": "1.48%",
+    "SBI": "1.5%",
+    "Axis Bank": "1.52%",
+    "Kotak Bank": "1.54%",
     "Wallet Payments": "1.75%",
     "QR Payments": "0%",
-    "International": "2.95%",
+    International: "2.95%",
     "Subscription Billing": "2.1%",
   },
   "PayU PG": {
     "UPI Payments": "0%",
     "Credit Card": "1.85%",
+    Visa: "1.85%",
+    Mastercard: "1.88%",
+    Rupay: "1.7%",
+    Amex: "2.55%",
     "Debit Card": "1.5%",
+    "Visa Debit": "1.5%",
+    "Mastercard Debit": "1.52%",
+    "Rupay Debit": "1.35%",
     "Net Banking": "1.55%",
+    "HDFC Bank": "1.5%",
+    "ICICI Bank": "1.53%",
+    "SBI": "1.55%",
+    "Axis Bank": "1.57%",
+    "Kotak Bank": "1.6%",
     "Wallet Payments": "1.8%",
     "QR Payments": "0%",
-    "International": "3.1%",
+    International: "3.1%",
     "Subscription Billing": "2.15%",
   },
   "Paytm PG": {
     "UPI Payments": "0%",
     "Credit Card": "1.7%",
+    Visa: "1.7%",
+    Mastercard: "1.72%",
+    Rupay: "1.55%",
+    Amex: "2.35%",
     "Debit Card": "1.35%",
+    "Visa Debit": "1.35%",
+    "Mastercard Debit": "1.37%",
+    "Rupay Debit": "1.2%",
     "Net Banking": "1.4%",
+    "HDFC Bank": "1.35%",
+    "ICICI Bank": "1.38%",
+    "SBI": "1.4%",
+    "Axis Bank": "1.42%",
+    "Kotak Bank": "1.45%",
     "Wallet Payments": "1.65%",
     "QR Payments": "0%",
-    "International": "2.85%",
+    International: "2.85%",
     "Subscription Billing": "1.95%",
   },
   "GPay PG": {
     "UPI Payments": "0%",
     "Credit Card": "1.82%",
+    Visa: "1.82%",
+    Mastercard: "1.84%",
+    Rupay: "1.68%",
+    Amex: "2.5%",
     "Debit Card": "1.48%",
+    "Visa Debit": "1.48%",
+    "Mastercard Debit": "1.5%",
+    "Rupay Debit": "1.32%",
     "Net Banking": "1.52%",
+    "HDFC Bank": "1.48%",
+    "ICICI Bank": "1.5%",
+    "SBI": "1.52%",
+    "Axis Bank": "1.54%",
+    "Kotak Bank": "1.56%",
     "Wallet Payments": "1.72%",
     "QR Payments": "0%",
-    "International": "3%",
+    International: "3%",
     "Subscription Billing": "2.05%",
   },
 };
 
-function getPricingForMode(firm, modeIndex) {
+function getPricingForMode(firm, modeIndex, subFilter = null) {
   const mode = paymentModes[modeIndex];
-  return firmModePricing[firm.name]?.[mode] ?? firm.pricing;
+  const pricingMap = firmModePricing[firm.name];
+  if (!pricingMap) return firm.pricing;
+
+  if (subFilter && pricingMap[subFilter]) {
+    return pricingMap[subFilter];
+  }
+
+  return pricingMap[mode] ?? firm.pricing;
 }
 
 const sortOptions = [
@@ -639,6 +718,7 @@ function ComparePgCell({
 function MobileFirmCard({
   firm,
   activeFilter,
+  activeSubFilter,
   compareModeOpen,
   isCompareSelected,
   onCompareToggle,
@@ -672,7 +752,7 @@ function MobileFirmCard({
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
-          {getPricingForMode(firm, activeFilter)}
+          {getPricingForMode(firm, activeFilter, activeSubFilter)}
         </span>
         <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
           {firm.location}
@@ -851,6 +931,7 @@ export function HomeComparisonTable() {
                 key={firm.name}
                 firm={firm}
                 activeFilter={activeFilter}
+                activeSubFilter={activeSubFilter}
                 compareModeOpen={compareModeOpen}
                 isCompareSelected={selectedCompareFirms.includes(firm.name)}
                 onCompareToggle={() => toggleCompareFirm(firm.name)}
@@ -911,7 +992,7 @@ export function HomeComparisonTable() {
                     </td>
                     <td className={tdBase}>{firm.location}</td>
                     <td className={`${tdBase} font-medium text-[#13203F]`}>
-                      {getPricingForMode(firm, activeFilter)}
+                      {getPricingForMode(firm, activeFilter, activeSubFilter)}
                     </td>
                     <td className={tdBase}>
                       <SettlementBadge value={firm.settlement} />

@@ -11,6 +11,7 @@ import {
   HiLifebuoy,
   HiShare,
   HiSquares2X2,
+  HiChatBubbleBottomCenterText,
 } from "react-icons/hi2";
 
 const stepsByRole = {
@@ -45,7 +46,7 @@ const stepsByRole = {
       title: "We Handle Qualification & Coordination",
       description:
         "CompareX manages merchant qualification, provider coordination, onboarding support, and follow-ups for you.",
-      Icon: HiClipboardDocumentCheck,
+      Icon: HiClipboardDocumentList,
     },
     {
       title: "Track Growth & Earn Commissions",
@@ -59,7 +60,7 @@ const stepsByRole = {
       title: "List & Position Your Offering",
       description:
         "Showcase your products, pricing, integrations, onboarding strengths, and smart tags through a structured marketplace profile.",
-      Icon: HiBuildingStorefront,
+        Icon: HiClipboardDocumentList,
     },
     {
       title: "Receive Qualified Business Leads",
@@ -71,7 +72,7 @@ const stepsByRole = {
       title: "Manage Leads & Build Trust",
       description:
         "Track leads, respond to reviews, nominate experts, and strengthen merchant relationships through CompareX.",
-      Icon: HiClipboardDocumentList,
+      Icon: HiChatBubbleBottomCenterText,
     },
   ],
 };
