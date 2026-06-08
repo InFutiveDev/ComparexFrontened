@@ -1,5 +1,3 @@
-import { Geist, Geist_Mono } from "next/font/google";
-
 import { StripExtensionAttrs } from "@/components/strip-extension-attrs";
 import "./globals.css";
 
@@ -45,16 +43,6 @@ const stripExtensionScript = `
 })();
 `;
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata = {
   title: "Comparex",
   description: "Comparex is a platform that helps you compare products and services.",
@@ -66,7 +54,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className="h-full antialiased"
       suppressHydrationWarning
     >
       <body
