@@ -320,57 +320,62 @@ const sortOptions = [
 const MAX_COMPARE_PG = 3;
 
 const tableColumns = [
-  { label: "PG Name", sortable: true, sticky: true },
-  { label: "Best For / Smart Tags", sortable: true },
-  { label: <>Business<br />Age</>, sortable: false },
-  { label: "Location", sortable: false },
-  { label: <>Pricing<br />(MDR)</>, sortable: false },
-  { label: <>Settlement<br />Cycle</>, sortable: false },
-  { label: <>Onboarding<br />TAT</>, sortable: false },
-  { label: "Products", sortable: true },
-  { label: "Supported Platforms", sortable: true },
-  { label: "Offers", sortable: true },
-  { label: "Review Link", sortable: true },
-  { label: "Talk to Expert", sortable: false },
-  { label: "Signup", sortable: false },
-  { label: "Personalised Quote", sortable: false },
+  { label: "PG Name", sortable: true, sticky: true, width: 125 },
+  { label: "Best For / Smart Tags", sortable: true, width: 150 },
+  { label: <>Business<br />Age</>, sortable: false, width: 72 },
+  { label: "Location", sortable: false, width: 88 },
+  { label: <>Pricing<br />(MDR)</>, sortable: false, width: 88 },
+  { label: <>Settlement<br />Cycle</>, sortable: false, width: 96 },
+  { label: <>Onboarding<br />TAT</>, sortable: false, width: 88 },
+  { label: "Products", sortable: true, width: 150 },
+  { label: "Supported Platforms", sortable: true, width: 130 },
+  { label: "Offers", sortable: true, width: 112 },
+  { label: "Review Link", sortable: true, width: 108 },
+  { label: "Talk to Expert", sortable: false, width: 118 },
+  { label: "Signup", sortable: false, width: 88 },
+  { label: "Personalised Quote", sortable: false, width: 128 },
 ];
 
 const colDivider =
   "relative [&:not(:last-child)]:after:pointer-events-none [&:not(:last-child)]:after:absolute [&:not(:last-child)]:after:right-0 [&:not(:last-child)]:after:top-1/2 [&:not(:last-child)]:after:h-[58%] [&:not(:last-child)]:after:w-px [&:not(:last-child)]:after:-translate-y-1/2 [&:not(:last-child)]:after:bg-[#2D4CC8]/20 [&:not(:last-child)]:after:content-['']";
 
-const thBase = `whitespace-nowrap px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-[#13203F]/70 ${colDivider}`;
+const thBase = `whitespace-nowrap px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-[#13203F]/70 sm:px-4 sm:py-3.5 sm:text-[11px] ${colDivider}`;
 
-const tdBase = `border-t border-slate-100 px-4 py-4 align-middle text-sm text-slate-700 ${colDivider}`;
+const tdBase = `border-t border-slate-100 px-3 py-2 align-middle text-[12px] text-slate-700 sm:px-4 sm:py-4 sm:text-sm ${colDivider}`;
 
 const stickyCellShadow =
   "shadow-[4px_0_12px_-4px_rgba(19,32,63,0.12)]";
 
 function FirmPgName({ name, logo }) {
   return (
-    <div className="flex w-[155px] max-w-[155px] items-center gap-2">
+    <div className="flex w-[130px] max-w-[130px] items-center gap-1.5 sm:w-[155px] sm:max-w-[155px] sm:gap-2">
       <div className="relative shrink-0">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-[#2D4CC8] bg-white/80 text-sm font-bold text-black">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-[#2D4CC8] bg-white/80 text-xs font-bold text-black sm:h-10 sm:w-10 sm:text-sm">
           {logo}
         </div>
       </div>
 
       <div className="min-w-0">
-        <h3 className="truncate text-[13px] font-bold leading-tight text-[#13203F]">{name}</h3>
+        <h3 className="truncate text-[12px] font-bold leading-tight text-[#13203F] sm:text-[13px]">{name}</h3>
       </div>
     </div>
   );
 }
-function SmartTags({ labels }) {
+function SmartTags({ labels, compact = false }) {
   return (
-    <div className="flex w-fit mx-auto justify-center gap-x-2 gap-y-1 flex-wrap items-center">
+    <div
+      className={`flex flex-wrap items-start justify-start gap-x-1 gap-y-0.5 sm:gap-x-2 sm:gap-y-1 ${
+        compact ? "max-w-[138px]" : "max-w-[138px] sm:max-w-none"
+      }`}
+    >
       {labels.map((label) => (
         <span
           key={label}
-          className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[#2D4CC8] bg-white/80 px-3 py-1 text-xs font-semibold text-black"
+          className="inline-flex max-w-full items-center gap-1 whitespace-nowrap rounded-full border border-[#2D4CC8] bg-white/80 px-1.5 py-0.5 text-[9px] font-semibold text-black sm:px-3 sm:py-1 sm:text-xs"
         >
           {label}
-        </span>      ))}
+        </span>
+      ))}
     </div>
   );
 }
@@ -449,7 +454,7 @@ function SettlementBadge({ value }) {
   const isInstant = value.toLowerCase().includes("instant");
   return (
     <span
-      className={`inline-flex px-2.5 py-1 text-sm font-semibold border border-[#2D4CC8] rounded-full ${
+      className={`inline-flex px-3 py-1 text-[12px] font-semibold border border-[#2D4CC8] rounded-full ${
         isInstant
           ? "bg-white border border-[#2D4CC8] rounded-full text-gray-600"
           : "bg-white border border-[#2D4CC8] rounded-full text-gray-600"
@@ -479,18 +484,11 @@ function OfferCoupon({
       <p className="px-1 py-2 text-center text-[11px] font-bold uppercase leading-tight text-[#13203F]">
         {headline}
       </p>
-      <div className="flex items-center justify-between gap-1 rounded-lg bg-white border border-[#2D4CC8] px-2 py-2">
+      <div className="flex items-center justify-between gap-1 rounded-lg bg-white px-2 py-2">
         <span className="text-[11px] font-bold tracking-wide text-gray-600">
           {masked}
         </span>
-        <button
-          type="button"
-          onClick={copyCode}
-          className="shrink-0 cursor-pointer rounded p-0.5 text-[#40C3CF] transition-opacity hover:opacity-80"
-          aria-label={`Copy coupon code ${code}`}
-        >
-          <HiOutlineClipboardDocument className="size-4" aria-hidden />
-        </button>
+        
       </div>
     </div>
   );
@@ -504,7 +502,7 @@ function FirmReview({ rating, reviewCount }) {
     >
       <button
         type="button"
-        className="mt-1 cursor-pointer rounded-full border border-[#2D4CC8] px-3 py-1 text-sm font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white"
+        className="mt-1 cursor-pointer rounded-full border border-[#2D4CC8] px-3 py-1 text-[12px] font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white"
       >
         Add Review
       </button>
@@ -633,6 +631,13 @@ function PaymentModeFilterButton({
       : "border border-[#2D4CC8] bg-white text-[12px] font-semibold text-slate-600 hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8]"
   }`;
 
+  function handleButtonClick() {
+    onSelectMode(index);
+    if (hasDropdown) {
+      setIsOpen((prev) => !prev);
+    }
+  }
+
   if (!hasDropdown) {
     return (
       <button type="button" onClick={() => onSelectMode(index)} className={baseButtonClass}>
@@ -649,7 +654,7 @@ function PaymentModeFilterButton({
     >
       <button
         type="button"
-        onClick={() => onSelectMode(index)}
+        onClick={handleButtonClick}
         className={baseButtonClass}
         aria-haspopup="true"
         aria-expanded={isOpen}
@@ -715,99 +720,6 @@ function ComparePgCell({
   );
 }
 
-function MobileFirmCard({
-  firm,
-  activeFilter,
-  activeSubFilter,
-  compareModeOpen,
-  isCompareSelected,
-  onCompareToggle,
-  disableCompareCheckbox,
-}) {
-  return (
-    <article
-      className={`relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm ${
-        firm.featured ? "ring-1 ring-[#2D4CC8]/25" : ""
-      }`}
-    >
-      {firm.featured ? (
-        <div className="absolute inset-x-0 top-0 h-1 bg-[#2D4CC8]" aria-hidden />
-      ) : null}
-
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          {compareModeOpen ? (
-            <input
-              type="checkbox"
-              checked={isCompareSelected}
-              disabled={disableCompareCheckbox}
-              onChange={onCompareToggle}
-              className="mt-3 size-4 shrink-0 cursor-pointer rounded border-slate-300 text-[#2D4CC8] focus:ring-[#2D4CC8]/30 disabled:cursor-not-allowed disabled:opacity-40"
-              aria-label={`Compare ${firm.name}`}
-            />
-          ) : null}
-          <FirmPgName name={firm.name} logo={firm.logo} />
-        </div>
-      </div>
-
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
-          {getPricingForMode(firm, activeFilter, activeSubFilter)}
-        </span>
-        <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
-          {firm.location}
-        </span>
-        <BusinessAgeRing businessAge={firm.businessAge} size={52} />
-        <SettlementBadge value={firm.settlement} />
-      </div>
-
-      <div className="mt-4">
-        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-          Best For
-        </p>
-        <SmartTags labels={firm.bestForTags} />
-      </div>
-
-      <div className="mt-4">
-        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-          Products
-        </p>
-        <SmartTags labels={firm.products} />
-      </div>
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:items-center">
-        <div className="sm:order-2">
-          <OfferCoupon headline={firm.offer.headline} code={firm.offer.code} />
-        </div>
-        <div className="sm:order-1">
-          <FirmReview rating={firm.review} reviewCount={firm.reviewCount} />
-        </div>
-      </div>
-
-      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-        <button
-          type="button"
-          className="cursor-pointer rounded-xl border border-[#2D4CC8]/40 bg-white px-3 py-2 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#2D4CC8] hover:text-white"
-        >
-          Talk to Expert
-        </button>
-        <button
-          type="button"
-          className="cursor-pointer rounded-xl border border-[#2D4CC8]/40 bg-white px-3 py-2 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#2D4CC8] hover:text-white"
-        >
-          Signup
-        </button>
-        <button
-          type="button"
-          className="col-span-2 cursor-pointer rounded-xl bg-[#2D4CC8] px-3 py-2 text-sm font-semibold text-white shadow-md shadow-[#2D4CC8]/20 transition hover:bg-[#2542b6] sm:col-span-1"
-        >
-          Request Quote
-        </button>
-      </div>
-    </article>
-  );
-}
-
 export function HomeComparisonTable() {
   const [activeFilter, setActiveFilter] = useState(0);
   const [activeSubFilter, setActiveSubFilter] = useState(null);
@@ -867,7 +779,7 @@ export function HomeComparisonTable() {
         </p>
       </div>
 
-      <div className="flex max-h-[min(85vh,780px)] flex-col rounded-2xl border border-slate-200 bg-white shadow-lg shadow-[#13203F]/5">
+      <div className="flex max-h-none flex-col rounded-2xl border border-slate-200 bg-white shadow-lg shadow-[#13203F]/5 lg:max-h-[min(85vh,780px)]">
         {/* Filters — fixed */}
         <div className="relative z-30 shrink-0 overflow-visible border-b border-slate-200 bg-[#f8fafc] px-4 py-4 sm:px-5">
           <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
@@ -923,29 +835,8 @@ export function HomeComparisonTable() {
           </div>
         </div>
 
-        {/* Mobile cards */}
-        <div className="min-h-0 flex-1 overflow-auto lg:hidden">
-          <div className="grid gap-4 p-4 sm:p-5">
-            {sortedFirms.map((firm) => (
-              <MobileFirmCard
-                key={firm.name}
-                firm={firm}
-                activeFilter={activeFilter}
-                activeSubFilter={activeSubFilter}
-                compareModeOpen={compareModeOpen}
-                isCompareSelected={selectedCompareFirms.includes(firm.name)}
-                onCompareToggle={() => toggleCompareFirm(firm.name)}
-                disableCompareCheckbox={
-                  !selectedCompareFirms.includes(firm.name) &&
-                  selectedCompareFirms.length >= MAX_COMPARE_PG
-                }
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Desktop table — scrollable */}
-        <div className="min-h-0 flex-1 overflow-auto hidden lg:block">
+        {/* Table — horizontal scroll; mobile shows 4 rows */}
+        <div className="h-[252px] min-h-0 shrink-0 overflow-auto sm:h-[300px] lg:h-auto lg:max-h-none lg:flex-1">
           <table className="w-full min-w-[2135px] border-collapse">
             <thead className="sticky top-0 z-10 bg-[#f4f6fc] shadow-sm">
               <tr>
@@ -985,10 +876,12 @@ export function HomeComparisonTable() {
                     </td>
 
                     <td className={tdBase}>
-                      <SmartTags labels={firm.bestForTags} />
+                      <SmartTags labels={firm.bestForTags} compact />
                     </td>
                     <td className={tdBase}>
-                      <BusinessAgeRing businessAge={firm.businessAge} />
+                      <div className="mx-auto w-fit origin-center scale-[0.72] sm:scale-100">
+                        <BusinessAgeRing businessAge={firm.businessAge} />
+                      </div>
                     </td>
                     <td className={tdBase}>{firm.location}</td>
                     <td className={`${tdBase} font-medium text-[#13203F]`}>
@@ -1001,7 +894,7 @@ export function HomeComparisonTable() {
                       {firm.onboarding}
                     </td>
                     <td className={tdBase}>
-                      <SmartTags labels={firm.products} />
+                      <SmartTags labels={firm.products} compact />
                     </td>
                     <td className={tdBase}>
                       <SupportedPlatforms
@@ -1026,7 +919,7 @@ export function HomeComparisonTable() {
                     <td className={tdBase}>
                       <button
                         type="button"
-                        className="whitespace-nowrap cursor-pointer rounded-full border-2 border-[#2D4CC8] px-4 py-2 text-sm font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white"
+                        className="whitespace-nowrap cursor-pointer rounded-full border border-[#2D4CC8] px-3 py-1 text-[12px] font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white"
                       >
                         Talk to Expert
                       </button>
@@ -1035,7 +928,7 @@ export function HomeComparisonTable() {
                     <td className={tdBase}>
                       <button
                         type="button"
-                        className="whitespace-nowrap cursor-pointer rounded-full border-2 border-[#2D4CC8] px-4 py-2 text-sm font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white"
+                        className="whitespace-nowrap cursor-pointer rounded-full border border-[#2D4CC8] px-3 py-1 text-[12px] font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white"
                       >
                         Signup
                       </button>
@@ -1044,7 +937,7 @@ export function HomeComparisonTable() {
                     <td className={tdBase}>
                       <button
                         type="button"
-                        className="whitespace-nowrap cursor-pointer rounded-full bg-[#2D4CC8] px-4 py-2 text-sm font-semibold text-white shadow-md shadow-[#2D4CC8]/20 transition-colors hover:bg-[#2542b6]"
+                        className="whitespace-nowrap cursor-pointer rounded-full bg-[#2D4CC8] px-3 py-1 text-[12px] font-semibold text-white shadow-md shadow-[#2D4CC8]/20 transition-colors hover:bg-[#2542b6]"
                       >
                         Request Quote
                       </button>

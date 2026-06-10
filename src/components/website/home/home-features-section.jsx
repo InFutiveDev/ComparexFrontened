@@ -49,14 +49,14 @@ export function HomeFeaturesSection() {
     <section className="mx-auto max-w-8xl py-10 px-4 pb-16 sm:px-6 lg:px-8 lg:pb-20">
       <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-12">
         <div
-          className="relative overflow-hidden rounded-[30px] p-6 shadow-xs md:col-span-5"
+          className="relative min-h-[220px] overflow-hidden rounded-2xl p-5 shadow-xs sm:rounded-[30px] sm:p-6 md:col-span-5 md:min-h-[260px]"
           style={{
             backgroundImage: `linear-gradient(90deg, rgba(16,37,125,0.95) 15%, rgba(16,37,125,0.78) 45%, rgba(16,37,125,0.2) 100%), url(${promoSlides[activeSlide].bgImage})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         >
-          <h5 className="mb-6 max-w-[380px] text-3xl font-bold leading-[1.2] tracking-tight text-white">
+          <h5 className="mb-6 max-w-[380px] text-xl font-bold leading-[1.2] tracking-tight text-white sm:text-2xl lg:text-3xl">
             {promoSlides[activeSlide].title}
           </h5>
           <Link href="/" className="relative inline-flex items-center px-10 py-2 overflow-hidden text-[14px] font-medium !text-white border-2 border-white rounded-full hover:text-white group hover:bg-white/10">
@@ -80,12 +80,11 @@ export function HomeFeaturesSection() {
         </div>
 
         <div
-          className="overflow-hidden rounded-[30px] border border-neutral-200 bg-neutral-100 shadow-xs md:col-span-7"
+          className="min-h-[200px] overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 shadow-xs sm:rounded-[30px] sm:min-h-[260px] md:col-span-7 lg:min-h-[290px]"
           style={{
             backgroundImage: `url(${features[activeSlide].icon})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
-            minHeight: "290px",
           }}
           aria-label={`Feature ${activeSlide + 1}`}
         />

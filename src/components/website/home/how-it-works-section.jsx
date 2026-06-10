@@ -8,10 +8,10 @@ import {
   HiClipboardDocumentCheck,
   HiClipboardDocumentList,
   HiInboxArrowDown,
-  HiLifebuoy,
+  HiRocketLaunch,
   HiShare,
+  HiShieldCheck,
   HiSquares2X2,
-  HiChatBubbleBottomCenterText,
 } from "react-icons/hi2";
 
 const stepsByRole = {
@@ -32,7 +32,7 @@ const stepsByRole = {
       title: "Activate Faster with Expert Support",
       description:
         "Connect with experts, get onboarding assistance, and move from discovery to activation with CompareX managing the journey end-to-end.",
-      Icon: HiLifebuoy,
+      Icon: HiRocketLaunch,
     },
   ],
   reseller: [
@@ -72,7 +72,7 @@ const stepsByRole = {
       title: "Manage Leads & Build Trust",
       description:
         "Track leads, respond to reviews, nominate experts, and strengthen merchant relationships through CompareX.",
-      Icon: HiChatBubbleBottomCenterText,
+      Icon: HiShieldCheck,
     },
   ],
 };
@@ -80,24 +80,24 @@ const stepsByRole = {
 const cardStyles = [
   {
     cardBg: "bg-gradient-to-b from-[#EEF2FC] to-white",
-    accent: "bg-blue-500",
-    chipBg: "bg-blue-100 text-blue-700",
-    iconBg: "bg-blue-100 border-blue-200",
-    iconColor: "text-blue-700",
+    accent: "bg-[#2D4CC8]",
+    chipBg: "bg-[#EEF2FC] text-[#2D4CC8]",
+    iconBg: "bg-[#EEF2FC] border-[#2D4CC8]/25",
+    iconColor: "text-[#2D4CC8]",
   },
   {
-    cardBg: "bg-gradient-to-b from-[#E8FAFC] to-white",
-    accent: "bg-[#40C3CF]",
-    chipBg: "bg-[#E8FAFC] text-[#0f766e]",
-    iconBg: "bg-[#E8FAFC] border-[#40C3CF]/35",
-    iconColor: "text-[#0f766e]",
+    cardBg: "bg-gradient-to-b from-[#ECFDF5] to-white",
+    accent: "bg-[#25a36f]",
+    chipBg: "bg-[#ECFDF5] text-[#25a36f]",
+    iconBg: "bg-[#ECFDF5] border-[#25a36f]/25",
+    iconColor: "text-[#25a36f]",
   },
   {
-    cardBg: "bg-gradient-to-b from-[#E8FAFC] to-white",
-    accent: "bg-emerald-500",
-    chipBg: "bg-emerald-100 text-emerald-700",
-    iconBg: "bg-emerald-100 border-emerald-200",
-    iconColor: "text-emerald-700",
+    cardBg: "bg-gradient-to-b from-[#EEF2FC] to-white",
+    accent: "bg-[#2D4CC8]",
+    chipBg: "bg-[#EEF2FC] text-[#2D4CC8]",
+    iconBg: "bg-[#EEF2FC] border-[#2D4CC8]/25",
+    iconColor: "text-[#2D4CC8]",
   },
 ];
 
@@ -176,7 +176,7 @@ export const HowItWorksSection = () => {
               <div className={`relative z-10 mx-auto flex size-14 items-center justify-center rounded-2xl border ${style.iconBg}`}>
                 <step.Icon className={`size-7 ${style.iconColor}`} aria-hidden />
               </div>
-              <h3 className="mt-6 text-[20px] font-semibold leading-tight text-slate-900">
+              <h3 className="mt-6 text-lg font-semibold leading-tight text-slate-900 sm:text-xl">
                 {step.title}
               </h3>
               <p className="mt-4 text-base leading-relaxed text-slate-600">

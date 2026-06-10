@@ -4,8 +4,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { HiXMark } from "react-icons/hi2";
 
 import { headerNavItems, routes } from "@/lib/site-navigation";
+
+function MenuIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M4 7H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M4 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -45,141 +56,177 @@ export function SiteHeader() {
     };
   }, [isHome]);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   return (
-    <header
-      className={`top-0 z-40 w-full ${isHome
-          ? isScrolled
-            ? "fixed left-0 right-0 border-b border-white/20 bg-[#f4f6fc] backdrop-blur-md"
-            : "absolute left-0 right-0 border-b border-white/20 bg-[#f4f6fc] backdrop-blur-md"
-          : "sticky border-b border-white/20 bg-[#f4f6fc] backdrop-blur"
-        } transition-all duration-500 ease-out ${isHome
-          ? isScrolled && playScrollIntro
-            ? "-translate-y-4 opacity-0"
+    <>
+      <header
+        className={`top-0 z-40 w-full ${isHome
+            ? isScrolled
+              ? "fixed left-0 right-0 border-b border-white/20 bg-[#f4f6fc] backdrop-blur-md"
+              : "absolute left-0 right-0 border-b border-white/20 bg-[#f4f6fc] backdrop-blur-md"
+            : "sticky border-b border-white/20 bg-[#f4f6fc] backdrop-blur"
+          } transition-all duration-500 ease-out ${isHome
+            ? isScrolled && playScrollIntro
+              ? "-translate-y-4 opacity-0"
+              : "translate-y-0 opacity-100"
             : "translate-y-0 opacity-100"
-          : "translate-y-0 opacity-100"
-        }`}
-    >
-      <div className="mx-auto flex max-w-8xl items-center justify-between px-6 py-3.5 sm:px-6 lg:px-8">
-        <Link href={routes.home} className={`text-lg font-bold ${isHome ? "text-white" : "text-slate-900"}`}>
-          <Image src="/images/logo.svg" alt="Logo" width={100} height={100} className="h-14 w-auto object-cover" />
-
-        </Link>
-
-        <nav className="hidden items-center gap-5 md:flex">
-          {headerNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`text-[16px] font-medium ${isHome ? "text-black hover:text-black" : "text-black hover:text-black"}`}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="hidden items-center gap-3 md:flex">
-          <Link
-            href={routes.home}
-            className="group relative inline-flex h-[calc(40px+6px)] items-center justify-center rounded-full bg-[#2D4CC8] py-1  pl-6 pr-14 font-medium text-white"
-            style={{ color: "#fff" }}
-          >
-            <span className="z-10 pr-2 text-white">Login</span>
-            <div className="absolute right-1 inline-flex h-10 w-10 items-center justify-end rounded-full bg-[#25a36f] transition-[width] group-hover:w-[calc(100%-8px)]">
-              <div className="mr-3.5 flex items-center justify-center">
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 15 15"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-neutral-50"
-                >
-                  <path
-                    d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z"
-                    fill="currentColor"
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </div>
+          }`}
+      >
+        <div className="mx-auto flex max-w-8xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+          <Link href={routes.home} className="text-lg font-bold text-slate-900">
+            <Image src="/images/logo.svg" alt="Logo" width={100} height={100} className="h-10 w-auto object-contain sm:h-12 lg:h-14" />
           </Link>
-        </div>
 
-        <button
-          type="button"
-          onClick={() => setOpen((prev) => !prev)}
-          className={`rounded-md px-3 py-2 text-sm md:hidden ${isHome ? "border border-white/40 text-white" : "border border-slate-300 text-slate-700"
-            }`}
-        >
-          Menu
-        </button>
-      </div>
-
-      {open ? (
-        <div className={`px-4 py-3 md:hidden ${isHome ? "border-t border-white/15 bg-slate-950/95" : "border-t border-slate-200 bg-white"}`}>
-          <div className="flex flex-col gap-3">
+          <nav className="hidden items-center gap-5 md:flex">
             {headerNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-sm ${isHome ? "text-slate-100" : "text-slate-700"}`}
-                onClick={() => setOpen(false)}
+                className={`text-[16px] font-medium ${isHome ? "text-black hover:text-black" : "text-black hover:text-black"}`}
               >
                 {item.label}
               </Link>
             ))}
-            <p className={`mt-2 text-xs font-semibold uppercase tracking-wide ${isHome ? "text-slate-400" : "text-slate-500"}`}>
-              Tools
-            </p>
+          </nav>
+
+          <div className="hidden items-center gap-3 md:flex">
             <Link
-              href={routes.tools.pgMdrCalculator}
-              className={`text-sm ${isHome ? "text-slate-100" : "text-slate-700"}`}
-              onClick={() => setOpen(false)}
+              href={routes.home}
+              className="group relative inline-flex h-[calc(40px+6px)] items-center justify-center rounded-full bg-[#2D4CC8] py-1  pl-6 pr-14 font-medium text-white"
+              style={{ color: "#fff" }}
             >
-              PG Cost (MDR) Calculator
-            </Link>
-            <Link
-              href={routes.tools.pgAssessment}
-              className={`text-sm ${isHome ? "text-slate-100" : "text-slate-700"}`}
-              onClick={() => setOpen(false)}
-            >
-              PG Assessment
-            </Link>
-            <p className={`mt-2 text-xs font-semibold uppercase tracking-wide ${isHome ? "text-slate-400" : "text-slate-500"}`}>
-              Resources
-            </p>
-            <Link
-              href={routes.resources.blogs}
-              className={`text-sm ${isHome ? "text-slate-100" : "text-slate-700"}`}
-              onClick={() => setOpen(false)}
-            >
-              Blogs
-            </Link>
-            <Link
-              href={routes.resources.learningCenter}
-              className={`text-sm ${isHome ? "text-slate-100" : "text-slate-700"}`}
-              onClick={() => setOpen(false)}
-            >
-              Learning Center
-            </Link>
-            <Link
-              href={routes.resources.news}
-              className={`text-sm ${isHome ? "text-slate-100" : "text-slate-700"}`}
-              onClick={() => setOpen(false)}
-            >
-              News
-            </Link>
-            <Link
-              href={routes.talkToExpert}
-              className="mt-2 rounded-full bg-[#2D4CC8] px-4 py-2 text-center text-sm font-semibold text-white hover:bg-[#3B5BDB]"
-              onClick={() => setOpen(false)}
-            >
-              Talk to Expert
+              <span className="z-10 pr-2 text-white">Login</span>
+              <div className="absolute right-1 inline-flex h-10 w-10 items-center justify-end rounded-full bg-[#25a36f] transition-[width] group-hover:w-[calc(100%-8px)]">
+                <div className="mr-3.5 flex items-center justify-center">
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 15 15"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-neutral-50"
+                  >
+                    <path
+                      d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z"
+                      fill="currentColor"
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
             </Link>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setOpen((prev) => !prev)}
+            className="flex size-10 items-center justify-center rounded-lg border border-[#2D4CC8]/20 bg-white text-[#2D4CC8] shadow-sm transition hover:border-[#2D4CC8]/40 hover:bg-[#2D4CC8]/5 md:hidden"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+          >
+            {open ? <HiXMark className="size-5" /> : <MenuIcon className="size-5" />}
+          </button>
         </div>
-      ) : null}
-    </header>
+      </header>
+
+      {/* Mobile sidebar overlay */}
+      <div
+        className={`fixed inset-0 z-50 bg-[#13203F]/40 backdrop-blur-[2px] transition-opacity duration-300 md:hidden ${
+          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        onClick={() => setOpen(false)}
+        aria-hidden={!open}
+      />
+
+      {/* Mobile sidebar drawer */}
+      <aside
+        className={`fixed left-0 top-0 z-50 flex h-full w-[88%] max-w-[340px] flex-col bg-white shadow-[4px_0_40px_rgba(19,32,63,0.18)] transition-transform duration-300 ease-out md:hidden ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+        aria-hidden={!open}
+      >
+        {/* Drawer header */}
+        <div className="relative shrink-0 border-b border-slate-100 px-5 py-4">
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#40C3CF] via-[#2D4CC8] to-[#25a36f]" aria-hidden />
+          <div className="flex items-center justify-between pt-1">
+            <Link href={routes.home} onClick={() => setOpen(false)}>
+              <Image
+                src="/images/logo.svg"
+                alt="CompareX"
+                width={100}
+                height={100}
+                className="h-9 w-auto object-contain"
+              />
+            </Link>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="flex size-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-[#2D4CC8]/30 hover:bg-[#2D4CC8]/5 hover:text-[#2D4CC8]"
+              aria-label="Close menu"
+            >
+              <HiXMark className="size-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Nav links */}
+        <nav className="flex-1 overflow-y-auto px-4 py-5">
+          <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+            Navigation
+          </p>
+          <ul className="space-y-1">
+            {headerNavItems.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={`block rounded-xl px-4 py-3.5 text-[15px] font-medium transition ${
+                      isActive
+                        ? "bg-[#2D4CC8]/10 font-semibold text-[#2D4CC8]"
+                        : "text-[#13203F] hover:bg-[#f2f6fb] hover:text-[#2D4CC8]"
+                    }`}
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        {/* Footer CTA */}
+        <div className="shrink-0 border-t border-slate-100 bg-[#f8fafc] px-5 py-5">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+            Get Started
+          </p>
+          <Link
+            href={routes.talkToExpert}
+            className="mb-3 flex w-full items-center justify-center rounded-full border-2 border-[#2D4CC8] px-4 py-3 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#2D4CC8]/5"
+            onClick={() => setOpen(false)}
+          >
+           Login
+          </Link>
+          
+        </div>
+      </aside>
+    </>
   );
 }

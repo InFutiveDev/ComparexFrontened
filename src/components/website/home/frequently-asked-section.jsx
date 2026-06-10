@@ -6,29 +6,29 @@ import { HiArrowRight, HiChevronRight, HiChevronUp } from "react-icons/hi2";
 
 const faqs = [
     {
-        question: "What is Compare Software and how does it work?",
+        question: "How does CompareX ensure reviews are genuine?",
         answer:
-            "Compare Software lets you browse software options in one place, compare features side by side, and shortlist what fits your business before you commit. You explore categories, filter by need, read verified reviews, then connect with sellers when you're ready.",
+            "Reviews go through verification layers such as OTP validation, business checks, moderation filters, and fraud detection systems.",
     },
     {
-        question: "Is Compare Software free to use?",
+        question: "Does CompareX share merchant data publicly?",
         answer:
-            "Browsing comparisons, specs, and most educational content on the platform is free. Paid listings or promotions for vendors may apply separately when you engage with sellers.",
+            "No. Merchant information is protected and shared only as required for onboarding or consultation workflows.",
     },
     {
-        question: "Which software vendors are listed?",
+        question: "Does CompareX support only online payment gateways?",
         answer:
-            "We list vendors across popular business categories—from CRM and billing to HR, security, and industry-specific tools. The catalog grows over time providers join.",
+            "No. CompareX also supports categories like POS, QR payments, international payments, payouts, subscriptions, orchestration, and verification tools.",
     },
     {
-        question: "How do I verify software details before signing up?",
+        question: "Can businesses compare providers category-wise?",
         answer:
-            "Use official product pages linked from comparisons, confirm pricing tiers in writing with the vendor, and check review dates and disclosure notes on listings so expectations stay clear.",
+            "Yes. Businesses can compare solutions based on categories, use cases, features, pricing, onboarding complexity, and operational fit.",
     },
     {
-        question: "What should I prepare before subscribing to a SaaS?",
+        question: "Is CompareX built only for startups?",
         answer:
-            "Gather your feature priorities, integrations, seat counts, migration needs, compliance requirements, and budget. Request a sandbox or demo and clarify support SLAs before you subscribe.",
+            "No. CompareX is designed for startups, D2C brands, SaaS companies, exporters, enterprises, marketplaces, agencies, retail businesses, and scaling merchants alike.",
     },
 ];
 
@@ -105,7 +105,7 @@ export const FrequentlyAskedSection = () => {
                                                 {String(index + 1).padStart(2, "0")}
                                             </span>
                                             <span className="min-w-0 flex-1 pr-4">
-                                                <span className="block text-[1.05rem] font-bold leading-snug text-slate-900 transition-colors group-hover:text-[#2D4CC8]">
+                                                <span className="block text-base font-bold leading-snug text-slate-900 transition-colors group-hover:text-[#2D4CC8] sm:text-[1.05rem]">
                                                     {item.question}
                                                 </span>
                                             </span>

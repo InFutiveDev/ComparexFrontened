@@ -186,10 +186,10 @@ export function HeroAdviceForm() {
          Our team is reviewing the best-fit payment gateway options based on your business needs. Our team will connect with you shortly to help with comparisons, onboarding guidance, and activation support.
         </p>
         <p className="mt-2 text-[16px] font-semibold leading-relaxed text-slate-600">Meanwhile, Explore:</p>
-        <div className="flex items-center justify-center gap-2">
-        <Link href="/" className="mt-4 inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-[14px] font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">PG Comparison Tools</Link>
-        <Link href="/" className="mt-4 inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-[14px] font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">Merchant Reviews</Link>
-        <Link href="/" className="mt-4 inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-[14px] font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">Payment Cost Calculator</Link>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+        <Link href="/" className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-2.5 text-xs font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 sm:py-3 sm:text-sm">PG Comparison Tools</Link>
+        <Link href="/" className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-2.5 text-xs font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 sm:py-3 sm:text-sm">Merchant Reviews</Link>
+        <Link href="/" className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-2.5 text-xs font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 sm:py-3 sm:text-sm">Payment Cost Calculator</Link>
         </div>
       </div>
     );
@@ -218,7 +218,7 @@ export function HeroAdviceForm() {
               <div className="mb-3 flex items-start gap-3">
 
                 <div>
-                  <h2 className="text-left text-[22px] font-bold text-[#13203F]">What Kind of Business Are You Running?</h2>
+                  <h2 className="text-left text-lg font-bold text-[#13203F] sm:text-xl lg:text-[22px]">What Kind of Business Are You Running?</h2>
                 </div>
               </div>
               <h3 className="mb-4 text-left text-[16px] font-normal text-slate-600">We’ll recommend PGs best suited for your business model.</h3>
@@ -245,7 +245,7 @@ export function HeroAdviceForm() {
               <div className="mb-3 flex items-start gap-3">
 
                 <div>
-                  <h2 className="text-left text-[22px] font-bold text-[#13203F]">What Matters Most to Your Business Right Now?</h2>
+                  <h2 className="text-left text-lg font-bold text-[#13203F] sm:text-xl lg:text-[22px]">What Matters Most to Your Business Right Now?</h2>
                 </div>
               </div>
               <h3 className="mb-4 text-left text-[16px] font-normal text-slate-600">Choose the key factor influencing your decision.</h3>
@@ -265,11 +265,11 @@ export function HeroAdviceForm() {
             <>
               <div className="mb-3 flex items-start gap-3">
                 <div>
-                  <h2 className="text-left text-[22px] font-bold text-[#13203F]">Almost Done</h2>
+                  <h2 className="text-left text-lg font-bold text-[#13203F] sm:text-xl lg:text-[22px]">Almost Done</h2>
                 </div>
               </div>
               <h3 className="mb-4 text-left text-[16px] font-normal text-slate-600">Let’s connect you with the right Payment Gateway.</h3>
-              <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-2">
+              <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="hero-category" className={labelClass}>
                     Business name

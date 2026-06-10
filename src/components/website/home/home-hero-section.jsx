@@ -55,7 +55,7 @@ export function HomeHeroSection() {
 
   return (
     <section>
-      <div className="relative overflow-hidden pt-21">
+      <div className="relative overflow-hidden pt-16 sm:pt-21 lg:pt-20">
         <div className="absolute inset-0 bg-gradient-to-r from-[#13203F] via-[#2D4CC8] to-[#40C3CF]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.16),transparent_35%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.14),transparent_32%)]" />
 
@@ -84,7 +84,7 @@ export function HomeHeroSection() {
 
         <div className="relative z-30 mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
 
-          <div className="flex min-h-[520px] items-center py-6 sm:min-h-[560px] sm:py-8">
+          <div className="flex min-h-0 items-center py-8 sm:min-h-[480px] sm:py-10 lg:min-h-[560px]">
 
             <div className="grid w-full grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:items-center">
 
@@ -93,39 +93,48 @@ export function HomeHeroSection() {
                   <p className="text-[16px] border border-white/50 rounded-full px-4 py-1.5 w-fit font-normal leading-tight text-white mb-2">
                   India’s 1st PG Comparison Platform
                   </p>
-                  <h1 className="text-[32px] font-medium leading-tight sm:text-[32px] lg:text-[32px] mt-4">
+                  <h1 className="mt-4 text-2xl font-medium leading-snug sm:text-3xl lg:text-[32px] lg:leading-tight">
                   Discover, Compare & Choose the Right Payment Gateway for Your Business.
                   </h1>
 
-                  <form
-                    onSubmit={handleSearchSubmit}
-                    className="mt-6 flex h-12 w-full items-center rounded-full border border-white/35 bg-white/95 px-4 text-sm text-slate-600 shadow-lg shadow-slate-950/10 sm:h-12 sm:max-w-[520px]"
-                  >
-                    <IoSearch className="mr-2 cursor-pointer text-2xl text-[#2d4cc8]" aria-hidden="true" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(event) => setSearchQuery(event.target.value)}
-                      placeholder="Search Payment Gateway"
-                      className="h-full w-full border-0 bg-transparent text-[16px] text-slate-700 placeholder:text-slate-400 outline-none"
-                      aria-label="Search software"
-                    />
-                  </form>
+                  <div className="mt-6 w-full sm:max-w-[520px]">
+                    <form
+                      onSubmit={handleSearchSubmit}
+                      className="flex h-12 w-full items-center rounded-full border border-white/35 bg-white/95 px-4 text-sm text-slate-600 shadow-lg shadow-slate-950/10"
+                    >
+                      <IoSearch className="mr-2 shrink-0 cursor-pointer text-2xl text-[#2d4cc8]" aria-hidden="true" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(event) => setSearchQuery(event.target.value)}
+                        placeholder="Search Payment Gateway"
+                        className="h-full w-full border-0 bg-transparent text-[16px] text-slate-700 placeholder:text-slate-400 outline-none"
+                        aria-label="Search software"
+                      />
+                    </form>
 
-                  <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-0">
-                    {heroStats.map((stat, index) => (
-                      <div
-                        key={stat.label}
-                        className={`sm:px-2 ${index !== 0 ? "sm:border-l sm:border-white/50 text-center" : ""}`}
-                      >
-                        <p className="text-[22px] font-medium leading-tight text-white">{stat.value}</p>
-                        
-                      </div>
-                    ))}
+                    <div className="mt-4 flex w-full items-center">
+                      {heroStats.map((stat, index) => (
+                        <div
+                          key={stat.label}
+                          className={`flex flex-1 items-center ${
+                            index === 0
+                              ? "justify-start"
+                              : index === heroStats.length - 1
+                                ? "justify-end"
+                                : "justify-center"
+                          } ${index !== 0 ? "border-l border-white/50 pl-3 sm:pl-4" : ""}`}
+                        >
+                          <p className="text-sm font-medium leading-tight text-white sm:text-base lg:text-lg">
+                            {stat.value}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <p className="mt-6 text-[18px] font-normal leading-tight text-white">
-                    Register as:
+                  <p className="mt-6 text-base font-normal leading-tight text-white sm:text-lg">
+                  Get Started As
                   </p>
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <Link
