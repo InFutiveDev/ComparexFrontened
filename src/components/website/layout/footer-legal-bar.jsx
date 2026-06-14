@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { HiArrowUp } from "react-icons/hi2";
 
-import { footerLegalLinks } from "@/lib/site-navigation";
+const footerLegalLinks = [
+  { href: "/privacy-policy", label: "Privacy Policy" },
+  { href: "/terms-and-conditions", label: "Terms & Conditions" },
+];
 
 export function FooterLegalBar() {
   const year = new Date().getFullYear();
@@ -14,7 +17,7 @@ export function FooterLegalBar() {
 
   return (
     <div className="border-t border-neutral-200 bg-slate-50">
-      <div className="relative mx-auto max-w-8xl overflow-hidden bg-neutral-100 px-4 py-5 sm:px-6 sm:py-4 lg:px-8">
+      <div className="relative mx-auto overflow-hidden bg-neutral-100 px-4 py-5 sm:px-6 sm:py-4 lg:px-8">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.45]"
           aria-hidden

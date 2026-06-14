@@ -6,7 +6,21 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { HiXMark } from "react-icons/hi2";
 
-import { headerNavItems, routes } from "@/lib/site-navigation";
+const routes = {
+  home: "/",
+  login: "/login",
+};
+
+const headerNavItems = [
+  { href: "/about", label: "About Us" },
+  { href: "/how-it-works", label: "How it Works" },
+  { href: "/why-comparex", label: "Why CompareX" },
+  { href: "/compare-pg", label: "Compare PG" },
+  { href: "/talk-to-expert", label: "Talk to Expert" },
+  { href: "/tools", label: "Tools" },
+  { href: "/resources", label: "Resources" },
+  { href: "/merchant-support-center", label: "Merchant Support" },
+];
 
 function MenuIcon({ className }) {
   return (
@@ -103,7 +117,7 @@ export function SiteHeader() {
 
           <div className="hidden items-center gap-3 md:flex">
             <Link
-              href={routes.home}
+              href={routes.login}
               className="group relative inline-flex h-[calc(40px+6px)] items-center justify-center rounded-full bg-[#2D4CC8] py-1  pl-6 pr-14 font-medium text-white"
               style={{ color: "#fff" }}
             >
@@ -218,7 +232,7 @@ export function SiteHeader() {
             Get Started
           </p>
           <Link
-            href={routes.talkToExpert}
+            href={routes.login}
             className="mb-3 flex w-full items-center justify-center rounded-full border-2 border-[#2D4CC8] px-4 py-3 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#2D4CC8]/5"
             onClick={() => setOpen(false)}
           >

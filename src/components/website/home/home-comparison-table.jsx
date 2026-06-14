@@ -150,7 +150,7 @@ const paymentModes = [
   "Debit Card",
   "Net Banking",
   "Wallet Payments",
-  "QR Payments",
+  
   "International",
 ];
 
@@ -767,9 +767,6 @@ export function HomeComparisonTable() {
   return (
     <section className="mx-auto max-w-8xl px-4 py-14 sm:px-6 lg:px-8">
       <div className="mb-8 max-w-3xl">
-        <p className="text-sm font-semibold uppercase tracking-widest text-[#40C3CF]">
-          CompareX
-        </p>
         <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#13203F] sm:text-4xl">
           Compare Payment Gateways
         </h2>

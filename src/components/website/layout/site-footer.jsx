@@ -3,8 +3,56 @@ import Link from "next/link";
 import { FaFacebookF, FaLinkedinIn, FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
-import { FooterLegalBar } from "@/components/website/footer-legal-bar";
-import { footerColumns, routes } from "@/lib/site-navigation";
+import { FooterLegalBar } from "@/components/website/layout/footer-legal-bar";
+
+const routes = {
+  home: "/",
+};
+
+const footerColumns = [
+  {
+    title: "Company",
+    links: [
+      { href: "/about", label: "About Us" },
+      { href: "/why-comparex", label: "Why CompareX" },
+      { href: "/careers", label: "Careers" },
+      { href: "/contact", label: "Contact Us" },
+      { href: "/merchant-support-center", label: "Merchant Support Center" },
+    ],
+  },
+  {
+    title: "Compare",
+    links: [
+      { href: "/how-it-works", label: "How it Works" },
+      { href: "/compare-pg", label: "Compare PG" },
+      { href: "/talk-to-expert", label: "Talk to Expert" },
+      { href: "/pg-marketplace", label: "PG Marketplace Directory" },
+    ],
+  },
+  {
+    title: "Tools",
+    links: [
+      { href: "/tools/pg-mdr-calculator", label: "PG Cost (MDR) Calculator" },
+      { href: "/tools/pg-assessment", label: "PG Assessment" },
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
+      { href: "/resources/blogs", label: "Blogs" },
+      { href: "/resources/learning-center", label: "Learning Center" },
+      { href: "/resources/news", label: "News" },
+    ],
+  },
+  {
+    title: "Testimonials",
+    links: [
+      { href: "/testimonials/reviews-and-ratings", label: "Reviews & Ratings" },
+      { href: "/testimonials/merchant-success-stories", label: "Merchant Success Stories" },
+      { href: "/testimonials/case-studies", label: "Case Studies" },
+    ],
+  },
+];
 
 const socialLinks = [
   { href: "#", label: "Facebook", icon: FaFacebookF },
@@ -17,7 +65,7 @@ export function SiteFooter() {
   return (
     <footer>
       <section className="bg-slate-50">
-        <div className="relative mx-auto max-w-8xl overflow-hidden bg-neutral-100 px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
+        <div className="relative mx-auto overflow-hidden bg-neutral-100 px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.45]"
             aria-hidden

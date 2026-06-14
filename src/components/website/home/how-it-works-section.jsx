@@ -55,7 +55,7 @@ const stepsByRole = {
       Icon: HiChartBarSquare,
     },
   ],
-  vendor: [
+  PA_PG: [
     {
       title: "List & Position Your Offering",
       description:
@@ -145,14 +145,14 @@ export const HowItWorksSection = () => {
           </button>
           <button
             type="button"
-            onClick={() => setActiveRole("vendor")}
+            onClick={() => setActiveRole("PA_PG")}
             className={`inline-flex flex-1 min-w-[118px] items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition sm:px-5 ${
-              activeRole === "vendor"
+              activeRole === "PA_PG"
                 ? "bg-[#2D4CC8] text-white shadow-sm"
                 : "text-slate-700 hover:bg-slate-50"
             }`}
           >
-            Vendor(PG)
+            PA PG
           </button>
         </div>
 

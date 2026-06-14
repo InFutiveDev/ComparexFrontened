@@ -4,7 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { IoSearch } from "react-icons/io5";
-import { PiSparkleFill } from "react-icons/pi";
 import { HeroAdviceForm } from "@/components/website/home/hero-advice-form";
 import Link from "next/link";
 
@@ -25,21 +24,16 @@ const scrollTickerMessages = [
 export function HomeHeroSection() {
   const router = useRouter();
   const brandLogos = [
-    { name: "", src: "/images/brand-3.svg" },
-    { name: "", src: "/images/brand-4.svg" },
-    { name: "", src: "/images/brand-5.svg" },
-    { name: "", src: "/images/brand-3.svg" },
-    { name: "", src: "/images/brand-4.svg" },
-    { name: "", src: "/images/brand-5.svg" },
-    { name: "", src: "/images/brand-3.svg" },
-    { name: "", src: "/images/brand-4.svg" },
-    { name: "", src: "/images/brand-5.svg" },
-    { name: "", src: "/images/brand-3.svg" },
-    { name: "", src: "/images/brand-4.svg" },
-    { name: "", src: "/images/brand-5.svg" },
-    { name: "", src: "/images/brand-3.svg" },
-    { name: "", src: "/images/brand-4.svg" },
-    { name: "", src: "/images/brand-5.svg" },
+    { name: "", src: "/images/brand-logos/razorpay_logo.svg" },
+    { name: "", src: "/images/brand-logos/cashfree.png" },
+    { name: "", src: "/images/brand-logos/Payu.png" },
+    { name: "", src: "/images/brand-logos/ccavenue.png" },
+    { name: "", src: "/images/brand-logos/easebuzz.png" },
+    { name: "", src: "/images/brand-logos/stripe.png" },
+    { name: "", src: "/images/brand-logos/paytm.png" },
+    { name: "", src: "/images/brand-logos/amazon.jpg" },
+    { name: "", src: "/images/brand-logos/phonepe.png" },
+    
   ];
 
   const marqueeItems = [...brandLogos, ...brandLogos];
@@ -67,13 +61,17 @@ export function HomeHeroSection() {
                   {tickerItems.map((message, index) => (
                     <span
                       key={`${message}-${index}`}
-                      className="inline-flex shrink-0 items-center gap-10 text-xs font-medium tracking-wide text-white/95 sm:text-sm"
+                      className="inline-flex shrink-0 items-center gap-2.5 text-xs font-medium tracking-wide text-white/95 sm:gap-3 sm:text-sm"
                     >
-                      {message}
-                      <PiSparkleFill
-                        className="size-5 shrink-0 text-white"
+                      <Image
+                        src="/images/logo-icon.svg"
+                        alt=""
+                        width={20}
+                        height={20}
+                        className="h-5 w-5 shrink-0 object-contain"
                         aria-hidden
                       />
+                      {message}
                     </span>
                   ))}
                 </div>
@@ -88,7 +86,7 @@ export function HomeHeroSection() {
 
             <div className="grid w-full grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:items-center">
 
-              <div className="lg:col-span-7">
+              <div className="lg:col-span-6">
                 <div className="w-full max-w-xl text-white lg:max-w-2xl">
                   <p className="text-[16px] border border-white/50 rounded-full px-4 py-1.5 w-fit font-normal leading-tight text-white mb-2">
                   India’s 1st PG Comparison Platform
@@ -138,7 +136,7 @@ export function HomeHeroSection() {
                   </p>
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <Link
-                      href="/"
+                      href="/merchant"
                       className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
                     >
                       <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
@@ -148,7 +146,7 @@ export function HomeHeroSection() {
                       <span className="relative">Merchant</span>
                     </Link>
                     <Link
-                      href="/"
+                      href="/reseller"
                       className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
                     >
                       <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
@@ -158,20 +156,20 @@ export function HomeHeroSection() {
                       <span className="relative">Reseller</span>
                     </Link>
                     <Link
-                      href="/"
+                      href="/payment"
                       className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
                     >
                       <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
                       <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                       </span>
-                      <span className="relative">PA - PG</span>
+                      <span className="relative">PA PG</span>
                     </Link>
                   </div>
                 </div>
               </div>
 
-              <div className="relative z-40 lg:col-span-5 lg:self-center">
+              <div className="relative z-40 w-full lg:col-span-6 lg:flex lg:justify-end lg:self-center">
                 <HeroAdviceForm />
               </div>
             </div>
@@ -184,9 +182,9 @@ export function HomeHeroSection() {
               {marqueeItems.map((brand, index) => (
                 <div
                   key={`${brand.name}-${index}`}
-                  className="flex h-10 w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 text-white/95"
+                  className="flex h-10 w-fit items-center justify-center gap-2 rounded-full border border-white/15 bg-white px-3 text-white/95"
                 >
-                  <Image src={brand.src} alt={brand.name} width={92} height={26} className="h-6 w-auto opacity-95" />
+                  <Image src={brand.src} alt={brand.name} width={92} height={26} className="h-6 w-auto object-contain object-center" />
                   <span className="whitespace-nowrap text-xs font-semibold tracking-wide">{brand.name}</span>
                 </div>
               ))}
