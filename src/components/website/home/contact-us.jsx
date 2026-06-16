@@ -144,14 +144,14 @@ const whyReachOutItems = [
 const disclosureText =
     "CompareX provides independent assistance and may facilitate communication with participating payment providers. Final decisions and resolutions remain with the respective provider.";
 
-function GreenTickIcon() {
+function GreenTickIcon({ className = "mt-0.5 shrink-0" }) {
     return (
         <Image
             src="/images/icon-1.svg"
             alt=""
             width={20}
             height={20}
-            className="mt-0.5 shrink-0"
+            className={className}
             aria-hidden
         />
     );
@@ -201,7 +201,10 @@ export const ContactUs = () => {
     }, [submitted]);
 
     return (
-        <section className="bg-slate-50 px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+        <section
+            id="merchant-assistance-desk"
+            className="scroll-mt-24 bg-slate-50 px-4 py-14 sm:px-6 sm:py-20 lg:px-8"
+        >
             <div className="mx-auto max-w-7xl">
                 <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-[#eff4ff] via-[#e9f2ff] to-[#ecf9f3] px-5 py-12 text-center shadow-[0_20px_60px_-30px_rgba(30,58,138,0.35)] sm:rounded-[2.5rem] sm:px-10 sm:py-20 lg:px-16 lg:py-24">
                     <div
@@ -380,15 +383,20 @@ export const ContactUs = () => {
                                     </div>
                                 </div>
 
-                                <div className="mt-8 text-left">
+                                <div className="mt-8 rounded-2xl border border-[#2D4CC8]/15 bg-white/10 p-5 text-left shadow-sm backdrop-blur-sm sm:p-6">
                                     <h3 className="text-lg font-bold text-slate-900 sm:text-xl">
                                         Why Reach out to Comparex
                                     </h3>
-                                    <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                                    <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                         {whyReachOutItems.map((item) => (
-                                            <li key={item} className="flex items-start gap-2">
-                                                <GreenTickIcon />
-                                                <span className="text-sm leading-relaxed text-slate-600">
+                                            <li
+                                                key={item}
+                                                className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white/10 px-4 py-3 shadow-sm transition hover:border-[#2D4CC8]/25 hover:shadow-md"
+                                            >
+                                                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#25a36f]/15 to-[#2D4CC8]/10">
+                                                    <GreenTickIcon className="size-5 shrink-0" />
+                                                </span>
+                                                <span className="text-sm font-medium leading-snug text-slate-700 sm:text-[15px]">
                                                     {item}
                                                 </span>
                                             </li>

@@ -41,92 +41,48 @@ const testimonials = [
 
 const reviewCards = [
     {
-        id: "svetlana",
-        name: "Svetlana",
-        role: "Financial Advisor",
-        initials: "SV",
+        id: "priya-patel",
+        name: "Priya Patel",
+        role: "SaaS Startup, Bangalore",
+        initials: "PP",
         rating: 5,
-        title: "Proxies that don't freeze when the market goes crazy",
+        title: "A payment solution built to scale with our startup",
         body:
-            "Had a situation where volatility spiked hard, and I had to react fast across multiple platforms. Used dedicated IPv4 proxies in different regions....",
-        logoLabel: "ProxyLine",
+            "As a tech startup, we needed a payment solution that could scale with us. CompareX didn't just find us the best option—they found us the most reliable.",
+        logoLabel: "SaaS",
     },
     {
-        id: "artur",
-        name: "Artur Lykov",
-        role: "Developer",
-        initials: "AL",
+        id: "vikram-singh",
+        name: "Vikram Singh",
+        role: "Retail Chain, Delhi NCR",
+        initials: "VS",
         rating: 5,
-        title: "Predictable performance in long sessions, support handled my mistake professionally",
+        title: "Seamless omnichannel payments at lower costs",
         body:
-            "With SpaceProxy I get predictable behavior during long sessions. The connection remains stable, pages load consistently, and there are no random drops...",
-        logoLabel: "SpaceProxy",
+            "Our omnichannel business needed different payment solutions for online and offline. CompareX helped us integrate everything seamlessly while reducing our overall processing costs.",
+        logoLabel: "Retail",
     },
     {
-        id: "nina-k",
-        name: "Nina Kovacs",
-        role: "Data Analyst",
-        initials: "NK",
+        id: "sunil-mehta",
+        name: "Sunil Mehta",
+        role: "Manufacturing Business, Ahmedabad",
+        initials: "SM",
         rating: 5,
-        title: "Side-by-side pricing finally made our CFO say yes",
+        title: "Better rates and support for high-value B2B transactions",
         body:
-            "We stacked three analytics suites on Comparex — export limits and renewal clauses were visible without digging through PDFs. Procurement shaved almost two weeks off the cycle....",
-        logoLabel: "DataLens",
+            "As a manufacturer selling B2B, we needed specific payment features. CompareX found us a gateway with excellent support management and better rates for high-value transactions.",
+        logoLabel: "Manufacturing",
     },
     {
-        id: "omar-h",
-        name: "Omar Hassan",
-        role: "Security Engineer",
-        initials: "OH",
-        rating: 4,
-        title: "Honest SOC2 notes saved us from a bad shortlist",
-        body:
-            "Buyer reviews called out gaps in SSO that glossy demos skipped. We pivoted before legal spend kicked in — rare win for an infra bake-off....",
-        logoLabel: "ShieldOne",
-    },
-    {
-        id: "mei-l",
-        name: "Mei Lin",
-        role: "HR Director",
-        initials: "ML",
+        id: "rajesh-sharma",
+        name: "Rajesh Sharma",
+        role: "E-commerce Founder, Mumbai",
+        initials: "RS",
         rating: 5,
-        title: "Onboarding checklists matched real payroll quirks",
+        title: "A gateway matched to our volume and customers",
         body:
-            "Past HR tools looked fine until month-end. This stack lined up with how we split contractors vs employees — Comparex threads surfaced that early....",
-        logoLabel: "PeopleFlow",
-    },
-    {
-        id: "diego-r",
-        name: "Diego Ramos",
-        role: "Sales Ops",
-        initials: "DR",
-        rating: 5,
-        title: "CRM migration without losing pipeline history",
-        body:
-            "Field reps were skeptical; staged rollout notes from other buyers calmed leadership. Sync stayed stable through quarter close....",
-        logoLabel: "PipeHQ",
-    },
-    {
-        id: "yuki-t",
-        name: "Yuki Tanaka",
-        role: "Product Manager",
-        initials: "YT",
-        rating: 4,
-        title: "API docs matched what engineers saw in sandbox",
-        body:
-            "Webhook retries and rate limits were documented where reviews said they'd be — fewer midnight pages during integration week....",
-        logoLabel: "BridgeAPI",
-    },
-    {
-        id: "claire-v",
-        name: "Claire Vermeer",
-        role: "Finance Controller",
-        initials: "CV",
-        rating: 5,
-        title: "Multi-entity billing rules reviewed clearly upfront",
-        body:
-            "Subsidiary invoicing is messy for us. Peer reviews flagged rounding behaviour before we signed — avoided another spreadsheet workaround....",
-        logoLabel: "LedgerCloud",
+            "CompareX detailed comparison helped us switch to a gateway that perfectly matched our business volume and customer demographics.",
+        logoLabel: "E-commerce",
     },
 ];
 
@@ -405,7 +361,7 @@ export const HomeWriteAReview = () => {
                 </div>
             </section>
 
-            {/* —— Top reviewed software — carousel —— */}
+            {/* —— Merchant testimonials — carousel —— */}
             <section className="mx-auto">
                 <div className="overflow-hidden">
                     <div className="grid lg:grid-cols-[2fr_4fr]">
@@ -427,11 +383,12 @@ export const HomeWriteAReview = () => {
                                     <RiDoubleQuotesL className="mb-3 size-[72px] text-[#2D4CC8]/30" aria-hidden />
                                 </div>
                                 <h3 className="text-2xl font-bold leading-tight text-[#13203F] sm:text-3xl lg:text-[40px]">
-                                    Most Reviewed Software of{" "}
-                                    <span className="text-[#2D4CC8]">April 2026</span>
+                                    What Businesses Say About{" "}
+                                    <span className="text-[#2D4CC8]">CompareX</span>
                                 </h3>
                                 <p className="mt-4 max-w-sm text-base leading-relaxed text-slate-600 sm:text-lg lg:text-xl">
-                                    Honest buyer feedback on payment gateways, billing, and business tools — verified by CompareX.
+                                    Real stories from merchants across India who compared, chose, and switched to the
+                                    right payment gateway.
                                 </p>
 
                                

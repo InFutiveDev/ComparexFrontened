@@ -17,7 +17,7 @@ const footerColumns = [
       { href: "/why-comparex", label: "Why CompareX" },
       { href: "/careers", label: "Careers" },
       { href: "/contact", label: "Contact Us" },
-      { href: "/merchant-support-center", label: "Merchant Support Center" },
+      { href: "/#merchant-assistance-desk", label: "Merchant Support" },
     ],
   },
   {

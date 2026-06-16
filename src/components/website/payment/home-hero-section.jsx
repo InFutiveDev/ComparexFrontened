@@ -1,6 +1,6 @@
 "use client";
 
-import { HeroAdviceForm } from "@/components/website/home/hero-advice-form";
+import { PaymentAdviceForm } from "@/components/website/payment/advice-form";
 
 const whyCompareItems = [
   {
@@ -91,7 +91,7 @@ export function PaymentHomeHeroSection() {
               </div>
 
               <div className="relative z-40 w-full lg:col-span-6 lg:flex lg:justify-end lg:self-center">
-                <HeroAdviceForm />
+                <PaymentAdviceForm />
               </div>
             </div>
           </div>

@@ -19,7 +19,7 @@ const headerNavItems = [
   { href: "/talk-to-expert", label: "Talk to Expert" },
   { href: "/tools", label: "Tools" },
   { href: "/resources", label: "Resources" },
-  { href: "/merchant-support-center", label: "Merchant Support" },
+  { href: "/#merchant-assistance-desk", label: "Merchant Support" },
 ];
 
 function MenuIcon({ className }) {

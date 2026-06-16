@@ -75,9 +75,7 @@ export function MerchantHomeHeroSection() {
                             <p className="text-sm font-semibold text-slate-900 sm:text-base">
                               {item.title}
                             </p>
-                            {/* <p className="mt-0.5 text-sm leading-relaxed text-slate-600">
-                              {item.description}
-                            </p> */}
+                            
                           </div>
                         </li>
                       ))}

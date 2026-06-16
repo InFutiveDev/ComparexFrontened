@@ -1,6 +1,6 @@
 "use client";
 
-import { HeroAdviceForm } from "@/components/website/home/hero-advice-form";
+import { ResellerAdviceForm } from "@/components/website/reseller/advice-form";
 
 const whyCompareItems = [
   {
@@ -86,7 +86,7 @@ export function ResellerHomeHeroSection() {
               </div>
 
               <div className="relative z-40 w-full lg:col-span-6 lg:flex lg:justify-end lg:self-center">
-                <HeroAdviceForm />
+                <ResellerAdviceForm />
               </div>
             </div>
           </div>

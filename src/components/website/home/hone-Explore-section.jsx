@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 const cards = [
   {
     id: 1,
-    image: "/images/Compare-1.png",
+    image: "/images/compare-1.png",
     subtitle: "Compare",
     title: <>Avoid Costly Payment Gateway Mistakes</>,
     description:
@@ -128,12 +128,12 @@ export function HoneExploreSection() {
         <div className="flex flex-col gap-10 lg:hidden">
           {cards.map((card) => (
             <article key={card.id} className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
-              <div className="relative mb-6 aspect-[4/3] w-full sm:aspect-square">
+              <div className="relative mb-6 aspect-[4/3] w-full overflow-hidden rounded-lg sm:aspect-square">
                 <Image
                   src={card.image}
                   alt={card.subtitle}
                   fill
-                  className="object-contain object-left-top"
+                  className="rounded-xl object-contain object-left-top"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
@@ -144,12 +144,12 @@ export function HoneExploreSection() {
 
         {/* Desktop: sticky image + scroll-synced content */}
         <div className="hidden w-full lg:grid lg:grid-cols-[minmax(0,44%)_minmax(0,56%)] lg:items-start lg:gap-10 xl:gap-14">
-          <div className="sticky top-24 min-w-0 self-start overflow-hidden">
+          <div className="sticky top-24 min-w-0 self-start overflow-hidden rounded-lg">
             <div className="relative h-[420px] w-full lg:h-[480px] xl:h-[520px]">
               {cards.map((card, index) => (
                 <div
                   key={card.id}
-                  className={`absolute inset-0 transition-all duration-500 ${
+                  className={`absolute inset-0 overflow-hidden rounded-lg transition-all duration-500 ${
                     activeCard === index ? "z-10 opacity-100" : "z-0 opacity-0"
                   }`}
                   aria-hidden={activeCard !== index}
@@ -158,7 +158,7 @@ export function HoneExploreSection() {
                     src={card.image}
                     alt={card.subtitle}
                     fill
-                    className="object-contain object-left-top"
+                    className="rounded-xl object-contain object-left-top"
                     sizes="(min-width: 1280px) 38vw, (min-width: 1024px) 42vw, 100vw"
                     priority={index === 0}
                   />

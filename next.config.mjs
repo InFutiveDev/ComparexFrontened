@@ -12,12 +12,19 @@ const websiteRoutes = [
   "pricing",
   "login",
   "get-started",
+  "careers",
+  "why-comparex",
+  "compare-pg",
+  "merchant-support",
   "merchant",
   "merchant/form",
   "reseller",
   "reseller/form",
   "payment",
   "payment/form",
+  "privacy-policy",
+  "terms-and-conditions",
+  "resources",
 ];
 
 const nextConfig = {

@@ -1,0 +1,395 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { HiArrowLeft, HiArrowRight, HiCheck } from "react-icons/hi2";
+import Image from "next/image";
+
+const steps = [
+  { id: 1, label: "Organisation" },
+  { id: 2, label: "Capabilities" },
+  { id: 3, label: "Partnership" },
+];
+
+const paymentCapabilityOptions = [
+  { value: "online-payment", label: "Online Payment Acceptance" },
+  { value: "upi", label: "UPI Payment Solutions" },
+  { value: "subscription-billing", label: "Subscription & Recurring Billing" },
+  { value: "cross-border", label: "International & Cross-Border Payments" },
+  { value: "checkout-optimization", label: "Checkout & Conversion Optimization" },
+  { value: "routing-orchestration", label: "Payment Routing & Orchestration" },
+  { value: "payouts", label: "Payouts & Disbursements" },
+  { value: "pos-offline", label: "POS & Offline Payments" },
+  { value: "merchant-banking", label: "Merchant Banking & Financial Services" },
+  { value: "fraud-risk", label: "Fraud Prevention & Risk Management" },
+  { value: "other", label: "Other" },
+];
+
+const partnershipGoalOptions = [
+  { value: "visibility", label: "Increase Visibility Among Businesses Evaluating Solutions" },
+  { value: "connect-segments", label: "Connect with Relevant Business Segments" },
+  { value: "acquisition-efficiency", label: "Improve Merchant Acquisition Efficiency" },
+  { value: "showcase-strengths", label: "Showcase Product Strengths & Differentiators" },
+  { value: "partnership-opportunities", label: "Explore Partnership Opportunities" },
+  { value: "learn-more", label: "Learn More About CompareX" },
+  { value: "multiple-objectives", label: "Multiple Objectives" },
+];
+
+const initialForm = {
+  companyName: "",
+  contactPerson: "",
+  designation: "",
+  email: "",
+  phone: "",
+  website: "",
+  paymentCapabilities: [],
+  partnershipGoals: [],
+  consent: false,
+};
+
+const inputClass =
+  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#40C3CF] focus:ring-2 focus:ring-[#40C3CF]/20";
+
+const labelClass = "mb-1.5 block text-left text-sm font-medium text-slate-600";
+
+const checkboxRowClass = "flex cursor-pointer items-start gap-3 text-left";
+
+function SelectedCheckIcon() {
+  return (
+    <Image
+      src="/images/icon-1.svg"
+      alt=""
+      width={20}
+      height={20}
+      className="shrink-0"
+      aria-hidden
+    />
+  );
+}
+
+function EmptyCheckIcon() {
+  return (
+    <span
+      className="size-5 shrink-0 rounded-md border border-slate-300 bg-white"
+      aria-hidden
+    />
+  );
+}
+
+function IconToggle({ checked, onToggle, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={checked}
+      className={checkboxRowClass}
+    >
+      {checked ? <SelectedCheckIcon /> : <EmptyCheckIcon />}
+      {children}
+    </button>
+  );
+}
+
+function MultiCheckboxList({ options, values, onChange }) {
+  function toggle(value) {
+    if (values.includes(value)) {
+      onChange(values.filter((item) => item !== value));
+      return;
+    }
+    onChange([...values, value]);
+  }
+
+  return (
+    <div className="space-y-3">
+      {options.map((option) => (
+        <IconToggle
+          key={option.value}
+          checked={values.includes(option.value)}
+          onToggle={() => toggle(option.value)}
+        >
+          <span className="text-sm leading-relaxed text-slate-700">{option.label}</span>
+        </IconToggle>
+      ))}
+    </div>
+  );
+}
+
+function StepHeader({ title, subtitle }) {
+  return (
+    <>
+      <h2 className="mb-1 text-left text-lg font-bold text-[#13203F] sm:text-xl lg:text-[22px]">
+        {title}
+      </h2>
+      {subtitle ? (
+        <p className="text-left text-base font-normal text-slate-600">{subtitle}</p>
+      ) : null}
+    </>
+  );
+}
+
+export function PaymentAdviceForm() {
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState(initialForm);
+  const [submitted, setSubmitted] = useState(false);
+
+  function updateField(key, value) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function canGoNext() {
+    if (step === 1) {
+      return Boolean(
+        form.companyName.trim() &&
+          form.contactPerson.trim() &&
+          form.designation.trim() &&
+          form.email.trim() &&
+          form.phone.trim()
+      );
+    }
+    if (step === 2) {
+      return form.paymentCapabilities.length > 0;
+    }
+    return form.partnershipGoals.length > 0 && form.consent;
+  }
+
+  function handleNext() {
+    if (!canGoNext()) return;
+    setStep((s) => Math.min(s + 1, 3));
+  }
+
+  function handleBack() {
+    setStep((s) => Math.max(s - 1, 1));
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (!canGoNext()) return;
+    setSubmitted(true);
+  }
+
+  useEffect(() => {
+    if (!submitted) return;
+    const timer = window.setTimeout(() => {
+      setSubmitted(false);
+      setForm(initialForm);
+      setStep(1);
+    }, 30000);
+    return () => window.clearTimeout(timer);
+  }, [submitted]);
+
+  const activeStep = steps.find((item) => item.id === step) ?? steps[0];
+  const progressWidth = `${(step / steps.length) * 100}%`;
+
+  if (submitted) {
+    return (
+      <div className="w-full max-w-xl rounded-2xl border border-white/30 bg-white p-4 text-center shadow-xl shadow-slate-950/15 sm:p-6">
+        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-[#25a36f] text-white">
+          <HiCheck className="size-7" aria-hidden />
+        </div>
+        <h3 className="mt-5 text-xl font-bold text-slate-900">Thank You for Your Interest</h3>
+        <p className="mt-3 text-sm leading-relaxed text-slate-600">
+          We appreciate your interest in partnering with CompareX.
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          Our team will review the information provided and connect with you to better understand
+          your solutions, business priorities, and partnership objectives.
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          If additional information is required, a member of our team may reach out to you.
+        </p>
+        <p className="mt-4 text-sm font-semibold text-slate-700">
+          We look forward to exploring potential opportunities together.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative z-50 w-full max-w-xl rounded-[28px] border border-slate-200 bg-[#eef2fa] p-4 shadow-2xl shadow-[#13203F]/10 sm:p-5">
+      <div className="mb-4 flex items-center justify-between gap-4 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+        <span>
+          Step {step} of {steps.length}
+        </span>
+        <span className="text-[#13203F]">{activeStep.label}</span>
+      </div>
+      <div className="mb-4 h-1 overflow-hidden rounded-full bg-[#2D4CC8]/15">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] transition-all duration-300"
+          style={{ width: progressWidth }}
+        />
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex flex-col">
+        <div className="max-h-[min(26rem,50vh)] space-y-4 overflow-y-auto overscroll-y-contain pr-3 [-ms-overflow-style:none] [scrollbar-color:#cbd5e1_transparent] [scrollbar-width:thin] sm:pr-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-track]:bg-transparent">
+          {step === 1 && (
+            <>
+              <StepHeader
+                title="Let's Get Acquainted"
+                subtitle="Share a few details about your organisation so we can better understand your business and partnership interests."
+              />
+
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="company-name" className={labelClass}>
+                    Company Name *
+                  </label>
+                  <input
+                    id="company-name"
+                    value={form.companyName}
+                    onChange={(e) => updateField("companyName", e.target.value)}
+                    className={inputClass}
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="contact-person" className={labelClass}>
+                    Contact Person *
+                  </label>
+                  <input
+                    id="contact-person"
+                    value={form.contactPerson}
+                    onChange={(e) => updateField("contactPerson", e.target.value)}
+                    className={inputClass}
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="designation" className={labelClass}>
+                    Designation *
+                  </label>
+                  <input
+                    id="designation"
+                    value={form.designation}
+                    onChange={(e) => updateField("designation", e.target.value)}
+                    className={inputClass}
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="business-email" className={labelClass}>
+                    Business Email *
+                  </label>
+                  <input
+                    id="business-email"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => updateField("email", e.target.value)}
+                    className={inputClass}
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="mobile-number" className={labelClass}>
+                    Mobile Number *
+                  </label>
+                  <input
+                    id="mobile-number"
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => updateField("phone", e.target.value)}
+                    className={inputClass}
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="company-website" className={labelClass}>
+                    Company Website
+                  </label>
+                  <input
+                    id="company-website"
+                    type="url"
+                    value={form.website}
+                    onChange={(e) => updateField("website", e.target.value)}
+                    placeholder="https://"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <StepHeader
+                title="Who Do You Serve Best?"
+                subtitle="Which payment capabilities or solutions does your organisation currently support? (Select all that apply)"
+              />
+
+              <div className="mt-4">
+                <MultiCheckboxList
+                  options={paymentCapabilityOptions}
+                  values={form.paymentCapabilities}
+                  onChange={(values) => updateField("paymentCapabilities", values)}
+                />
+              </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <StepHeader
+                title="Explore Partnership Opportunities"
+                subtitle="What would you like to achieve through CompareX?"
+              />
+
+              <div className="mt-4">
+                <MultiCheckboxList
+                  options={partnershipGoalOptions}
+                  values={form.partnershipGoals}
+                  onChange={(values) => updateField("partnershipGoals", values)}
+                />
+              </div>
+
+              <div className="border-t border-slate-200/70 pt-4">
+                <IconToggle
+                  checked={form.consent}
+                  onToggle={() => updateField("consent", !form.consent)}
+                >
+                  <span className="text-sm leading-relaxed text-slate-600">
+                    I consent to being contacted by CompareX regarding partnership opportunities,
+                    platform updates, and merchant engagement initiatives.
+                  </span>
+                </IconToggle>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="mt-4 flex items-center justify-end gap-3 border-t border-slate-200/70 pt-4">
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-[#2D4CC8]/40 hover:text-[#13203F]"
+            >
+              <HiArrowLeft className="size-4" aria-hidden />
+              Back
+            </button>
+          ) : (
+            <div className="h-fit w-fit" />
+          )}
+
+          {step < 3 ? (
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={!canGoNext()}
+              className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-10 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {step === 2 ? "Continue" : "Next"}
+              <HiArrowRight className="size-4" aria-hidden />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={!canGoNext()}
+              className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Explore Partnership Opportunities
+              <HiArrowRight className="size-4" aria-hidden />
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
+  );
+}
