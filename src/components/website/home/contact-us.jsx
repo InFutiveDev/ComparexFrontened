@@ -226,7 +226,7 @@ export const ContactUs = () => {
 
                     <div className="relative mx-auto flex w-full  flex-col items-center">
                         <span className="inline-flex rounded-full border border-blue-200 bg-white/90 px-4 py-1.5 text-xs font-semibold tracking-tight text-blue-700 shadow-sm backdrop-blur">
-                        CompareX Merchant Assistance Desk 
+                        CompareX Merchant Support Desk 
                         </span>
                         <h2 className="mt-6 text-balance text-[30px] font-bold tracking-tight text-slate-900 sm:text-[30px] lg:text-[30px] lg:leading-tight">
                         Need Help navigating a Payment Gateway Issue?
@@ -256,33 +256,8 @@ export const ContactUs = () => {
                                         />
                                     </div>
                                     <div className="lg:col-span-2">
-                                        <label htmlFor="website" className={labelClass}>
-                                            Website <span className="font-normal text-slate-500">(Optional)</span>
-                                        </label>
-                                        <input
-                                            id="website"
-                                            name="website"
-                                            type="url"
-                                            placeholder="https://example.com"
-                                            className={inputClass}
-                                        />
-                                    </div>
-                                    <div className="sm:col-span-2 lg:col-span-2">
-                                        <label htmlFor="payment-gateway" className={labelClass}>
-                                            Payment Gateway
-                                        </label>
-                                        <SearchableSelect
-                                            id="payment-gateway"
-                                            name="paymentGateway"
-                                            options={paymentGatewayOptions}
-                                            placeholder="Search or enter payment gateway"
-                                            toggleAriaLabel="Toggle payment gateway options"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="lg:col-span-2">
                                         <label htmlFor="contact-number" className={labelClass}>
-                                            Contact Number
+                                        Phone number (WhatsApp preferred)
                                         </label>
                                         <input
                                             id="contact-number"
@@ -307,6 +282,32 @@ export const ContactUs = () => {
                                         />
                                         
                                     </div>
+                                    <div className="lg:col-span-2">
+                                        <label htmlFor="website" className={labelClass}>
+                                            Website <span className="font-normal text-slate-500">(Optional)</span>
+                                        </label>
+                                        <input
+                                            id="website"
+                                            name="website"
+                                            type="url"
+                                            placeholder="https://example.com"
+                                            className={inputClass}
+                                        />
+                                    </div>
+                                    <div className="sm:col-span-2 lg:col-span-2">
+                                        <label htmlFor="payment-gateway" className={labelClass}>
+                                            Payment Gateway
+                                        </label>
+                                        <SearchableSelect
+                                            id="payment-gateway"
+                                            name="paymentGateway"
+                                            options={paymentGatewayOptions}
+                                            placeholder="Search or enter payment gateway"
+                                            toggleAriaLabel="Toggle payment gateway options"
+                                            required
+                                        />
+                                    </div>
+                                    
                                     <div className="sm:col-span-2 lg:col-span-2">
                                         <label htmlFor="issue-category" className={labelClass}>
                                             Issue Category

@@ -25,6 +25,7 @@ const websiteRoutes = [
   "privacy-policy",
   "terms-and-conditions",
   "resources",
+  "tools",
 ];
 
 const nextConfig = {

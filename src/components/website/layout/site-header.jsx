@@ -15,10 +15,10 @@ const headerNavItems = [
   { href: "/about", label: "About Us" },
   { href: "/how-it-works", label: "How it Works" },
   { href: "/why-comparex", label: "Why CompareX" },
-  { href: "/compare-pg", label: "Compare PG" },
+  { href: "/compare-pg", label: "Compare" },
   { href: "/talk-to-expert", label: "Talk to Expert" },
   { href: "/tools", label: "Tools" },
-  { href: "/resources", label: "Resources" },
+  // { href: "/resources", label: "Resources" },
   { href: "/#merchant-assistance-desk", label: "Merchant Support" },
 ];
 

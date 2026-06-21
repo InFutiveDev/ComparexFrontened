@@ -625,10 +625,10 @@ function PaymentModeFilterButton({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const hasDropdown = Boolean(subOptions?.length);
-  const baseButtonClass = `inline-flex h-9 shrink-0 cursor-pointer items-center gap-1 rounded-full px-3 text-sm font-medium transition-colors ${
+  const baseButtonClass = `inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-sm font-semibold leading-none transition-colors ${
     isActive
-      ? "bg-[#2D4CC8] text-white shadow-md shadow-[#2D4CC8]/25"
-      : "border border-[#2D4CC8] bg-white text-[12px] font-semibold text-slate-600 hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8]"
+      ? "border-[#2D4CC8] bg-[#2D4CC8] text-white shadow-md shadow-[#2D4CC8]/25"
+      : "border-[#2D4CC8] bg-white text-slate-600 hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8]"
   }`;
 
   function handleButtonClick() {
@@ -779,12 +779,14 @@ export function HomeComparisonTable() {
       <div className="flex max-h-none flex-col rounded-2xl border border-slate-200 bg-white shadow-lg shadow-[#13203F]/5 lg:max-h-[min(85vh,780px)]">
         {/* Filters — fixed */}
         <div className="relative z-30 shrink-0 overflow-visible border-b border-slate-200 bg-[#f8fafc] px-4 py-4 sm:px-5">
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-            <div className="overflow-visible">
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
                 Filter by payment mode
               </p>
-              <div className="flex flex-wrap gap-2 overflow-visible pb-2">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
+          
+            <div className="min-w-0 flex-1 overflow-visible">
+              
+              <div className="flex flex-wrap items-center gap-2 overflow-visible">
                 {paymentModes.map((mode, index) => (
                   <PaymentModeFilterButton
                     key={mode}
@@ -801,25 +803,25 @@ export function HomeComparisonTable() {
                 ))}
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-end gap-3 sm:gap-4">
+            <div className="flex shrink-0 flex-wrap items-center gap-3 sm:gap-4">
               <button
                 type="button"
                 onClick={() => setCompareModeOpen((prev) => !prev)}
-                className={`h-9 cursor-pointer rounded-full px-5 text-sm font-semibold transition-colors ${
+                className={`inline-flex h-9 cursor-pointer items-center justify-center rounded-full border px-5 text-sm font-semibold leading-none transition-colors ${
                   compareModeOpen
-                    ? "bg-[#2D4CC8] text-white shadow-md shadow-[#2D4CC8]/25"
-                    : "border border-[#2D4CC8] bg-white text-gray-600 hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8]"
+                    ? "border-[#2D4CC8] bg-[#2D4CC8] text-white shadow-md shadow-[#2D4CC8]/25"
+                    : "border-[#2D4CC8] bg-white text-slate-600 hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8]"
                 }`}
               >
                 Compare
               </button>
 
-              <label className="flex items-center gap-2 whitespace-nowrap text-xs font-bold uppercase tracking-wider text-slate-500">
+              <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-bold uppercase tracking-wider text-slate-500">
                 <span>Sort by:</span>
                 <select
                   value={sortBy}
                   onChange={(event) => setSortBy(event.target.value)}
-                  className="h-9 cursor-pointer rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-[#13203F] outline-none ring-[#2D4CC8]/30 focus:ring"
+                  className="h-9 min-w-[9.5rem] cursor-pointer rounded-full border border-[#2D4CC8] bg-white px-4 text-sm font-semibold leading-none text-slate-600 outline-none transition-colors hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8] focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20"
                 >
                   {sortOptions.map((option) => (
                     <option key={option.value} value={option.value}>

@@ -35,10 +35,10 @@ export function MerchantHomeHeroSection() {
           aria-hidden
           style={{
             backgroundImage:
-              "repeating-linear-gradient(90deg, transparent 0, transparent 26px, rgba(37,163,111,0.06) 26px, rgba(37,163,111,0.06) 27px)",
+              "repeating-linear-gradient(90deg, transparent 0, transparent 26px, rgba(45,76,200,0.06) 26px, rgba(45,76,200,0.06) 27px)",
           }}
         />
-        <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#25A36F]/10 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#2D4CC8]/10 blur-3xl" aria-hidden />
         <div className="pointer-events-none absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-[#2D4CC8]/10 blur-3xl" aria-hidden />
 
         <div className="relative z-30 mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
@@ -46,7 +46,7 @@ export function MerchantHomeHeroSection() {
             <div className="grid w-full grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-6">
                 <div className="w-full max-w-xl text-[#13203F] lg:max-w-2xl">
-                  <span className="inline-flex rounded-full border border-[#25A36F]/30 bg-white px-4 py-1.5 text-sm font-medium text-[#25A36F] shadow-sm">
+                  <span className="inline-flex rounded-full border border-[#2D4CC8]/30 bg-white px-4 py-1.5 text-[17px] font-medium text-[#2D4CC8] shadow-sm">
                   For Business & Merchant
                   </span>
 
@@ -57,18 +57,18 @@ export function MerchantHomeHeroSection() {
                   <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
                     Stop guessing. Answer quick questions and CompareX matches you with the right
                     payment gateway — based on your industry, volume, and priorities.{" "}
-                    <span className="font-semibold text-[#25A36F]">Free, unbiased, instant.</span>
+                    <span className="font-semibold text-[#2D4CC8]">Free, unbiased, instant.</span>
                   </p>
 
-                  <div className="mt-8 rounded-2xl border border-[#25A36F]/15 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-5">
-                    <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-[#25A36F]">
+                  <div className="mt-8 rounded-2xl border border-[#2D4CC8]/15 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-5">
+                    <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-[#2D4CC8]">
                       Why CompareX?
                     </h2>
                     <ul className="mt-4 space-y-4">
                       {whyCompareItems.map((item) => (
                         <li key={item.title} className="flex items-start gap-3">
                           <span
-                            className="mt-2.5 block size-1.5 shrink-0 rounded-full bg-[#25A36F]"
+                            className="mt-2.5 block size-1.5 shrink-0 rounded-full bg-[#2D4CC8]"
                             aria-hidden
                           />
                           <div>

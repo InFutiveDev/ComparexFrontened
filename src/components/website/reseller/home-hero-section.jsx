@@ -46,7 +46,7 @@ export function ResellerHomeHeroSection() {
             <div className="grid w-full grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-6">
                 <div className="w-full max-w-xl text-[#13203F] lg:max-w-2xl">
-                  <span className="inline-flex rounded-full border border-[#25A36F]/30 bg-white px-4 py-1.5 text-sm font-medium text-[#25A36F] shadow-sm">
+                  <span className="inline-flex rounded-full border border-[#2D4CC8]/30 bg-white px-4 py-1.5 text-[17px] font-medium text-[#2D4CC8] shadow-sm">
                   For Partner & Reseller 
                   </span>
 
@@ -56,11 +56,11 @@ export function ResellerHomeHeroSection() {
 
                   <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
                   Join India's fastest-growing payment marketplace as a reseller partner. Earn commission for every merchant you onboard across 15+ payment gateways - no sales targets,{" "}
-                    <span className="font-semibold text-[#25A36F]">no minimums.</span>
+                    <span className="font-semibold text-[#2D4CC8]">no minimums.</span>
                   </p>
 
-                  <div className="mt-8 rounded-2xl border border-[#25A36F]/15 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-5">
-                    <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-[#25A36F]">
+                  <div className="mt-8 rounded-2xl border border-[#2D4CC8]/15 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-5">
+                    <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-[#2D4CC8]">
                     Why Partner With CompareX?
                     </h2>
                     <ul className="mt-4 space-y-4">

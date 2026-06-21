@@ -40,10 +40,10 @@ export function PaymentHomeHeroSection() {
           aria-hidden
           style={{
             backgroundImage:
-              "repeating-linear-gradient(90deg, transparent 0, transparent 26px, rgba(6,182,212,0.07) 26px, rgba(6,182,212,0.07) 27px)",
+              "repeating-linear-gradient(90deg, transparent 0, transparent 26px, rgba(45,76,200,0.07) 26px, rgba(45,76,200,0.07) 27px)",
           }}
         />
-        <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#06b6d4]/12 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#2D4CC8]/12 blur-3xl" aria-hidden />
         <div className="pointer-events-none absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-[#2D4CC8]/10 blur-3xl" aria-hidden />
 
         <div className="relative z-30 mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
@@ -51,7 +51,7 @@ export function PaymentHomeHeroSection() {
             <div className="grid w-full grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-6">
                 <div className="w-full max-w-xl text-[#13203F] lg:max-w-2xl">
-                  <span className="inline-flex rounded-full border border-[#06b6d4]/30 bg-white px-4 py-1.5 text-sm font-medium text-[#0891b2] shadow-sm">
+                  <span className="inline-flex rounded-full border border-[#2D4CC8]/30 bg-white px-4 py-1.5 text-[17px] font-medium text-[#2D4CC8] shadow-sm">
                   For Solution Provider & Payment Gateway
                   </span>
 
@@ -61,18 +61,18 @@ export function PaymentHomeHeroSection() {
 
                   <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
                   Most acquisition channels generate enquiries. CompareX connects you with businesses that are actively evaluating providers and searching for the right partner, helping you reduce acquisition costs, improve conversion rates, and accelerate merchant onboarding.{" "}
-                    <span className="font-semibold text-[#0891b2]">merchant onboarding.</span>
+                    <span className="font-semibold text-[#2D4CC8]">merchant onboarding.</span>
                   </p>
 
-                  <div className="mt-8 rounded-2xl border border-[#06b6d4]/15 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-5">
-                    <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-[#0891b2]">
+                  <div className="mt-8 rounded-2xl border border-[#2D4CC8]/15 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-5">
+                    <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-[#2D4CC8]">
                     Why CompareX?
                     </h2>
                     <ul className="mt-4 space-y-4">
                       {whyCompareItems.map((item) => (
                         <li key={item.title} className="flex items-start gap-3">
                           <span
-                            className="mt-2.5 block size-1.5 shrink-0 rounded-full bg-[#0891b2]"
+                            className="mt-2.5 block size-1.5 shrink-0 rounded-full bg-[#2D4CC8]"
                             aria-hidden
                           />
                           <div>

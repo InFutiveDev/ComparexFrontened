@@ -64,11 +64,11 @@ export function HomeHeroSection() {
                       className="inline-flex shrink-0 items-center gap-2.5 text-xs font-medium tracking-wide text-white/95 sm:gap-3 sm:text-sm"
                     >
                       <Image
-                        src="/images/logo-icon.svg"
+                        src="/favicon.ico"
                         alt=""
                         width={20}
                         height={20}
-                        className="h-5 w-5 shrink-0 object-contain"
+                        className="h-5 w-5 shrink-0 object-contain brightness-0 invert"
                         aria-hidden
                       />
                       {message}
@@ -88,17 +88,44 @@ export function HomeHeroSection() {
 
               <div className="lg:col-span-6">
                 <div className="w-full max-w-xl text-white lg:max-w-2xl">
-                  <p className="text-[16px] border border-white/50 rounded-full px-4 py-1.5 w-fit font-normal leading-tight text-white mb-2">
-                  India’s 1st PG Comparison Platform
-                  </p>
-                  <h1 className="mt-4 text-2xl font-medium leading-snug sm:text-3xl lg:text-[32px] lg:leading-tight">
-                  Discover, Compare & Choose the Right Payment Gateway for Your Business.
-                  </h1>
+                  <span className="relative mb-4 inline-flex rounded-full bg-gradient-to-r from-[#25a36f]/70 via-white/40 to-[#40C3CF]/70 p-px shadow-[0_10px_30px_-14px_rgba(0,0,0,0.45)]">
+                    <span className="inline-flex items-center gap-2.5 rounded-full bg-[#0f1f4d]/55 px-4 py-2 text-sm font-medium text-white backdrop-blur-md sm:text-[15px]">
+                      <Image
+                        src="/favicon.ico"
+                        alt=""
+                        width={16}
+                        height={16}
+                        className="h-4 w-4 shrink-0 object-contain brightness-0 invert"
+                        aria-hidden
+                      />
+                      India&apos;s 1st Payment Gateway Comparison Platform
+                    </span>
+                  </span>
 
-                  <div className="mt-6 w-full sm:max-w-[520px]">
+                  <div className="relative">
+                    <div
+                      className="pointer-events-none absolute -left-6 top-4 hidden h-28 w-28 rounded-full bg-[#25a36f]/25 blur-3xl sm:block"
+                      aria-hidden
+                    />
+                    <h1 className="relative text-balance text-[1.65rem] font-semibold leading-[1.18] tracking-tight sm:text-3xl lg:text-[2.125rem] lg:leading-[1.12]">
+                      <span className="block leading-12 bg-[#25a36f] bg-clip-text font-bold text-transparent drop-shadow-[0_2px_12px_rgba(37,163,111,0.35)]">
+                        Discover, Compare & Choose the Right
+                      </span>
+                      <span className="mt-2 block text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.22)] sm:mt-2.5">
+                        <span className="font-semibold text-[#d1fae5]">Payment Gateway</span> for Your
+                        Business.
+                      </span>
+                    </h1>
+                    {/* <div
+                      className="mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-[#25a36f] via-[#40C3CF] to-transparent"
+                      aria-hidden
+                    /> */}
+                  </div>
+
+                  <div className="mt-7 w-full sm:max-w-[520px]">
                     <form
                       onSubmit={handleSearchSubmit}
-                      className="flex h-12 w-full items-center rounded-full border border-white/35 bg-white/95 px-4 text-sm text-slate-600 shadow-lg shadow-slate-950/10"
+                      className="flex h-12 w-full items-center rounded-full border border-white/40 bg-white/95 px-4 text-sm text-slate-600 shadow-[0_12px_32px_-16px_rgba(0,0,0,0.45)] ring-1 ring-white/50 transition focus-within:border-[#25a36f]/50 focus-within:ring-[#25a36f]/30"
                     >
                       <IoSearch className="mr-2 shrink-0 cursor-pointer text-2xl text-[#2d4cc8]" aria-hidden="true" />
                       <input
@@ -111,7 +138,7 @@ export function HomeHeroSection() {
                       />
                     </form>
 
-                    <div className="mt-4 flex w-full items-center">
+                    {/* <div className="mt-4 flex w-full items-center">
                       {heroStats.map((stat, index) => (
                         <div
                           key={stat.label}
@@ -128,44 +155,44 @@ export function HomeHeroSection() {
                           </p>
                         </div>
                       ))}
-                    </div>
+                    </div> */}
                   </div>
 
                   <p className="mt-6 text-base font-normal leading-tight text-white sm:text-lg">
-                  Get Started As
+                  Get Started As:
                   </p>
-                  <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <Link
-                      href="/merchant"
-                      className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
-                    >
-                      <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
-                      <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                      </span>
-                      <span className="relative">Merchant</span>
-                    </Link>
-                    <Link
-                      href="/reseller"
-                      className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
-                    >
-                      <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
-                      <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                      </span>
-                      <span className="relative">Reseller</span>
-                    </Link>
-                    <Link
-                      href="/payment"
-                      className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
-                    >
-                      <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
-                      <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                      </span>
-                      <span className="relative">PA PG</span>
-                    </Link>
-                  </div>
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                      <Link
+                        href="/merchant"
+                        className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
+                      >
+                        <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
+                        <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </span>
+                        <span className="relative">Merchant</span>
+                      </Link>
+                      <Link
+                        href="/reseller"
+                        className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
+                      >
+                        <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
+                        <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </span>
+                        <span className="relative">Reseller</span>
+                      </Link>
+                      <Link
+                        href="/payment"
+                        className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
+                      >
+                        <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
+                        <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </span>
+                        <span className="relative">PA PG</span>
+                      </Link>
+                    </div>
                 </div>
               </div>
 
@@ -181,11 +208,18 @@ export function HomeHeroSection() {
             <div className="cx-marquee__track gap-10">
               {marqueeItems.map((brand, index) => (
                 <div
-                  key={`${brand.name}-${index}`}
-                  className="flex h-10 w-fit items-center justify-center gap-2 rounded-full border border-white/15 bg-white px-3 text-white/95"
+                  key={`${brand.src}-${index}`}
+                  className="flex h-11 w-[7.5rem] shrink-0 items-center justify-center rounded-full border border-white/15 bg-white px-3 sm:h-12 sm:w-[8.5rem]"
                 >
-                  <Image src={brand.src} alt={brand.name} width={92} height={26} className="h-6 w-auto object-contain object-center" />
-                  <span className="whitespace-nowrap text-xs font-semibold tracking-wide">{brand.name}</span>
+                  <div className="relative h-6 w-24 sm:h-7 sm:w-28">
+                    <Image
+                      src={brand.src}
+                      alt={brand.name || "Payment partner logo"}
+                      fill
+                      sizes="112px"
+                      className="object-contain object-center"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
