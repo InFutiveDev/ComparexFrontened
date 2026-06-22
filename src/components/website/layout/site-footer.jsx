@@ -47,7 +47,7 @@ const footerColumns = [
   {
     title: "Testimonials",
     links: [
-      { href: "/testimonials/reviews-and-ratings", label: "Reviews & Ratings" },
+      { href: "/reviews", label: "Reviews & Ratings" },
       { href: "/testimonials/merchant-success-stories", label: "Merchant Success Stories" },
       { href: "/testimonials/case-studies", label: "Case Studies" },
     ],

@@ -331,7 +331,7 @@ export const HomeWriteAReview = () => {
                         </p>
                         <div className="mt-6">
                         <Link
-                                href="/"
+                                href="/reviews"
                                 className="group relative inline-flex h-[calc(48px+8px)] items-center justify-center rounded-full bg-[#2D4CC8] py-1 pl-6 pr-14 font-medium text-white"
                                 style={{ color: "#fff" }}
                             >

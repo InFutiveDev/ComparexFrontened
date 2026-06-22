@@ -17,7 +17,7 @@ const cards = [
     description3:
       "No more jumping between websites, decoding complex blogs, or relying solely on sales conversations. ",
     button: "Compare Payment Gateways",
-    href: "/compare",
+    href: "/compare-pg",
   },
   {
     id: 2,
@@ -69,7 +69,7 @@ function CardContent({ card }) {
       {card.button && card.href ? (
         <Link
           href={card.href}
-          className="mt-5 inline-flex items-center gap-3 text-base font-semibold text-[#2D4CC8] transition hover:text-[#2542b6] sm:text-lg"
+          className="mt-5 inline-flex items-center gap-3 text-base font-semibold text-[#2D4CC8] transition hover:!text-[#2542b6] sm:text-lg"
         >
           {card.button}
           <svg

@@ -26,6 +26,7 @@ const websiteRoutes = [
   "terms-and-conditions",
   "resources",
   "tools",
+  "reviews",
 ];
 
 const nextConfig = {
