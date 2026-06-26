@@ -88,8 +88,8 @@ export function HomeHeroSection() {
 
               <div className="lg:col-span-6">
                 <div className="w-full max-w-xl text-white lg:max-w-2xl">
-                  <span className="relative mb-4 inline-flex rounded-full bg-gradient-to-r from-[#25a36f]/70 via-white/40 to-[#40C3CF]/70 p-px shadow-[0_10px_30px_-14px_rgba(0,0,0,0.45)]">
-                    <span className="inline-flex items-center gap-2.5 rounded-full bg-[#0f1f4d]/55 px-4 py-2 text-sm font-medium text-white backdrop-blur-md sm:text-[15px]">
+                  <span className="relative mb-4 inline-flex rounded-full ">
+                    <span className="inline-flex items-center gap-2.5 rounded-full bg-[#0f1f4d] px-4 py-2 text-sm font-medium text-white backdrop-blur-md sm:text-[15px]">
                       <Image
                         src="/favicon.ico"
                         alt=""
@@ -108,11 +108,15 @@ export function HomeHeroSection() {
                       aria-hidden
                     />
                     <h1 className="relative text-balance text-[1.65rem] font-semibold leading-[1.18] tracking-tight sm:text-3xl lg:text-[2.125rem] lg:leading-[1.12]">
-                      <span className="block leading-12 bg-[#25a36f] bg-clip-text font-bold text-transparent drop-shadow-[0_2px_12px_rgba(37,163,111,0.35)]">
-                        Discover, Compare & Choose the Right
-                      </span>
+                      <span className="block leading-12 text-white">
+                       <span className="font-bold text-white">
+                        Discover, Compare & Choose
+                       </span>{" "}
+                       the Right
+                        </span>
+                      
                       <span className="mt-2 block text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.22)] sm:mt-2.5">
-                        <span className="font-semibold text-[#d1fae5]">Payment Gateway</span> for Your
+                        <span className="font-semibold">Payment Gateway</span> for Your
                         Business.
                       </span>
                     </h1>

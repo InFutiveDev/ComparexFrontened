@@ -17,12 +17,12 @@ export default function HeroSection() {
         </span>
 
         <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-          Helping businesses choose the right payment partner
+        Helping Businesses Navigate Payment Decisions with Confidence
+
         </h1>
 
         <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
-          CompareX makes it easy to compare payment gateways, get expert guidance, and make
-          confident decisions — free and unbiased.
+        CompareX brings together payment providers, insights, comparisons, and expert guidance in one place-helping businesses make more informed decisions with greater clarity and confidence.
         </p>
 
         

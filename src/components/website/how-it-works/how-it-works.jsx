@@ -18,37 +18,37 @@ const flows = [
   {
     id: "merchant",
     badge: "For Merchants",
-    heading: "Find the right payment gateway",
-    highlight: "without the guesswork",
+    heading: "Find the Right Fit - Faster, Smarter, ",
+    highlight: "Without the Guesswork.",
     description:
-      "Share your business needs, compare providers side by side, and activate faster with expert support — all in one place.",
+      "Explore solutions, understand your options, and move forward with greater confidence.",
     steps: [
       {
-        title: "Share your business needs",
+        title: "Tell Us What Matters Most",
         description:
-          "Tell us about your industry, transaction volume, and payment priorities — takes just a few minutes.",
+          "Share your business model, transaction volume, and must-have features. We’ll use your inputs to shortlist PGs that actually fit - not just the ones with the biggest sales teams.",
         Icon: HiBuildingOffice2,
         accent: "text-[#25A36F]",
         iconBg: "bg-[#ECFDF5]",
       },
       {
-        title: "Compare gateways side by side",
+        title: "Discover & Compare Providers",
         description:
-          "Review pricing, features, onboarding speed, and integrations in one unbiased comparison view.",
+          "Evaluate PGs side-by-side across pricing, settlement timelines, integrations, onboarding ease, and support quality - all in one place",
         Icon: HiSquares2X2,
         accent: "text-[#2D4CC8]",
         iconBg: "bg-[#EEF2FC]",
       },
       {
-        title: "Activate with expert support",
+        title: "Move Forward with Confidence",
         description:
-          "Get matched, onboard faster, and go live with CompareX guiding you through every step.",
+          "Get expert guidance, compare offers, and onboard with clarity. We’re with you from evaluation to activation.",
         Icon: HiRocketLaunch,
         accent: "text-[#0891b2]",
         iconBg: "bg-[#ecfeff]",
       },
     ],
-    highlights: ["Free Recommendations", "Unbiased Comparisons"],
+    highlights: ["Clear Shortlist", "Side-by-Side Evaluation"],
     image:
       "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Merchant comparing payment gateways",
@@ -57,82 +57,82 @@ const flows = [
   },
   {
     id: "reseller",
-    badge: "For Resellers",
-    heading: "Grow your partner business",
-    highlight: "with qualified leads",
+    badge: "For Partners",
+    heading: "Relationships Into New ",
+    highlight: "Opportunities",
     description:
-      "Register on CompareX, refer merchant leads, and earn commissions while we handle qualification and coordination.",
+      "Support your business network while accessing multiple solution providers through a single platform.",
     steps: [
       {
-        title: "Join as a partner",
+        title: "Join the Ecosystem",
         description:
-          "Register on CompareX and start referring merchant leads through a single trusted platform.",
+          "Create your partner profile and become part of a growing ecosystem focused on helping businesses make informed decisions.",
         Icon: HiShare,
         accent: "text-[#2D4CC8]",
         iconBg: "bg-[#EEF2FC]",
       },
       {
-        title: "Submit & track leads",
+        title: "Share Opportunities ",
         description:
-          "We handle qualification, provider coordination, and follow-ups — you focus on relationships.",
+          "Share business opportunities with us, and we'll help facilitate connections with relevant solution providers while supporting the process from initial qualification , onboarding readiness to activation- so you can stay focused on growing your business.",
         Icon: HiClipboardDocumentList,
         accent: "text-[#25A36F]",
         iconBg: "bg-[#ECFDF5]",
       },
       {
-        title: "Earn on every activation",
+        title: "Track Activity & Growth",
         description:
-          "Monitor progress, activations, and commissions from your partner dashboard in real time.",
+          "Monitor opportunities, engagement activity, progress updates, and partnership performance through a centralized dashboard.",
         Icon: HiChartBarSquare,
         accent: "text-[#0891b2]",
         iconBg: "bg-[#ecfeff]",
       },
     ],
-    highlights: ["Lead Tracking", "Commission Payouts"],
+    highlights: ["Opportunity Tracking", "Growth Monitoring"],
     image:
       "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Reseller team collaborating",
-    cta: { href: "/reseller", label: "Join as Partner" },
+    cta: { href: "/reseller", label: "Explore as Partner" },
     reverse: true,
   },
   {
     id: "payment",
-    badge: "For PA / PG",
-    heading: "Reach merchants actively",
-    highlight: "looking for you",
+    badge: "For Providers",
+    heading: "Be Part of the Decision",
+    highlight: "Journey",
     description:
-      "List your gateway on CompareX, receive qualified leads, and build trust through reviews and expert visibility.",
+      "Increase visibility and engage with interested businesses actively exploring and evaluating payment solutions.",
     steps: [
       {
-        title: "List your gateway",
+        title: "List Your Solution",
         description:
-          "Create a marketplace profile with pricing, integrations, onboarding strengths, and smart tags.",
+          "Showcase your products, capabilities, strengths, and differentiators through a structured provider profile.",
         Icon: HiClipboardDocumentList,
         accent: "text-[#0891b2]",
         iconBg: "bg-[#ecfeff]",
       },
       {
-        title: "Receive qualified leads",
+        title: "Get Discovered",
         description:
-          "Get matched with merchants actively searching for a payment solution like yours.",
+          "Help businesses discover and evaluate your solutions while researching payment options relevant to their needs.",
         Icon: HiInboxArrowDown,
         accent: "text-[#2D4CC8]",
         iconBg: "bg-[#EEF2FC]",
       },
       {
-        title: "Convert & build trust",
+        title: "Build Trust Through Engagement",
         description:
-          "Manage leads, respond to reviews, and grow merchant relationships through CompareX.",
+          "Nominate your team as experts for consultations. Share nsights, address merchant concerns, and position your brand as a trusted partner - not just another option.",
         Icon: HiShieldCheck,
         accent: "text-[#25A36F]",
         iconBg: "bg-[#ECFDF5]",
       },
     ],
-    highlights: ["Qualified Leads", "Marketplace Visibility"],
+    highlights: ["Expert Consultations", "Brand Visibility"],
     image:
       "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Payment provider dashboard overview",
-    cta: { href: "/payment", label: "List Your PG" },
+    cta: { href: "/payment", label: "Explore as Provider" },
     reverse: false,
   },
 ];
@@ -250,12 +250,16 @@ export default function HowItWorks() {
       <div className="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <span className="inline-block rounded-md bg-[#E8F5EE] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#1a7a52]">
-            Simple 3-step flow
+          How CompareX Works
+
           </span>
           <h2 className="mt-5 text-3xl font-medium leading-[1.15] tracking-tight text-slate-900 sm:text-4xl">
-            How CompareX works for{" "}
-            <em className="italic text-slate-800">every role</em>
+          Different goals. One connected {" "}
+            <em className="italic text-slate-800">ecosystem.</em>
           </h2>
+          <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
+          CompareX brings together merchants, partners, and providers in a single, transparent ecosystem - where better information leads to smarter decisions and stronger outcomes for everyone.
+          </p>
           
         </div>
 

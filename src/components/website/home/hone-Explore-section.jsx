@@ -99,30 +99,42 @@ export function HoneExploreSection() {
     const nodes = contentRefs.current.filter(Boolean);
     if (!nodes.length) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    let rafId = 0;
 
-        if (!visible) return;
-        const index = Number(visible.target.dataset.index);
-        if (!Number.isNaN(index)) {
-          setActiveCard(index);
+    function updateActiveCard() {
+      if (window.innerWidth < 1024) return;
+
+      const anchor = window.innerHeight * 0.38;
+      let nextIndex = 0;
+
+      nodes.forEach((node, index) => {
+        const { top } = node.getBoundingClientRect();
+        if (top <= anchor) {
+          nextIndex = index;
         }
-      },
-      {
-        threshold: [0.25, 0.5, 0.75],
-        rootMargin: "-35% 0px -35% 0px",
-      }
-    );
+      });
 
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
+      setActiveCard((prev) => (prev === nextIndex ? prev : nextIndex));
+    }
+
+    function onScroll() {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateActiveCard);
+    }
+
+    updateActiveCard();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   return (
-    <section className="bg-[#eef2fa] pb-8 pt-4 sm:pb-10 sm:pt-5 lg:pb-12 lg:pt-20">
+    <section className="bg-[#eef2fa] pb-4 pt-4 sm:pb-6 sm:pt-5 lg:pt-20">
       <div className="mx-auto w-full max-w-8xl px-4 sm:px-6 lg:px-8">
         {/* Mobile + tablet: image above each block */}
         <div className="flex flex-col gap-10 lg:hidden">
@@ -143,14 +155,16 @@ export function HoneExploreSection() {
         </div>
 
         {/* Desktop: sticky image + scroll-synced content */}
-        <div className="hidden w-full lg:grid lg:grid-cols-[minmax(0,44%)_minmax(0,56%)] lg:items-start lg:gap-10 xl:gap-14">
+        <div className="hidden w-full lg:grid lg:grid-cols-[minmax(0,44%)_minmax(0,48%)] lg:items-start lg:gap-10 xl:gap-14">
           <div className="sticky top-24 min-w-0 self-start overflow-hidden rounded-lg">
-            <div className="relative h-[420px] w-full lg:h-[480px] xl:h-[520px]">
+            <div className="relative h-[420px] w-full lg:h-[450px] xl:h-[420px]">
               {cards.map((card, index) => (
                 <div
                   key={card.id}
-                  className={`absolute inset-0 overflow-hidden rounded-lg transition-all duration-500 ${
-                    activeCard === index ? "z-10 opacity-100" : "z-0 opacity-0"
+                  className={`absolute inset-0 overflow-hidden rounded-lg transition-opacity duration-500 ${
+                    activeCard === index
+                      ? "z-10 opacity-100"
+                      : "pointer-events-none z-0 opacity-0"
                   }`}
                   aria-hidden={activeCard !== index}
                 >
@@ -171,7 +185,11 @@ export function HoneExploreSection() {
             {cards.map((card, index) => (
               <div
                 key={card.id}
-                className="flex min-h-[420px] w-full items-start lg:min-h-[480px] xl:min-h-[520px]"
+                className={`flex w-full ${
+                  index === cards.length - 1
+                    ? "min-h-[420px] items-center lg:min-h-[480px] xl:min-h-[520px]"
+                    : "min-h-[420px] items-start lg:min-h-[480px] xl:min-h-[520px]"
+                }`}
                 data-index={index}
                 ref={(el) => {
                   contentRefs.current[index] = el;

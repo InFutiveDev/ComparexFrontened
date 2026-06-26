@@ -10,35 +10,53 @@ import {
   HiXMark,
 } from "react-icons/hi2";
 
+const ecosystemRows = [
+  {
+    stakeholder: "For Businesses (Merchants)",
+    delivers:
+      "Access transparent comparisons, expert guidance, and tailored recommendations – so you choose the right PG the first time.",
+  },
+  {
+    stakeholder: "For Partners (Resellers)",
+    delivers:
+      "Help clients make confident payment decisions - while participating in a structured referral program designed for long-term mutual growth.",
+  },
+  {
+    stakeholder: "For Providers (PGs)",
+    delivers:
+      "Increase visibility among high-intent merchants actively comparing solutions - not just browsing. Reduce CAC, increase conversion.",
+  },
+];
+
 const differentiators = [
   {
-    title: "Truly unbiased",
+    title: "Truly Independent",
     description:
-      "We don't push one provider — we help you compare all options fairly based on your business needs.",
+      "Evaluate options from multiple providers in one place – based on your business needs, not sales pitches.",
     Icon: HiShieldCheck,
     accent: "text-[#2D4CC8]",
     iconBg: "bg-[#EEF2FC]",
   },
   {
-    title: "Save weeks of research",
+    title: "Reduce Research Effort",
     description:
-      "Pricing, settlement, integrations, and onboarding — compared in one place instead of ten websites.",
+      "Skip the endless tabs. Compare providers, capabilities, and considerations side-by-side in one unified view.",
     Icon: HiSparkles,
     accent: "text-[#25A36F]",
     iconBg: "bg-[#ECFDF5]",
   },
   {
-    title: "Expert guidance included",
+    title: "Compare What Matters to You",
     description:
-      "Talk to payment specialists who shortlist gateways for your industry, volume, and growth plans.",
+      "Filter, sort, and weigh PGs based on your unique priorities – whether it's lowest MDR, fastest settlement, or best plugin support.",
     Icon: HiUserGroup,
     accent: "text-[#0891b2]",
     iconBg: "bg-[#ecfeff]",
   },
   {
-    title: "Better pricing access",
+    title: "Talk to an Expert",
     description:
-      "Leverage CompareX partner network for competitive rates and offers you may not find on your own.",
+      "Connect with experienced payment professionals to clarify onboarding, integration, capabilities, and solution-specific questions.",
     Icon: HiCurrencyRupee,
     accent: "text-[#2D4CC8]",
     iconBg: "bg-[#EEF2FC]",
@@ -47,41 +65,40 @@ const differentiators = [
 
 const comparisonRows = [
   {
-    feature: "Unbiased payment gateway comparisons",
+    feature: "Explore multiple solutions in one place",
     comparex: "yes",
-    alone: "no",
+    alone: "limited",
     sales: "no",
   },
   {
-    feature: "Side-by-side pricing & settlement view",
+    feature: "Compare key decision factors side-by-side",
     comparex: "yes",
-    alone: "partial",
-    sales: "partial",
+    alone: "Time-intensive",
+    sales: "Provider-specific",
   },
   {
-    feature: "Real merchant reviews & ratings",
+    feature: "Access to structured provider information",
     comparex: "yes",
-    alone: "partial",
-    sales: "no",
+    alone: "Partial",
+    sales: "limited",
   },
   {
-    feature: "Expert guidance at no cost",
+    feature: "Access educational resources & insights",
+    comparex: "yes",
+    alone: "limited",
+    sales: "Provider-specific",
+  },
+  {
+    feature: "Expert guidance when needed",
     comparex: "yes",
     alone: "no",
-    sales: "no",
+    sales: "Provider-specific",
   },
   {
-    feature: "Onboarding & activation support",
-    comparex: "yes",
-    alone: "no",
-    sales: "partial",
-  },
-  {
-    feature: "Time to shortlist providers",
+    feature: "Time required to evaluate options",
     comparex: "Minutes",
-    alone: "Weeks",
-    sales: "Slow",
-    isText: true,
+    alone: "Days / Weeks",
+    sales: "Multiple Conversations",
   },
 ];
 
@@ -106,7 +123,7 @@ function CellValue({ value, highlight = false }) {
     );
   }
 
-  if (value === "partial") {
+  if (value === "partial" || value === "limited") {
     return <span className="text-sm font-medium text-amber-600">Limited</span>;
   }
 
@@ -126,12 +143,11 @@ export default function WhyCompareXSection() {
             The CompareX Advantage
           </span>
           <h2 className="mt-5 text-3xl font-medium leading-[1.15] tracking-tight text-slate-900 sm:text-4xl lg:text-[2.75rem]">
-            Why businesses trust{" "}
+          Why Businesses Start Their Search with {" "}
             <em className="italic text-slate-800">CompareX</em>
           </h2>
           <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
-            See how CompareX stacks up against researching on your own or relying only on provider
-            sales conversations.
+          CompareX helps businesses navigate payment gateway evaluations with greater clarity, context, and confidence - without relying solely on provider websites or sales conversations.
           </p>
         </div>
 
@@ -140,15 +156,17 @@ export default function WhyCompareXSection() {
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="border-b border-slate-200 bg-[#f8fafc]">
-                  <th className="px-6 py-5 text-sm font-semibold text-slate-700">What you get</th>
+                  <th className="px-6 py-5 text-sm font-semibold text-slate-700">
+                    What Businesses Need
+                  </th>
                   <th className="bg-[#EEF2FC] px-6 py-5 text-center text-sm font-bold text-[#2D4CC8]">
                     CompareX
                   </th>
                   <th className="px-6 py-5 text-center text-sm font-semibold text-slate-600">
-                    On your own
+                    Independent Research
                   </th>
                   <th className="px-6 py-5 text-center text-sm font-semibold text-slate-600">
-                    Sales pitches
+                    Individual Provider Conversations
                   </th>
                 </tr>
               </thead>
@@ -191,7 +209,7 @@ export default function WhyCompareXSection() {
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                      Alone
+                      Research
                     </p>
                     <div className="mt-2 flex justify-center">
                       <CellValue value={row.alone} />
@@ -199,7 +217,7 @@ export default function WhyCompareXSection() {
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                      Sales
+                      Providers
                     </p>
                     <div className="mt-2 flex justify-center">
                       <CellValue value={row.sales} />
@@ -225,7 +243,51 @@ export default function WhyCompareXSection() {
             </li>
           ))}
         </ul>
+        <div className="mt-14">
+          <h2 className="text-3xl text-center font-medium leading-[1.15] tracking-tight text-slate-900 sm:text-4xl lg:text-[2.75rem]">
+            Built for the Entire Payments{" "}
+            <em className="italic text-slate-800">Ecosystem</em>  
+          </h2>
 
+          <div className="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_24px_60px_-24px_rgba(15,23,42,0.12)]">
+            <div className="hidden md:block">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-[#f8fafc]">
+                    <th className="px-6 py-5 text-sm font-semibold text-slate-700">Stakeholder</th>
+                    <th className="bg-[#EEF2FC] px-6 py-5 text-sm font-bold text-[#2D4CC8]">
+                      What CompareX Delivers
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ecosystemRows.map((row, index) => (
+                    <tr
+                      key={row.stakeholder}
+                      className={index % 2 === 0 ? "bg-white" : "bg-slate-50/60"}
+                    >
+                      <td className="px-6 py-4 text-sm font-semibold text-slate-800 sm:text-base sm:whitespace-nowrap">
+                        {row.stakeholder}
+                      </td>
+                      <td className="bg-[#EEF2FC]/50 px-6 py-4 text-sm leading-relaxed text-slate-600 sm:text-base">
+                        {row.delivers}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="divide-y divide-slate-200 md:hidden">
+              {ecosystemRows.map((row) => (
+                <div key={row.stakeholder} className="p-5">
+                  <p className="text-sm font-semibold text-slate-900">{row.stakeholder}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{row.delivers}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
         <div className="mt-14 flex flex-col items-center justify-between gap-6 rounded-3xl border border-[#2D4CC8]/15 bg-gradient-to-br from-[#EEF2FC] via-white to-[#ECFDF5] px-6 py-8 text-center sm:flex-row sm:text-left sm:px-10">
           <div className="flex items-start gap-4">
             <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[#2D4CC8]">
@@ -233,10 +295,11 @@ export default function WhyCompareXSection() {
             </div>
             <div>
               <h3 className="text-xl font-semibold text-slate-900 sm:text-2xl">
-                Ready to compare payment gateways?
+              Ready to Explore Your Options?
               </h3>
               <p className="mt-1.5 text-sm text-slate-600 sm:text-base">
-                Start with a free, unbiased comparison tailored to your business.
+              Compare payment solutions, understand key considerations, access expert guidance and navigate your evaluation journey with greater clarity.
+
               </p>
             </div>
           </div>
@@ -245,7 +308,7 @@ export default function WhyCompareXSection() {
             className="group relative inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-[#2D4CC8] py-1 pl-6 pr-14 text-sm font-medium text-white transition hover:bg-[#3B5BDB]"
             style={{ color: "#fff" }}
           >
-            <span className="z-10 pr-2 text-white">Compare Gateways</span>
+            <span className="z-10 pr-2 text-white"> Compare Payment Solutions</span>
             <span className="absolute right-1 inline-flex h-10 w-10 items-center justify-end rounded-full bg-[#25a36f] transition-[width] group-hover:w-[calc(100%-8px)]">
               <span className="mr-3 flex items-center justify-center">
                 <HiArrowRight className="size-5 text-white" aria-hidden />

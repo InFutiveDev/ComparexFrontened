@@ -27,6 +27,7 @@ const websiteRoutes = [
   "resources",
   "tools",
   "reviews",
+  "talk-to-expert",
 ];
 
 const nextConfig = {

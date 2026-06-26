@@ -8,8 +8,8 @@ import Link from "next/link";
 
 const steps = [
   { id: 1, label: "Your details" },
-  { id: 2, label: "Business info" },
-  { id: 3, label: "Software needs" },
+  { id: 2, label: "Business type" },
+  { id: 3, label: "Your priority" },
 ];
 
 const businessPriorityOptions = [
@@ -135,16 +135,16 @@ export function HeroAdviceForm() {
 
   function canGoNext() {
     if (step === 1) {
-      return heroFormStepOneFields.every((field) => Boolean(form[field.name]));
+      return Boolean(
+        (form.businessName ?? "").trim() &&
+        (form.email ?? "").trim() &&
+        (form.phone ?? "").trim()
+      );
     }
     if (step === 2) {
-      return Boolean(form.business);
+      return heroFormStepOneFields.every((field) => Boolean(form[field.name]));
     }
-    return Boolean(
-      (form.businessName ?? "").trim() &&
-      (form.email ?? "").trim() &&
-      (form.phone ?? "").trim()
-    );
+    return Boolean(form.business);
   }
 
   function handleNext() {
@@ -208,70 +208,21 @@ export function HeroAdviceForm() {
         />
       </div>
 
-      <div className="p-3 sm:p-3">
-
-
-
+      <div className="p-3 sm:p-1">
         <form onSubmit={handleSubmit} className="space-y-4">
           {step === 1 && (
             <>
-              <div className="mb-3 flex items-start gap-3">
-
-                <div>
-                  <h2 className="text-left text-lg font-bold text-[#13203F] sm:text-xl lg:text-[22px]">What Kind of Business Are You Running?</h2>
-                </div>
+              <div className="mb-3">
+                <h2 className="text-left text-lg font-bold text-[#13203F] sm:text-xl lg:text-[22px]">
+                Let’s connect you with the right Payment Gateway.
+                </h2>
               </div>
-              <h3 className="mb-4 text-left text-[16px] font-normal text-slate-600">We’ll recommend PGs best suited for your business model.</h3>
-              <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-1">
-                {heroFormStepOneFields.map((field) => (
-                  <div key={field.id}>
-                    {/* <label htmlFor={field.id} className={labelClass}>
-                      {field.label}
-                    </label> */}
-                    <OptionButtons
-                      name={field.name}
-                      value={form[field.name]}
-                      options={field.options}
-                      onChange={(value) => updateField(field.name, value)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <div className="mb-3 flex items-start gap-3">
-
-                <div>
-                  <h2 className="text-left text-lg font-bold text-[#13203F] sm:text-xl lg:text-[22px]">What Matters Most to Your Business Right Now?</h2>
-                </div>
-              </div>
-              <h3 className="mb-4 text-left text-[16px] font-normal text-slate-600">Choose the key factor influencing your decision.</h3>
-              <div className="mb-4">
-                {/* <label className={labelClass}>What matters most</label> */}
-                <OptionButtons
-                  name="business"
-                  value={form.business}
-                  options={businessPriorityOptions}
-                  onChange={(value) => updateField("business", value)}
-                />
-              </div>
-            </>
-          )}
-
-          {step === 3 && (
-            <>
-              <div className="mb-3 flex items-start gap-3">
-                <div>
-                  <h2 className="text-left text-lg font-bold text-[#13203F] sm:text-xl lg:text-[22px]">Almost Done</h2>
-                </div>
-              </div>
-              <h3 className="mb-4 text-left text-[16px] font-normal text-slate-600">Let’s connect you with the right Payment Gateway.</h3>
+              <h3 className="mb-4 text-left text-[16px] font-normal text-slate-600">
+                Please provide your details below to get started.
+              </h3>
               <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="hero-category" className={labelClass}>
+                  <label htmlFor="hero-business-name" className={labelClass}>
                     Business name
                   </label>
                   <input
@@ -283,7 +234,7 @@ export function HeroAdviceForm() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="hero-category" className={labelClass}>
+                  <label htmlFor="hero-phone" className={labelClass}>
                     Phone
                   </label>
                   <input
@@ -294,40 +245,80 @@ export function HeroAdviceForm() {
                     required
                   />
                 </div>
-                <div className="col-span-2">
-                  <label htmlFor="hero-category" className={labelClass}>
+                <div className="sm:col-span-2">
+                  <label htmlFor="hero-email" className={labelClass}>
                     Email
                   </label>
                   <input
                     id="hero-email"
+                    type="email"
                     value={form.email}
                     onChange={(e) => updateField("email", e.target.value)}
                     className={inputClass}
                     required
                   />
                 </div>
-                
-                
               </div>
-              <div className="mb-4 flex flex-col gap-2">
+              <div className="mb-4 flex flex-col-3:2 gap-8">
                 <div className="flex items-center gap-2">
-                   <Image src="/images/icon-1.svg" alt="Icon" width={20} height={20} />
-                   <span className="text-sm leading-relaxed text-slate-600">
-                   No Spam 
-                   </span>
+                  <Image src="/images/icon-1.svg" alt="" width={15} height={15} aria-hidden />
+                  <span className="text-[13px] leading-relaxed text-slate-600">No Spam</span>
                 </div>
                 <div className="flex items-center gap-2">
-                   <Image src="/images/icon-1.svg" alt="Icon" width={20} height={20} />
-                   <span className="text-sm leading-relaxed text-slate-600">
-                   No Sales Pressure
-                   </span>
+                  <Image src="/images/icon-1.svg" alt="" width={15} height={15} aria-hidden />
+                  <span className="text-[13px] leading-relaxed text-slate-600">No Sales Pressure</span>
                 </div>
                 <div className="flex items-center gap-2">
-                   <Image src="/images/icon-1.svg" alt="Icon" width={20} height={20} />
-                   <span className="text-sm leading-relaxed text-slate-600">
-                   Just Unbiased PG Recommendations
-                   </span>
+                  <Image src="/images/icon-1.svg" alt="" width={15} height={15} aria-hidden />
+                  <span className="text-[13px] leading-relaxed text-slate-600">
+                    Just Unbiased PG Recommendations
+                  </span>
                 </div>
+              </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <div className="mb-3">
+                <h2 className="text-left text-lg font-bold text-[#13203F] sm:text-xl lg:text-[22px]">
+                  What Kind of Business Are You Running?
+                </h2>
+              </div>
+              <h3 className="mb-4 text-left text-[16px] font-normal text-slate-600">
+                We’ll recommend PGs best suited for your business model.
+              </h3>
+              <div className="mb-4">
+                {heroFormStepOneFields.map((field) => (
+                  <OptionButtons
+                    key={field.id}
+                    name={field.name}
+                    value={form[field.name]}
+                    options={field.options}
+                    onChange={(value) => updateField(field.name, value)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <div className="mb-3">
+                <h2 className="text-left text-lg font-bold text-[#13203F] sm:text-xl lg:text-[22px]">
+                  What Matters Most to Your Business Right Now?
+                </h2>
+              </div>
+              <h3 className="mb-4 text-left text-[16px] font-normal text-slate-600">
+                Choose the key factor influencing your decision.
+              </h3>
+              <div className="mb-4">
+                <OptionButtons
+                  name="business"
+                  value={form.business}
+                  options={businessPriorityOptions}
+                  onChange={(value) => updateField("business", value)}
+                />
               </div>
             </>
           )}

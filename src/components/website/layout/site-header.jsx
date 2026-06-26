@@ -22,6 +22,21 @@ const headerNavItems = [
   { href: "/#merchant-assistance-desk", label: "Merchant Support" },
 ];
 
+function isNavItemActive(pathname, href, hash = "") {
+  if (href.includes("#")) {
+    const [, anchor] = href.split("#");
+    if (!anchor) return false;
+    return hash === `#${anchor}`;
+  }
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+const desktopNavLinkClass =
+  "relative inline-block pb-0.5 text-[16px] font-medium text-black transition-colors duration-300 after:pointer-events-none after:absolute after:-bottom-0.5 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-[#2D4CC8] after:transition-transform after:duration-300 after:ease-out hover:!text-[#2D4CC8] hover:after:scale-x-100";
+
+const desktopNavLinkActiveClass = "!text-[#2D4CC8] after:scale-x-100";
+
 function MenuIcon({ className }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -36,8 +51,16 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [playScrollIntro, setPlayScrollIntro] = useState(false);
+  const [hash, setHash] = useState("");
   const pathname = usePathname();
   const isHome = pathname === "/";
+
+  useEffect(() => {
+    const updateHash = () => setHash(window.location.hash);
+    updateHash();
+    window.addEventListener("hashchange", updateHash);
+    return () => window.removeEventListener("hashchange", updateHash);
+  }, [pathname]);
 
   useEffect(() => {
     if (!isHome) {
@@ -104,15 +127,20 @@ export function SiteHeader() {
           </Link>
 
           <nav className="hidden items-center gap-5 md:flex">
-            {headerNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`text-[16px] font-medium ${isHome ? "text-black hover:text-black" : "text-black hover:text-black"}`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {headerNavItems.map((item) => {
+              const isActive = isNavItemActive(pathname, item.href, hash);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`${desktopNavLinkClass} ${isActive ? desktopNavLinkActiveClass : ""}`}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
@@ -203,9 +231,7 @@ export function SiteHeader() {
           </p>
           <ul className="space-y-1">
             {headerNavItems.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+              const isActive = isNavItemActive(pathname, item.href, hash);
 
               return (
                 <li key={item.href}>

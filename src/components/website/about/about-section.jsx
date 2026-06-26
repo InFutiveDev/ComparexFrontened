@@ -16,24 +16,21 @@ export default function AboutSection() {
             </span>
 
             <h2 className="mt-6 text-4xl leading-[1.15] font-medium tracking-tight text-slate-900 sm:text-5xl lg:text-[3.25rem]">
-              Built to simplify how India chooses{" "}
-              <em className="italic text-slate-800">payment partners</em>
+            Making Payment {" "}
+              <em className="italic text-slate-800">Decisions Simpler</em>
             </h2>
 
             <p className="mt-6 text-base leading-relaxed text-slate-600 sm:text-lg">
-              CompareX started with a simple idea: businesses shouldn&apos;t need weeks of research
-              to find the right payment gateway. We combine comparisons, reviews, and expert advice
-              so every team can move forward with clarity.
+            CompareX is an independent platform designed to simplify how businesses discover, compare, and evaluate payment gateways.
             </p>
             <p className="mt-1 text-base leading-relaxed text-slate-600 sm:text-lg">
-              CompareX started with a simple idea: businesses shouldn&apos;t need weeks of research
-              to find the right payment gateway. We combine comparisons, reviews, and expert advice
-              so every team can move forward with clarity.
+            Instead of navigating multiple provider websites, sales conversations, and fragmented information, businesses can explore payment solutions side-by-side and make more informed decisions based on their unique requirements.
             </p>
           <p className="mt-1 text-base leading-relaxed text-slate-600 sm:text-lg">
-            CompareX started with a simple idea: businesses shouldn&apos;t need weeks of research
-            to find the right payment gateway. We combine comparisons, reviews, and expert advice
-            so every team can move forward with clarity.
+          Whether you're selecting your first payment provider, evaluating alternatives, or exploring additional payment capabilities, CompareX helps bring greater context, transparency, and confidence to the decision-making process.
+          </p>
+          <p className="mt-1 text-base leading-relaxed text-slate-600 sm:text-lg">
+          Because the right payment gateway can support growth, while the wrong one can create unnecessary friction.
           </p>
             
           </div>

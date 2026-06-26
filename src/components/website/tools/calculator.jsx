@@ -221,6 +221,7 @@ const Calculator = () => {
                     label="Custom Rates"
                     isChecked={useCustomRates}
                     onChange={setUseCustomRates}
+                    labelClassName="text-sm font-bold"
                   />
                 </div>
 

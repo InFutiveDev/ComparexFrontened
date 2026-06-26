@@ -6,6 +6,7 @@ const ToggleSwitch = ({
   isChecked,
   onChange,
   description,
+  labelClassName = "font-semibold",
 }) => {
   return (
     <div className="flex flex-col">
@@ -27,7 +28,7 @@ const ToggleSwitch = ({
           />
         </button>
         <span className="ml-3 text-sm">
-          <span className="font-semibold text-[#13203F]">{label}</span>
+          <span className={`${labelClassName} text-[#13203F]`}>{label}</span>
         </span>
       </div>
       {description && (

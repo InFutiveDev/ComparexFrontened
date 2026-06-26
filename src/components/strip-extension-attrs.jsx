@@ -1,19 +1,13 @@
 "use client";
 
 import { useLayoutEffect } from "react";
+import { EXTENSION_ATTRS } from "@/lib/strip-extension-attrs";
 
-const EXTENSION_ATTRS = new Set([
-  "bis_skin_checked",
-  "bis_register",
-  "bis_id",
-  "cz-shortcut-listen",
-  "data-new-gr-c-s-check-loaded",
-  "data-gr-ext-installed",
-]);
+const EXTENSION_ATTR_SET = new Set(EXTENSION_ATTRS);
 
 function shouldStripAttr(name) {
   if (!name) return false;
-  if (EXTENSION_ATTRS.has(name)) return true;
+  if (EXTENSION_ATTR_SET.has(name)) return true;
   return name.startsWith("__processed_");
 }
 

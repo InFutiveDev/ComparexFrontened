@@ -8,37 +8,37 @@ import {
 
 const reasons = [
   {
-    title: "Save time on research",
+    title: "Compare Multiple Solutions in One Place",
     description:
-      "Skip weeks of comparing websites, sales pitches, and pricing sheets — get matched in minutes.",
+      "Evaluate payment gateways across pricing, settlement timelines, integrations, onboarding requirements, support, and more.",
     Icon: HiSparkles,
     accent: "text-[#2D4CC8]",
     iconBg: "bg-[#EEF2FC]",
   },
   {
-    title: "Make better decisions",
+    title: "Make Decisions Based on Fit, Not Hype",
     description:
-      "Side-by-side comparisons, reviews, and benchmarks tailored to your industry and volume.",
+      "Understand which solutions align best with your business model, industry, operational needs, and growth plans.",
     Icon: HiChartBarSquare,
     accent: "text-[#25A36F]",
     iconBg: "bg-[#ECFDF5]",
   },
   {
-    title: "Unlock better pricing",
+    title: "Access Practical Guidance",
     description:
-      "Leverage our partner network for competitive rates and exclusive offers you won't find alone.",
+      "Connect with experienced payment professionals to gain additional context before making important decisions.",
     Icon: HiCurrencyRupee,
     accent: "text-[#0891b2]",
     iconBg: "bg-[#ecfeff]",
   },
-//   {
-//     title: "Expert guidance",
-//     description:
-//       "Specialists shortlist the right payment providers based on your goals — not commission targets.",
-//     Icon: HiShieldCheck,
-//     accent: "text-[#2D4CC8]",
-//     iconBg: "bg-[#EEF2FC]",
-//   },
+  {
+    title: "Save Time During Evaluation",
+    description:
+      "Reduce the effort spent researching, comparing, and navigating multiple provider websites.",
+    Icon: HiShieldCheck,
+    accent: "text-[#2D4CC8]",
+    iconBg: "bg-[#EEF2FC]",
+  },
 ];
 
 const highlights = ["Unbiased Comparisons", "Expert Support"];
@@ -50,17 +50,19 @@ export default function WhyChooseSection() {
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <div className="max-w-xl lg:max-w-none">
             <span className="inline-block rounded-md bg-[#E8F5EE] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#1a7a52]">
-              Why CompareX
+            Built for Better Payment Decisions
             </span>
 
             <h2 className="mt-5 text-3xl font-medium leading-[1.15] tracking-tight text-slate-900 sm:text-4xl lg:text-[2.75rem]">
-              Why businesses choose{" "}
-              <em className="italic text-slate-800">CompareX</em>
+            More Clarity. Less {" "}
+              <em className="italic text-slate-800">Guesswork.</em>
             </h2>
 
             <p className="mt-5 text-base leading-relaxed text-slate-600 sm:text-lg">
-              We combine unbiased comparisons with real expert support — so you pick the right
-              payment partner, not just the loudest sales pitch.
+            Businesses deserve more than marketing claims, sales pitches, and scattered information when evaluating solutions that impact revenue, cash flow, operations, and customer experience.
+            </p>
+            <p className="mt-1 text-base leading-relaxed text-slate-600 sm:text-lg">
+            CompareX brings together the tools, insights, and guidance needed to evaluate payment solutions with greater confidence and context.
             </p>
 
             <ul className="mt-10 space-y-6">

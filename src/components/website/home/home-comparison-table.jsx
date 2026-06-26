@@ -6,6 +6,7 @@ import {
   HiOutlineChevronDown,
   HiOutlineChevronUpDown,
   HiOutlineClipboardDocument,
+  HiOutlineMagnifyingGlass,
 } from "react-icons/hi2";
 const firms = [
   {
@@ -317,6 +318,8 @@ const sortOptions = [
   { value: "fastOnboarding", label: "Fast onboarding" },
 ];
 
+const FILTER_DROPDOWN_TITLE = "Filter by PG";
+
 const MAX_COMPARE_PG = 3;
 
 const tableColumns = [
@@ -614,6 +617,9 @@ function parseHours(value) {
   return Number.parseInt(value, 10) || 0;
 }
 
+const toolbarPillBaseClass =
+  "inline-flex h-8 shrink-0 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-full border px-2.5 text-xs font-semibold leading-none transition-colors sm:px-3";
+
 function PaymentModeFilterButton({
   mode,
   index,
@@ -625,9 +631,9 @@ function PaymentModeFilterButton({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const hasDropdown = Boolean(subOptions?.length);
-  const baseButtonClass = `inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-sm font-semibold leading-none transition-colors ${
+  const baseButtonClass = `${toolbarPillBaseClass} ${
     isActive
-      ? "border-[#2D4CC8] bg-[#2D4CC8] text-white shadow-md shadow-[#2D4CC8]/25"
+      ? "border-[#2D4CC8] bg-[#2D4CC8] text-white shadow-sm shadow-[#2D4CC8]/20"
       : "border-[#2D4CC8] bg-white text-slate-600 hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8]"
   }`;
 
@@ -648,7 +654,7 @@ function PaymentModeFilterButton({
 
   return (
     <div
-      className="relative shrink-0"
+      className="relative inline-flex shrink-0 items-center"
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
@@ -661,7 +667,7 @@ function PaymentModeFilterButton({
       >
         {mode}
         <HiOutlineChevronDown
-          className={`size-3.5 transition-transform ${
+          className={`size-3.5 shrink-0 transition-transform ${
             isOpen ? "rotate-180" : ""
           } ${isActive ? "text-white/90" : "text-[#2D4CC8]"}`}
           aria-hidden
@@ -669,7 +675,11 @@ function PaymentModeFilterButton({
       </button>
 
       {isOpen ? (
-        <div className="absolute left-0 top-full z-[60] w-max min-w-[180px] pt-1.5">
+        <div
+          className="absolute left-0 top-full z-[60] w-max min-w-[180px] pt-1.5"
+          onMouseEnter={() => setIsOpen(true)}
+          onMouseLeave={() => setIsOpen(false)}
+        >
           <div className="rounded-xl border border-slate-200 bg-white py-1.5 shadow-lg shadow-slate-900/10">
             {subOptions.map((option) => {
               const isSubActive = isActive && activeSubFilter === option;
@@ -689,6 +699,76 @@ function PaymentModeFilterButton({
                 </button>
               );
             })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ToolbarFilterDropdown({ title, options, value, onChange }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  function handleSelect(nextValue) {
+    onChange(nextValue);
+    setIsOpen(false);
+  }
+
+  return (
+    <div
+      className="relative inline-flex shrink-0 items-center"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className={`${toolbarPillBaseClass} border-[#2D4CC8] bg-white text-slate-600 hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8]`}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-label={title}
+      >
+        {title}
+        <HiOutlineChevronDown
+          className={`size-3.5 shrink-0 text-[#2D4CC8] transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+          aria-hidden
+        />
+      </button>
+
+      {isOpen ? (
+        <div
+          className="absolute right-0 top-full z-[60] w-max min-w-[200px] pt-1.5 sm:left-auto sm:right-0"
+          onMouseEnter={() => setIsOpen(true)}
+          onMouseLeave={() => setIsOpen(false)}
+        >
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10">
+            <div className="bg-[#2D4CC8] px-4 py-2 text-left text-sm font-medium text-white">
+              {title}
+            </div>
+            <div className="py-1.5" role="listbox" aria-label={title}>
+              {options.map((option) => {
+                const isSelected = value === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() => handleSelect(option.value)}
+                    className={`block w-full px-4 py-2 text-left text-sm font-medium transition-colors ${
+                      isSelected
+                        ? "bg-[#EEF2FC] text-[#2D4CC8]"
+                        : "text-slate-700 hover:bg-slate-50 hover:text-[#2D4CC8]"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       ) : null}
@@ -726,6 +806,7 @@ export function HomeComparisonTable() {
   const [compareModeOpen, setCompareModeOpen] = useState(false);
   const [selectedCompareFirms, setSelectedCompareFirms] = useState([]);
   const [sortBy, setSortBy] = useState("emerging");
+  const [searchQuery, setSearchQuery] = useState("");
 
   function selectPaymentMode(index, subOption = null) {
     setActiveFilter(index);
@@ -745,8 +826,27 @@ export function HomeComparisonTable() {
   function clearCompareFirms() {
     setSelectedCompareFirms([]);
   }
-  const sortedFirms = [...firms].sort((a, b) => {
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+
+  const sortedFirms = [...firms]
+    .filter((firm) => {
+      if (!normalizedSearch) return true;
+
+      return (
+        firm.name.toLowerCase().includes(normalizedSearch) ||
+        firm.location.toLowerCase().includes(normalizedSearch) ||
+        firm.products.some((product) =>
+          product.toLowerCase().includes(normalizedSearch)
+        ) ||
+        firm.bestForTags.some((tag) =>
+          tag.toLowerCase().includes(normalizedSearch)
+        )
+      );
+    })
+    .sort((a, b) => {
     switch (sortBy) {
+      case "all":
+        return 0;
       case "emerging":
         return parseHours(a.businessAge) - parseHours(b.businessAge);
       case "papgApproved":
@@ -779,57 +879,108 @@ export function HomeComparisonTable() {
       <div className="flex max-h-none flex-col rounded-2xl border border-slate-200 bg-white shadow-lg shadow-[#13203F]/5 lg:max-h-[min(85vh,780px)]">
         {/* Filters — fixed */}
         <div className="relative z-30 shrink-0 overflow-visible border-b border-slate-200 bg-[#f8fafc] px-4 py-4 sm:px-5">
-        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-                Filter by payment mode
-              </p>
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
-          
-            <div className="min-w-0 flex-1 overflow-visible">
-              
-              <div className="flex flex-wrap items-center gap-2 overflow-visible">
-                {paymentModes.map((mode, index) => (
-                  <PaymentModeFilterButton
-                    key={mode}
-                    mode={mode}
-                    index={index}
-                    isActive={activeFilter === index}
-                    subOptions={paymentModeDropdowns[mode]}
-                    activeSubFilter={activeSubFilter}
-                    onSelectMode={(modeIndex) => selectPaymentMode(modeIndex)}
-                    onSelectSub={(modeIndex, subOption) =>
-                      selectPaymentMode(modeIndex, subOption)
-                    }
-                  />
-                ))}
+          {selectedCompareFirms.length > 0 ? (
+            <div className="mb-4 flex flex-col gap-3 border-b border-slate-200/80 pb-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <span className="text-sm font-bold text-[#13203F]">Comparing</span>
+                <div
+                  className="flex flex-wrap items-center gap-2"
+                  role="tablist"
+                  aria-label="Selected payment gateways to compare"
+                >
+                  {selectedCompareFirms.map((firmName, index) => {
+                    const firm = firms.find((item) => item.name === firmName);
+                    if (!firm) return null;
+
+                    return (
+                      <button
+                        key={firmName}
+                        type="button"
+                        role="tab"
+                        aria-selected="true"
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#2D4CC8] bg-[#2D4CC8] px-3 py-1.5 text-sm font-semibold text-white shadow-sm shadow-[#2D4CC8]/20 transition-colors hover:bg-[#2542b6]"
+                      >
+                        <span className="flex size-6 items-center justify-center rounded-md border border-white/30 bg-white/15 text-[10px] font-bold">
+                          {firm.logo}
+                        </span>
+                        PG {index + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={clearCompareFirms}
+                  className="inline-flex h-9 cursor-pointer items-center justify-center rounded-full border border-[#2D4CC8] bg-white px-5 text-sm font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8]/5"
+                >
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  disabled={selectedCompareFirms.length < 2}
+                  className="inline-flex h-9 cursor-pointer items-center justify-center rounded-full bg-[#2D4CC8] px-5 text-sm font-semibold text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                  style={{ color: "#fff" }}
+                >
+                  Compare Side by Side
+                </button>
               </div>
             </div>
-            <div className="flex shrink-0 flex-wrap items-center gap-3 sm:gap-4">
+          ) : null}
+
+          <div className="flex flex-nowrap items-center gap-1.5 overflow-visible">
+            <div className="flex min-w-0 flex-1 flex-nowrap items-center gap-1.5 overflow-visible">
+              {paymentModes.map((mode, index) => (
+                <PaymentModeFilterButton
+                  key={mode}
+                  mode={mode}
+                  index={index}
+                  isActive={activeFilter === index}
+                  subOptions={paymentModeDropdowns[mode]}
+                  activeSubFilter={activeSubFilter}
+                  onSelectMode={(modeIndex) => selectPaymentMode(modeIndex)}
+                  onSelectSub={(modeIndex, subOption) =>
+                    selectPaymentMode(modeIndex, subOption)
+                  }
+                />
+              ))}
+            </div>
+            {/* search bar */}
+            <div className="relative w-50 shrink-0 sm:w-80">
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search PG"
+                aria-label="Search payment gateways"
+                className="h-8 w-full rounded-full border border-[#2D4CC8] bg-white py-0 pl-3 pr-8 text-xs font-medium text-slate-600 placeholder:text-slate-400 outline-none transition-colors hover:border-[#2D4CC8]/40 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20"
+              />
+              <HiOutlineMagnifyingGlass
+                className="pointer-events-none absolute right-2.5 top-1/2 size-3.5 -translate-y-1/2 text-[#2D4CC8]"
+                aria-hidden
+              />
+            </div>
+
+            <div className="ml-auto flex shrink-0 flex-nowrap items-center gap-1.5 overflow-visible pl-2">
               <button
                 type="button"
                 onClick={() => setCompareModeOpen((prev) => !prev)}
-                className={`inline-flex h-9 cursor-pointer items-center justify-center rounded-full border px-5 text-sm font-semibold leading-none transition-colors ${
+                className={`${toolbarPillBaseClass} ${
                   compareModeOpen
-                    ? "border-[#2D4CC8] bg-[#2D4CC8] text-white shadow-md shadow-[#2D4CC8]/25"
+                    ? "border-[#2D4CC8] bg-[#4f39f6] text-white shadow-sm shadow-[#4f39f6]/20"
                     : "border-[#2D4CC8] bg-white text-slate-600 hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8]"
                 }`}
               >
                 Compare
               </button>
 
-              <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-bold uppercase tracking-wider text-slate-500">
-                <span>Sort by:</span>
-                <select
-                  value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value)}
-                  className="h-9 min-w-[9.5rem] cursor-pointer rounded-full border border-[#2D4CC8] bg-white px-4 text-sm font-semibold leading-none text-slate-600 outline-none transition-colors hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8] focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20"
-                >
-                  {sortOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <ToolbarFilterDropdown
+                title={FILTER_DROPDOWN_TITLE}
+                options={sortOptions}
+                value={sortBy}
+                onChange={setSortBy}
+              />
             </div>
           </div>
         </div>
@@ -937,6 +1088,7 @@ export function HomeComparisonTable() {
                       <button
                         type="button"
                         className="whitespace-nowrap cursor-pointer rounded-full bg-[#2D4CC8] px-3 py-1 text-[12px] font-semibold text-white shadow-md shadow-[#2D4CC8]/20 transition-colors hover:bg-[#2542b6]"
+                        style={{ color: "#fff" }}
                       >
                         Request Quote
                       </button>
@@ -947,47 +1099,6 @@ export function HomeComparisonTable() {
             </tbody>
           </table>
         </div>
-
-        {selectedCompareFirms.length > 0 && (
-          <div className="flex shrink-0 flex-col gap-3 border-t border-slate-200 bg-[#f8fafc] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-              <h3 className="font-bold text-[#13203F]">Comparing</h3>
-              {selectedCompareFirms.map((firmName, index) => {
-                const firm = firms.find((item) => item.name === firmName);
-                if (!firm) return null;
-
-                return (
-                  <button
-                    key={firmName}
-                    type="button"
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#2D4CC8] px-4 py-2 font-medium text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6]"
-                  >
-                    <span className="flex size-7 items-center justify-center rounded-md border border-white/30 bg-white/15 text-xs font-bold">
-                      {firm.logo}
-                    </span>
-                    PG {index + 1}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={clearCompareFirms}
-                className="cursor-pointer rounded-xl bg-[#2D4CC8] px-6 py-2 font-medium text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6]"
-              >
-                Clear
-              </button>
-              <button
-                type="button"
-                disabled={selectedCompareFirms.length < 2}
-                className="cursor-pointer rounded-xl bg-[#2D4CC8] px-6 py-2 font-medium text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
-              >
-                Compare Side by Side
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );
