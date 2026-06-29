@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   HiArrowLeft,
   HiArrowRight,
   HiCalendarDays,
   HiCheck,
   HiOutlineChevronDown,
+  HiOutlineMagnifyingGlass,
   HiOutlineXMark,
   HiUserGroup,
   HiBuildingOffice2,
@@ -78,7 +80,7 @@ function ModalShell({ open, onClose, children, title }) {
             <HiOutlineXMark className="size-5" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">{children}</div>
+        <div className="flex-1 overflow-y-auto overflow-x-visible px-4 py-5 sm:px-6">{children}</div>
       </div>
     </div>
   );
@@ -102,63 +104,242 @@ function ProgressBar({ step, total }) {
   );
 }
 
-function FormSelect({ id, value, onChange, options, placeholder }) {
+function matchesSearchText(text, query) {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return true;
+  return text.toLowerCase().includes(normalized);
+}
+
+function sanitizePhoneDigits(value) {
+  return value.replace(/\D/g, "").slice(0, 10);
+}
+
+function SearchableSelect({
+  id,
+  value,
+  onChange,
+  options,
+  placeholder = "Search...",
+}) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [menuPosition, setMenuPosition] = useState(null);
   const containerRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const selectableOptions = useMemo(
+    () => options.filter((option) => option.value),
+    [options]
+  );
+
+  const selected = selectableOptions.find((option) => option.value === value);
+
+  const filteredOptions = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return selectableOptions;
+
+    return selectableOptions.filter((option) =>
+      option.label.toLowerCase().includes(normalized)
+    );
+  }, [selectableOptions, query]);
+
+  function updateMenuPosition() {
+    const input = inputRef.current;
+    if (!input) return;
+
+    const rect = input.getBoundingClientRect();
+    const menuMaxHeight = 220;
+    const gap = 6;
+    const spaceBelow = window.innerHeight - rect.bottom - gap;
+    const spaceAbove = rect.top - gap;
+    const openUpward = spaceBelow < menuMaxHeight && spaceAbove > spaceBelow;
+
+    setMenuPosition({
+      left: rect.left,
+      width: rect.width,
+      maxHeight: Math.min(menuMaxHeight, openUpward ? spaceAbove : spaceBelow),
+      top: openUpward ? undefined : rect.bottom + gap,
+      bottom: openUpward ? window.innerHeight - rect.top + gap : undefined,
+    });
+  }
+
+  function openDropdown() {
+    setOpen(true);
+    updateMenuPosition();
+  }
+
+  function closeDropdown() {
+    setOpen(false);
+    setQuery(selected?.label ?? "");
+  }
 
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setOpen(false);
-      }
+    if (!open) {
+      setQuery(selected?.label ?? "");
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [selected?.label, open]);
 
-  const selected = options.find((option) => option.value === value);
+  useEffect(() => {
+    if (!open) return;
+
+    updateMenuPosition();
+
+    function handleClickOutside(event) {
+      if (
+        containerRef.current?.contains(event.target) ||
+        event.target.closest?.("[data-form-select-menu]")
+      ) {
+        return;
+      }
+      closeDropdown();
+    }
+
+    function handleReposition() {
+      updateMenuPosition();
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", handleReposition, true);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", handleReposition, true);
+    };
+  }, [open, selected?.label]);
+
+  function handleSelect(optionValue, optionLabel) {
+    onChange(optionValue);
+    setQuery(optionLabel);
+    setOpen(false);
+  }
+
+  function handleInputChange(event) {
+    setQuery(event.target.value);
+    if (!open) setOpen(true);
+    if (value) onChange("");
+  }
+
+  function handleClear() {
+    setQuery("");
+    onChange("");
+    inputRef.current?.focus();
+    openDropdown();
+  }
+
+  const menu =
+    open && menuPosition && typeof document !== "undefined"
+      ? createPortal(
+          <ul
+            data-form-select-menu
+            role="listbox"
+            aria-labelledby={id}
+            style={{
+              position: "fixed",
+              left: menuPosition.left,
+              width: menuPosition.width,
+              maxHeight: menuPosition.maxHeight,
+              top: menuPosition.top,
+              bottom: menuPosition.bottom,
+              zIndex: 200,
+            }}
+            className="overflow-y-auto rounded-xl border border-[#2D4CC8]/25 bg-white py-1 shadow-2xl shadow-slate-900/15 [scrollbar-color:#cbd5e1_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-track]:bg-transparent"
+          >
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((option) => {
+                const isSelected = value === option.value;
+                return (
+                  <li key={option.value} role="option" aria-selected={isSelected}>
+                    <button
+                      type="button"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => handleSelect(option.value, option.label)}
+                      className={`flex w-full cursor-pointer items-center justify-between gap-2 px-4 py-2.5 text-left text-sm transition ${
+                        isSelected
+                          ? "bg-[#EEF2FC] font-semibold text-[#2D4CC8]"
+                          : "text-slate-700 hover:bg-slate-50 hover:text-[#2D4CC8]"
+                      }`}
+                    >
+                      <span className="truncate">{option.label}</span>
+                      {isSelected ? <HiCheck className="size-4 shrink-0" aria-hidden /> : null}
+                    </button>
+                  </li>
+                );
+              })
+            ) : (
+              <li className="px-4 py-3 text-sm text-slate-500">No matches found</li>
+            )}
+          </ul>,
+          document.body
+        )
+      : null;
 
   return (
-    <div ref={containerRef} className="relative">
-      <button
-        type="button"
+    <div ref={containerRef} className="relative z-10">
+      <HiOutlineMagnifyingGlass
+        className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#2D4CC8]"
+        aria-hidden
+      />
+      <input
+        ref={inputRef}
         id={id}
-        onClick={() => setOpen((prev) => !prev)}
-        className={`flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 text-left text-sm outline-none transition ${
-          open
-            ? "border-[#2D4CC8] ring-2 ring-[#2D4CC8]/15"
-            : "border-slate-200 hover:border-[#2D4CC8]/30"
-        } ${value ? "text-[#13203F]" : "text-slate-400"}`}
-      >
-        <span className="truncate">{selected?.label ?? placeholder}</span>
+        type="text"
+        value={query}
+        onChange={handleInputChange}
+        onFocus={openDropdown}
+        onClick={openDropdown}
+        placeholder={placeholder}
+        autoComplete="off"
+        role="combobox"
+        aria-expanded={open}
+        aria-controls={`${id}-listbox`}
+        aria-autocomplete="list"
+        className={`w-full rounded-xl border bg-white py-3 pl-10 pr-10 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:ring-2 focus:ring-[#2D4CC8]/20 ${
+          open ? "border-[#2D4CC8] ring-2 ring-[#2D4CC8]/15" : "border-slate-200 focus:border-[#2D4CC8]"
+        }`}
+      />
+      {query ? (
+        <button
+          type="button"
+          onClick={handleClear}
+          className="absolute right-3 top-1/2 flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+          aria-label="Clear search"
+        >
+          <HiOutlineXMark className="size-4" />
+        </button>
+      ) : (
         <HiOutlineChevronDown
-          className={`size-4 shrink-0 text-[#2D4CC8] transition-transform ${open ? "rotate-180" : ""}`}
+          className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-[#2D4CC8] transition-transform duration-200 ${
+            open ? "rotate-180" : ""
+          }`}
           aria-hidden
         />
-      </button>
-      {open ? (
-        <ul className="absolute z-50 mt-2 max-h-52 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white py-1.5 shadow-xl">
-          {options.map((option) => (
-            <li key={option.value}>
-              <button
-                type="button"
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => {
-                  onChange(option.value);
-                  setOpen(false);
-                }}
-                className={`flex w-full cursor-pointer px-4 py-2.5 text-left text-sm transition ${
-                  value === option.value
-                    ? "bg-[#EEF2FC] font-semibold text-[#2D4CC8]"
-                    : "text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                {option.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      )}
+      {menu}
+    </div>
+  );
+}
+
+function SearchField({ id, value, onChange, placeholder }) {
+  return (
+    <div className="relative">
+      <label htmlFor={id} className="sr-only">
+        {placeholder}
+      </label>
+      <HiOutlineMagnifyingGlass
+        className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#2D4CC8]"
+        aria-hidden
+      />
+      <input
+        id={id}
+        type="text"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-full border border-[#2D4CC8] bg-white py-3 pl-10 pr-4 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20"
+        autoComplete="off"
+      />
     </div>
   );
 }
@@ -210,6 +391,7 @@ function TalkToExpertModal({ open, onClose }) {
   const [visitorStep, setVisitorStep] = useState(1);
   const [visitor, setVisitor] = useState(initialVisitor);
   const [selectedSlot, setSelectedSlot] = useState("");
+  const [providerSearch, setProviderSearch] = useState("");
   const slots = useMemo(() => buildTimeSlots(), []);
 
   const selectedPg = consultType === "tpr" ? getPgById(selectedTargetId) : null;
@@ -222,6 +404,7 @@ function TalkToExpertModal({ open, onClose }) {
     setVisitorStep(1);
     setVisitor(initialVisitor);
     setSelectedSlot("");
+    setProviderSearch("");
   }
 
   function handleClose() {
@@ -253,7 +436,7 @@ function TalkToExpertModal({ open, onClose }) {
     if (visitorStep === 1) {
       return Boolean(
         visitor.fullName.trim() &&
-          visitor.phone.trim() &&
+          /^\d{10}$/.test(visitor.phone) &&
           visitor.email.trim() &&
           visitor.company.trim()
       );
@@ -326,8 +509,18 @@ function TalkToExpertModal({ open, onClose }) {
       {flow === "select" && consultType === "tpr" ? (
         <div className="space-y-5">
           <p className="text-sm text-slate-600">Select a payment gateway to connect with their nominated representative.</p>
+
+          <SearchField
+            id="pg-search"
+            value={providerSearch}
+            onChange={setProviderSearch}
+            placeholder="Search payment gateways..."
+          />
+
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {prominentPgs.map((pg) => (
+            {prominentPgs
+              .filter((pg) => matchesSearchText(pg.name, providerSearch))
+              .map((pg) => (
               <button
                 key={pg.id}
                 type="button"
@@ -343,15 +536,22 @@ function TalkToExpertModal({ open, onClose }) {
               </button>
             ))}
           </div>
+
+          {prominentPgs.filter((pg) => matchesSearchText(pg.name, providerSearch)).length === 0 ? (
+            <p className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-500">
+              No popular gateways match your search.
+            </p>
+          ) : null}
+
           <div>
             <label htmlFor="more-pg" className={labelClass}>
               More payment gateways
             </label>
-            <FormSelect
+            <SearchableSelect
               id="more-pg"
-              value={selectedTargetId}
+              value={morePgs.some((pg) => pg.id === selectedTargetId) ? selectedTargetId : ""}
               onChange={setSelectedTargetId}
-              placeholder="Select from more PGs"
+              placeholder="Type to search more PGs..."
               options={morePgs.map((pg) => ({ value: pg.id, label: pg.name }))}
             />
           </div>
@@ -361,8 +561,23 @@ function TalkToExpertModal({ open, onClose }) {
       {flow === "select" && consultType === "tir" ? (
         <div className="space-y-5">
           <p className="text-sm text-slate-600">Choose an industry expert for unbiased platform guidance.</p>
+
+          <SearchField
+            id="expert-search"
+            value={providerSearch}
+            onChange={setProviderSearch}
+            placeholder="Search industry experts..."
+          />
+
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {prominentExperts.map((expert) => (
+            {prominentExperts
+              .filter(
+                (expert) =>
+                  matchesSearchText(expert.name, providerSearch) ||
+                  matchesSearchText(expert.title, providerSearch) ||
+                  matchesSearchText(expert.focus, providerSearch)
+              )
+              .map((expert) => (
               <button
                 key={expert.id}
                 type="button"
@@ -389,15 +604,27 @@ function TalkToExpertModal({ open, onClose }) {
               </button>
             ))}
           </div>
+
+          {prominentExperts.filter(
+            (expert) =>
+              matchesSearchText(expert.name, providerSearch) ||
+              matchesSearchText(expert.title, providerSearch) ||
+              matchesSearchText(expert.focus, providerSearch)
+          ).length === 0 ? (
+            <p className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-500">
+              No experts match your search.
+            </p>
+          ) : null}
+
           <div>
             <label htmlFor="more-expert" className={labelClass}>
               More industry experts
             </label>
-            <FormSelect
+            <SearchableSelect
               id="more-expert"
-              value={selectedTargetId}
+              value={moreExperts.some((expert) => expert.id === selectedTargetId) ? selectedTargetId : ""}
               onChange={setSelectedTargetId}
-              placeholder="Select another expert"
+              placeholder="Type to search more experts..."
               options={moreExperts.map((expert) => ({
                 value: expert.id,
                 label: `${expert.name} — ${expert.title}`,
@@ -430,7 +657,18 @@ function TalkToExpertModal({ open, onClose }) {
                 </div>
                 <div>
                   <label htmlFor="visitor-phone" className={labelClass}>Mobile *</label>
-                  <input id="visitor-phone" value={visitor.phone} onChange={(e) => updateVisitor("phone", e.target.value)} className={inputClass} />
+                  <input
+                    id="visitor-phone"
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel"
+                    maxLength={10}
+                    pattern="[0-9]{10}"
+                    placeholder="10-digit mobile number"
+                    value={visitor.phone}
+                    onChange={(e) => updateVisitor("phone", sanitizePhoneDigits(e.target.value))}
+                    className={inputClass}
+                  />
                 </div>
                 <div className="sm:col-span-2">
                   <label htmlFor="visitor-email" className={labelClass}>Email *</label>
@@ -561,6 +799,7 @@ function TalkToExpertModal({ open, onClose }) {
               if (flow === "select") {
                 setFlow("type");
                 setSelectedTargetId("");
+                setProviderSearch("");
                 return;
               }
               if (flow === "details") {
@@ -626,7 +865,7 @@ export default function TalkToExpertSection({ isOpen, onOpenChange }) {
 
   return (
     <>
-      <section className="bg-[#f2f6fb] py-16 sm:py-20">
+      {/* <section className="bg-[#f2f6fb] py-16 sm:py-20">
         <div className="container mx-auto max-w-7xl px-4">
           <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center shadow-xl shadow-[#13203F]/5 sm:p-12">
             <h2 className="text-2xl font-bold text-[#13203F] sm:text-3xl">
@@ -661,7 +900,7 @@ export default function TalkToExpertSection({ isOpen, onOpenChange }) {
             </button>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <TalkToExpertModal open={open} onClose={() => setOpen(false)} />
     </>
