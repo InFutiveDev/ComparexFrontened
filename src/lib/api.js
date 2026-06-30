@@ -1,4 +1,4 @@
-const DEFAULT_API_URL = "http://localhost:3000/api";
+const DEFAULT_API_URL = "http://100.54.237.0/api/";
 
 export const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL
