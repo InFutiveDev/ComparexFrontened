@@ -1,11 +1,5 @@
-import { LeadsTable } from "@/components/dashboard/leads-table";
-import { StatsCards } from "@/components/dashboard/stats-cards";
+import { OverviewSection } from "@/components/dashboard/overview/overview-section";
 
 export default function DashboardPage() {
-  return (
-    <div className="space-y-5">
-      <StatsCards />
-      <LeadsTable />
-    </div>
-  );
+  return <OverviewSection />;
 }
