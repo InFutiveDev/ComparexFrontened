@@ -10,6 +10,7 @@ import {
   HiOutlineMagnifyingGlass,
   HiUserCircle,
 } from "react-icons/hi2";
+import { useAuth } from "@/components/auth/auth-provider";
 import { useDashboard } from "@/components/dashboard/layout/dashboard-context";
 
 const initialNotifications = [
@@ -52,6 +53,7 @@ const searchInputClass =
 
 export function DashboardNavbar({ onOpenMenu }) {
   const { leadSearch, setLeadSearch } = useDashboard();
+  const { user, logout } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState(initialNotifications);
@@ -234,8 +236,8 @@ export function DashboardNavbar({ onOpenMenu }) {
                 className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl shadow-slate-900/10"
               >
                 <div className="border-b border-slate-100 px-4 py-3">
-                  <p className="text-sm font-semibold text-[#13203F]">CompareX Admin</p>
-                  <p className="text-xs text-slate-500">admin@comparex.com</p>
+                  <p className="text-sm font-semibold text-[#13203F]">{user?.name || "CompareX User"}</p>
+                  <p className="text-xs text-slate-500">{user?.email || ""}</p>
                 </div>
                 <Link
                   href="/dashboard/settings"
@@ -255,15 +257,19 @@ export function DashboardNavbar({ onOpenMenu }) {
                   <HiCog6Tooth className="size-4 text-[#40C3CF]" aria-hidden />
                   Settings
                 </Link>
-                <Link
-                  href="/website/login"
+                <button
+                  type="button"
                   role="menuitem"
-                  onClick={() => setProfileOpen(false)}
-                  className="flex cursor-pointer items-center gap-2 border-t border-slate-100 px-4 py-2.5 text-sm text-[#13203F] transition hover:bg-slate-50"
+                  onClick={() => {
+                    setProfileOpen(false);
+                    logout();
+                    router.push("/login");
+                  }}
+                  className="flex w-full cursor-pointer items-center gap-2 border-t border-slate-100 px-4 py-2.5 text-left text-sm text-[#13203F] transition hover:bg-slate-50"
                 >
                   <HiArrowRightOnRectangle className="size-4 text-[#2D4CC8]" aria-hidden />
                   Log out
-                </Link>
+                </button>
               </div>
             ) : null}
           </div>

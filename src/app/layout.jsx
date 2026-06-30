@@ -1,4 +1,5 @@
 import Script from "next/script";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import { StripExtensionAttrs } from "@/components/strip-extension-attrs";
 import { stripExtensionScript } from "@/lib/strip-extension-attrs";
 import "./globals.css";
@@ -18,9 +19,11 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{ __html: stripExtensionScript }}
         />
         <StripExtensionAttrs />
-        <div className="contents" suppressHydrationWarning>
-          {children}
-        </div>
+        <AuthProvider>
+          <div className="contents" suppressHydrationWarning>
+            {children}
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

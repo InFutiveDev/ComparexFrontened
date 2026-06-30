@@ -11,26 +11,38 @@ import { ApiError } from "@/lib/api";
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20";
 
-export function LoginFormSection() {
+export function RegisterFormSection() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { register } = useAuth();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await login({ email, password, remember: rememberMe });
+      await register({ name, email, password });
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to sign in");
+      setError(err instanceof ApiError ? err.message : "Failed to create account");
     } finally {
       setIsSubmitting(false);
     }
@@ -50,7 +62,7 @@ export function LoginFormSection() {
 
       <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="grid w-full grid-cols-1 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_24px_80px_-32px_rgba(45,76,200,0.35)] lg:grid-cols-2">
-          <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-[#2D4CC8] via-[#3B5BDB] to-[#25A36F] p-10 text-white lg:flex">
+          <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-[#25A36F] via-[#2D4CC8] to-[#3B5BDB] p-10 text-white lg:flex">
             <div
               className="pointer-events-none absolute inset-0 opacity-20"
               aria-hidden
@@ -69,26 +81,24 @@ export function LoginFormSection() {
                   className="h-10 w-auto brightness-0 invert"
                 />
               </Link>
-              <h2 className="mt-10 text-3xl font-bold leading-tight">
-                Welcome back to CompareX
-              </h2>
+              <h2 className="mt-10 text-3xl font-bold leading-tight">Join CompareX</h2>
               <p className="mt-4 max-w-sm text-base leading-relaxed text-white/90">
-                Access your dashboard to manage leads, track merchant onboarding, and grow your
-                partner business — all in one place.
+                Create your account to compare payment gateways, manage leads, and grow your
+                business with expert guidance.
               </p>
             </div>
             <ul className="relative space-y-3 text-sm text-white/90">
               <li className="flex items-center gap-2">
                 <span className="size-1.5 rounded-full bg-white" aria-hidden />
-                Merchants, Resellers & Payment Providers
+                Free, unbiased payment gateway comparisons
               </li>
               <li className="flex items-center gap-2">
                 <span className="size-1.5 rounded-full bg-white" aria-hidden />
-                Secure access to your CompareX account
+                Dashboard access for merchants and partners
               </li>
               <li className="flex items-center gap-2">
                 <span className="size-1.5 rounded-full bg-white" aria-hidden />
-                Track leads, activations & commissions
+                Expert support when you need it
               </li>
             </ul>
           </div>
@@ -108,10 +118,10 @@ export function LoginFormSection() {
 
             <div className="mt-6 lg:mt-0">
               <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-                Sign in to your account
+                Create your account
               </h1>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
-                Enter your credentials to access your CompareX dashboard.
+                Sign up to access your CompareX dashboard.
               </p>
             </div>
 
@@ -121,6 +131,23 @@ export function LoginFormSection() {
                   {error}
                 </div>
               ) : null}
+
+              <div>
+                <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Full name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Your full name"
+                  className={inputClass}
+                />
+              </div>
 
               <div>
                 <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
@@ -140,27 +167,19 @@ export function LoginFormSection() {
               </div>
 
               <div>
-                <div className="mb-1.5 flex items-center justify-between">
-                  <label htmlFor="password" className="text-sm font-medium text-slate-700">
-                    Password
-                  </label>
-                  <Link
-                    href="/contact"
-                    className="text-sm font-medium text-[#2D4CC8] transition hover:text-[#3B5BDB]"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+                <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Password
+                </label>
                 <div className="relative">
                   <input
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     required
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    placeholder="Enter your password"
+                    placeholder="At least 6 characters"
                     className={`${inputClass} pr-12`}
                   />
                   <button
@@ -178,15 +197,25 @@ export function LoginFormSection() {
                 </div>
               </div>
 
-              <label className="flex cursor-pointer items-center gap-3">
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                  Confirm password
+                </label>
                 <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(event) => setRememberMe(event.target.checked)}
-                  className="size-4 rounded border-slate-300 text-[#2D4CC8] focus:ring-[#2D4CC8]/30"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  required
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  placeholder="Re-enter your password"
+                  className={inputClass}
                 />
-                <span className="text-sm text-slate-600">Remember me on this device</span>
-              </label>
+              </div>
 
               <div className="flex justify-center">
                 <button
@@ -194,7 +223,9 @@ export function LoginFormSection() {
                   disabled={isSubmitting}
                   className="group relative flex h-12 w-fit cursor-pointer items-center justify-center rounded-full bg-[#2D4CC8] py-1 pl-6 pr-14 font-medium text-white transition hover:bg-[#3B5BDB] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  <span className="z-10 pr-2">{isSubmitting ? "Signing in..." : "Sign In"}</span>
+                  <span className="z-10 pr-2">
+                    {isSubmitting ? "Creating account..." : "Create Account"}
+                  </span>
                   <div className="absolute right-1 inline-flex h-10 w-10 items-center justify-end rounded-full bg-[#25a36f] transition-[width] group-hover:w-[calc(100%-8px)]">
                     <div className="mr-3 flex items-center justify-center">
                       <HiArrowRight className="size-5 text-white" />
@@ -205,9 +236,9 @@ export function LoginFormSection() {
             </form>
 
             <p className="mt-8 text-center text-sm text-slate-600">
-              Don&apos;t have an account?{" "}
-              <Link href="/register" className="font-semibold text-[#2D4CC8] hover:underline">
-                Create account
+              Already have an account?{" "}
+              <Link href="/login" className="font-semibold text-[#2D4CC8] hover:underline">
+                Sign in
               </Link>
             </p>
           </div>

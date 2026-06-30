@@ -110,6 +110,10 @@ export function RoleCardsSection() {
           <Link href="/login" className="font-semibold text-[#2D4CC8] hover:underline">
             Sign in
           </Link>
+          {" · "}
+          <Link href="/register" className="font-semibold text-[#2D4CC8] hover:underline">
+            Create account
+          </Link>
         </p>
       </div>
     </div>

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { HiArrowLeft, HiArrowRight, HiCheck } from "react-icons/hi2";
 import Image from "next/image";
+import { ApiError } from "@/lib/api";
+import { submitPaymentProvider } from "@/lib/payment";
 
 const steps = [
   { id: 1, label: "Organisation" },
@@ -130,6 +132,8 @@ export function PaymentAdviceForm() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   function updateField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -160,10 +164,31 @@ export function PaymentAdviceForm() {
     setStep((s) => Math.max(s - 1, 1));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     if (!canGoNext()) return;
-    setSubmitted(true);
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      await submitPaymentProvider({
+        companyName: form.companyName.trim(),
+        contactPerson: form.contactPerson.trim(),
+        designation: form.designation.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        website: form.website.trim(),
+        paymentCapabilities: form.paymentCapabilities,
+        partnershipGoals: form.partnershipGoals,
+        consent: form.consent,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to submit partnership inquiry");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   useEffect(() => {
@@ -219,6 +244,12 @@ export function PaymentAdviceForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col">
+        {error ? (
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
+
         <div className="max-h-[min(26rem,50vh)] space-y-4 overflow-y-auto overscroll-y-contain pr-3 [-ms-overflow-style:none] [scrollbar-color:#cbd5e1_transparent] [scrollbar-width:thin] sm:pr-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-track]:bg-transparent">
           {step === 1 && (
             <>
@@ -381,10 +412,10 @@ export function PaymentAdviceForm() {
           ) : (
             <button
               type="submit"
-              disabled={!canGoNext()}
+              disabled={!canGoNext() || isSubmitting}
               className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Explore Partnership Opportunities
+              {isSubmitting ? "Submitting..." : "Explore Partnership Opportunities"}
               <HiArrowRight className="size-4" aria-hidden />
             </button>
           )}

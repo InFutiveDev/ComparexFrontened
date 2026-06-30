@@ -11,6 +11,7 @@ const websiteRoutes = [
   "features",
   "pricing",
   "login",
+  "register",
   "get-started",
   "careers",
   "why-comparex",
