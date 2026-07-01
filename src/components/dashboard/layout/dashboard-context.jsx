@@ -5,11 +5,12 @@ import { createContext, useContext, useMemo, useState } from "react";
 const DashboardContext = createContext(null);
 
 export function DashboardProvider({ children }) {
+  const [merchantSearch, setMerchantSearch] = useState("");
   const [leadSearch, setLeadSearch] = useState("");
 
   const value = useMemo(
-    () => ({ leadSearch, setLeadSearch }),
-    [leadSearch]
+    () => ({ merchantSearch, setMerchantSearch, leadSearch, setLeadSearch }),
+    [merchantSearch, leadSearch]
   );
 
   return <DashboardContext.Provider value={value}>{children}</DashboardContext.Provider>;

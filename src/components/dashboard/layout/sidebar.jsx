@@ -6,22 +6,27 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   HiArrowRightOnRectangle,
+  HiBuildingStorefront,
   HiCalendarDays,
   HiChartBarSquare,
+  HiChatBubbleLeftRight,
   HiChevronUp,
   HiCog6Tooth,
+  HiCreditCard,
   HiLifebuoy,
   HiSquares2X2,
+  HiStar,
   HiUserGroup,
-  HiUsers,
-  HiClipboardDocumentCheck,
-  HiChatBubbleBottomCenterText,
 } from "react-icons/hi2";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: HiSquares2X2 },
-  { href: "/dashboard/leads", label: "Leads", icon: HiUsers },
-  { href: "/dashboard/talk-to-expert", label: "Talk to Expert", icon: HiChatBubbleBottomCenterText },
+  { href: "/dashboard/merchants", label: "Merchants", icon: HiBuildingStorefront },
+  { href: "/dashboard/resellers", label: "Resellers", icon: HiUserGroup },
+  { href: "/dashboard/payment-gateways", label: "Payment Gateways", icon: HiCreditCard },
+  { href: "/dashboard/merchant-support", label: "Merchant Support", icon: HiChatBubbleLeftRight },
+  { href: "/dashboard/talk-to-expert", label: "Talk to Expert", icon: HiCalendarDays },
+  { href: "/dashboard/reviews-ratings", label: "Reviews & Ratings", icon: HiStar },
   { href: "/dashboard/reports", label: "Reports", icon: HiChartBarSquare },
   { href: "/dashboard/settings", label: "Settings", icon: HiCog6Tooth },
   { href: "/dashboard/help-support", label: "Help & Support", icon: HiLifebuoy },

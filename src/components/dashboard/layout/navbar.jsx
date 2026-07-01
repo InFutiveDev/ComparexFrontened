@@ -16,11 +16,11 @@ import { useDashboard } from "@/components/dashboard/layout/dashboard-context";
 const initialNotifications = [
   {
     id: "ntf-1",
-    title: "New lead assigned",
+    title: "New merchant assigned",
     message: "Meera Kapoor from Blue Orbit submitted a new inquiry.",
     time: "5 min ago",
     read: false,
-    href: "/dashboard/leads",
+    href: "/dashboard/merchants",
   },
   {
     id: "ntf-2",
@@ -28,12 +28,12 @@ const initialNotifications = [
     message: "Talk to Expert call booked for tomorrow at 11:00 AM.",
     time: "1 hr ago",
     read: false,
-    href: "/dashboard/leads",
+    href: "/dashboard/merchants",
   },
   {
     id: "ntf-3",
     title: "Weekly report ready",
-    message: "Your leads performance report is ready to review.",
+    message: "Your merchants performance report is ready to review.",
     time: "3 hrs ago",
     read: true,
     href: "/dashboard/reports",
@@ -44,7 +44,7 @@ const initialNotifications = [
     message: "PayU merchant onboarding moved to the next stage.",
     time: "Yesterday",
     read: true,
-    href: "/dashboard/leads",
+    href: "/dashboard/merchants",
   },
 ];
 
@@ -52,7 +52,7 @@ const searchInputClass =
   "w-full rounded-full border border-slate-200/90 bg-white py-2.5 pl-11 pr-4 text-sm text-[#13203F] shadow-[0_1px_4px_rgba(19,32,63,0.06)] outline-none transition placeholder:text-slate-400 focus:border-[#40C3CF]/40 focus:ring-2 focus:ring-[#40C3CF]/15";
 
 export function DashboardNavbar({ onOpenMenu }) {
-  const { leadSearch, setLeadSearch } = useDashboard();
+  const { merchantSearch, setMerchantSearch } = useDashboard();
   const { user, logout } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -97,17 +97,17 @@ export function DashboardNavbar({ onOpenMenu }) {
   }
 
   function handleSearchChange(value) {
-    setLeadSearch(value);
+    setMerchantSearch(value);
 
-    const onLeadsView = pathname === "/dashboard" || pathname === "/dashboard/leads";
-    if (value.trim() && !onLeadsView) {
-      router.push("/dashboard/leads");
+    const onMerchantsView = pathname === "/dashboard" || pathname === "/dashboard/merchants";
+    if (value.trim() && !onMerchantsView) {
+      router.push("/dashboard/merchants");
     }
   }
 
   function handleSearchKeyDown(event) {
-    if (event.key === "Enter" && leadSearch.trim()) {
-      router.push("/dashboard/leads");
+    if (event.key === "Enter" && merchantSearch.trim()) {
+      router.push("/dashboard/merchants");
     }
   }
 
@@ -126,14 +126,14 @@ export function DashboardNavbar({ onOpenMenu }) {
         </div>
 
         <label className="absolute left-1/2 hidden w-full max-w-md -translate-x-1/2 sm:block">
-          <span className="sr-only">Search leads</span>
+          <span className="sr-only">Search merchants</span>
           <HiOutlineMagnifyingGlass
             className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[#13203F]/55"
             aria-hidden
           />
           <input
             type="search"
-            value={leadSearch}
+            value={merchantSearch}
             onChange={(event) => handleSearchChange(event.target.value)}
             onKeyDown={handleSearchKeyDown}
             placeholder="Search.."
@@ -277,14 +277,14 @@ export function DashboardNavbar({ onOpenMenu }) {
       </div>
 
       <label className="relative block px-4 py-2.5 sm:hidden">
-        <span className="sr-only">Search leads</span>
+        <span className="sr-only">Search merchants</span>
         <HiOutlineMagnifyingGlass
           className="pointer-events-none absolute left-8 top-1/2 size-[18px] -translate-y-1/2 text-[#13203F]/55"
           aria-hidden
         />
         <input
           type="search"
-          value={leadSearch}
+          value={merchantSearch}
           onChange={(event) => handleSearchChange(event.target.value)}
           onKeyDown={handleSearchKeyDown}
           placeholder="Search.."

@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { HiArrowUp, HiInformationCircle, HiPlus } from "react-icons/hi2";
-import { dashboardStats } from "@/lib/mock-data";
+import { merchantStats } from "@/lib/mock-data";
 
 const timeRanges = ["Today", "Week", "Month", "3 Months"];
 
-export function StatsCards() {
+export function StatsCards({ stats }) {
   const [activeRange, setActiveRange] = useState("Month");
 
   return (
@@ -14,7 +14,7 @@ export function StatsCards() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold text-[#13203F]">Dashboard</h2>
+            <h2 className="text-2xl font-bold text-[#13203F]">Merchants</h2>
             
           </div>
           
@@ -42,7 +42,7 @@ export function StatsCards() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {dashboardStats.map((stat) => (
+        {stats.map((stat) => (
           <article
             key={stat.label}
             className={`rounded-2xl border border-white/80 bg-gradient-to-br p-5 shadow-sm shadow-[#13203F]/5 ${stat.cardClass}`}
