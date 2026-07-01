@@ -5,6 +5,10 @@ import { HiArrowLeft, HiArrowRight, HiCheck } from "react-icons/hi2";
 import Image from "next/image";
 import { ApiError } from "@/lib/api";
 import { submitPaymentProvider } from "@/lib/payment";
+import {
+  sanitizePhoneInput,
+  validateContactFields,
+} from "@/lib/validation";
 
 const steps = [
   { id: 1, label: "Organisation" },
@@ -155,8 +159,29 @@ export function PaymentAdviceForm() {
     return form.partnershipGoals.length > 0 && form.consent;
   }
 
+  function validateStepOne() {
+    const contactError = validateContactFields({
+      email: form.email,
+      phone: form.phone,
+    });
+
+    if (contactError) {
+      setError(contactError);
+      return false;
+    }
+
+    setError("");
+    return true;
+  }
+
   function handleNext() {
-    if (!canGoNext()) return;
+    if (step === 1) {
+      if (!canGoNext()) return;
+      if (!validateStepOne()) return;
+    } else if (!canGoNext()) {
+      return;
+    }
+
     setStep((s) => Math.min(s + 1, 3));
   }
 
@@ -167,6 +192,15 @@ export function PaymentAdviceForm() {
   async function handleSubmit(event) {
     event.preventDefault();
     if (!canGoNext()) return;
+
+    const contactError = validateContactFields({
+      email: form.email,
+      phone: form.phone,
+    });
+    if (contactError) {
+      setError(contactError);
+      return;
+    }
 
     setError("");
     setIsSubmitting(true);
@@ -305,6 +339,7 @@ export function PaymentAdviceForm() {
                     value={form.email}
                     onChange={(e) => updateField("email", e.target.value)}
                     className={inputClass}
+                    placeholder="you@company.com"
                     required
                   />
                 </div>
@@ -315,9 +350,12 @@ export function PaymentAdviceForm() {
                   <input
                     id="mobile-number"
                     type="tel"
+                    inputMode="numeric"
+                    maxLength={11}
                     value={form.phone}
-                    onChange={(e) => updateField("phone", e.target.value)}
+                    onChange={(e) => updateField("phone", sanitizePhoneInput(e.target.value))}
                     className={inputClass}
+                    placeholder="10-digit mobile number"
                     required
                   />
                 </div>

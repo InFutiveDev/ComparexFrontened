@@ -4,6 +4,12 @@ import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { HiArrowRight, HiCheck, HiChevronDown } from "react-icons/hi2";
 import { IoSearch } from "react-icons/io5";
+import { ApiError } from "@/lib/api";
+import { submitSupportRequest } from "@/lib/support";
+import {
+  sanitizePhoneInput,
+  validateContactFields,
+} from "@/lib/validation";
 
 const inputClass =
     "w-full rounded-full border border-[#2D4CC8] px-4 py-2.5 text-sm text-gray-600 outline-none transition focus:border-[#25a36f] focus:ring-2 focus:ring-[#25a36f]/25 sm:text-base";
@@ -183,10 +189,50 @@ function ContactThankYou() {
 export const ContactUs = () => {
     const [submitted, setSubmitted] = useState(false);
     const [showDisclosure, setShowDisclosure] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState("");
 
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
         event.preventDefault();
-        setSubmitted(true);
+        setError("");
+
+        const form = event.currentTarget;
+        const formData = new FormData(form);
+        const businessEmail = String(formData.get("businessEmail") || "").trim();
+        const contactNumber = String(formData.get("contactNumber") || "").trim();
+
+        const contactError = validateContactFields({
+            email: businessEmail,
+            phone: contactNumber,
+        });
+
+        if (contactError) {
+            setError(contactError);
+            return;
+        }
+
+        formData.set("businessEmail", businessEmail);
+        formData.set("contactNumber", contactNumber);
+        formData.set("businessName", String(formData.get("businessName") || "").trim());
+        formData.set("paymentGateway", String(formData.get("paymentGateway") || "").trim());
+        formData.set("issueCategory", String(formData.get("issueCategory") || "").trim());
+        formData.set("issueDescription", String(formData.get("issueDescription") || "").trim());
+
+        if (formData.get("disclaimerAccepted")) {
+            formData.set("disclaimerAccepted", "true");
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            await submitSupportRequest(formData);
+            setSubmitted(true);
+            form.reset();
+        } catch (err) {
+            setError(err instanceof ApiError ? err.message : "Failed to submit support request");
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     useEffect(() => {
@@ -195,6 +241,7 @@ export const ContactUs = () => {
         const timer = window.setTimeout(() => {
             setSubmitted(false);
             setShowDisclosure(false);
+            setError("");
         }, 5000);
 
         return () => window.clearTimeout(timer);
@@ -241,7 +288,14 @@ export const ContactUs = () => {
                             {submitted ? (
                                 <ContactThankYou />
                             ) : (
-                            <form onSubmit={handleSubmit}>                                <div className="grid grid-cols-1 gap-4 text-left lg:grid-cols-6">
+                            <form onSubmit={handleSubmit}>
+                                {error ? (
+                                    <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-left text-sm text-red-700">
+                                        {error}
+                                    </div>
+                                ) : null}
+
+                                <div className="grid grid-cols-1 gap-4 text-left lg:grid-cols-6">
                                     <div className="lg:col-span-2">
                                         <label htmlFor="business-name" className={labelClass}>
                                             Business Name
@@ -263,7 +317,12 @@ export const ContactUs = () => {
                                             id="contact-number"
                                             name="contactNumber"
                                             type="tel"
-                                            placeholder="Enter contact number"
+                                            inputMode="numeric"
+                                            maxLength={11}
+                                            placeholder="10-digit mobile number"
+                                            onChange={(event) => {
+                                                event.target.value = sanitizePhoneInput(event.target.value);
+                                            }}
                                             className={inputClass}
                                             required
                                         />
@@ -371,10 +430,13 @@ export const ContactUs = () => {
                                     <div className="mt-1 sm:col-span-2 lg:col-span-6">
                                         <button
                                             type="submit"
-                                            className="group relative inline-flex h-[calc(48px+8px)] w-full cursor-pointer items-center justify-center rounded-full bg-[#2D4CC8] py-1 pl-6 pr-14 font-medium text-white sm:w-auto"
+                                            disabled={isSubmitting}
+                                            className="group relative inline-flex h-[calc(48px+8px)] w-full cursor-pointer items-center justify-center rounded-full bg-[#2D4CC8] py-1 pl-6 pr-14 font-medium text-white disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
                                             style={{ color: "#fff" }}
                                         >
-                                            <span className="z-10 pr-2 text-white">Submit Request</span>
+                                            <span className="z-10 pr-2 text-white">
+                                                {isSubmitting ? "Submitting..." : "Submit Request"}
+                                            </span>
                                             <div className="absolute right-1 inline-flex h-12 w-12 items-center justify-end rounded-full bg-[#25a36f] transition-[width] group-hover:w-[calc(100%-8px)]">
                                                 <div className="mr-3.5 flex items-center justify-center">
                                                     <HiArrowRight className="size-5 text-neutral-50" />

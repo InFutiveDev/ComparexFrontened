@@ -5,6 +5,12 @@ import { HiArrowLeft, HiArrowRight, HiCheck } from "react-icons/hi2";
 import { heroFormStepOneFields } from "@/lib/mock-data";
 import Image from "next/image";
 import Link from "next/link";
+import { ApiError } from "@/lib/api";
+import { submitMerchantLead } from "@/lib/merchant";
+import {
+  sanitizePhoneInput,
+  validateContactFields,
+} from "@/lib/validation";
 
 const steps = [
   { id: 1, label: "Your details" },
@@ -128,6 +134,8 @@ export function HeroAdviceForm() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   function updateField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -147,8 +155,29 @@ export function HeroAdviceForm() {
     return Boolean(form.business);
   }
 
+  function validateStepOne() {
+    const contactError = validateContactFields({
+      email: form.email,
+      phone: form.phone,
+    });
+
+    if (contactError) {
+      setError(contactError);
+      return false;
+    }
+
+    setError("");
+    return true;
+  }
+
   function handleNext() {
-    if (!canGoNext()) return;
+    if (step === 1) {
+      if (!canGoNext()) return;
+      if (!validateStepOne()) return;
+    } else if (!canGoNext()) {
+      return;
+    }
+
     setStep((s) => Math.min(s + 1, 3));
   }
 
@@ -156,10 +185,36 @@ export function HeroAdviceForm() {
     setStep((s) => Math.max(s - 1, 1));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     if (!canGoNext()) return;
-    setSubmitted(true);
+
+    const contactError = validateContactFields({
+      email: form.email,
+      phone: form.phone,
+    });
+    if (contactError) {
+      setError(contactError);
+      return;
+    }
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      await submitMerchantLead({
+        businessName: form.businessName.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        industry: form.industry,
+        priority: form.business,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to submit your request");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   useEffect(() => {
@@ -210,6 +265,12 @@ export function HeroAdviceForm() {
 
       <div className="p-3 sm:p-1">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          ) : null}
+
           {step === 1 && (
             <>
               <div className="mb-3">
@@ -239,9 +300,13 @@ export function HeroAdviceForm() {
                   </label>
                   <input
                     id="hero-phone"
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={11}
                     value={form.phone}
-                    onChange={(e) => updateField("phone", e.target.value)}
+                    onChange={(e) => updateField("phone", sanitizePhoneInput(e.target.value))}
                     className={inputClass}
+                    placeholder="10-digit mobile number"
                     required
                   />
                 </div>
@@ -255,6 +320,7 @@ export function HeroAdviceForm() {
                     value={form.email}
                     onChange={(e) => updateField("email", e.target.value)}
                     className={inputClass}
+                    placeholder="you@company.com"
                     required
                   />
                 </div>
@@ -351,10 +417,10 @@ export function HeroAdviceForm() {
             ) : (
               <button
                 type="submit"
-                disabled={!canGoNext()}
+                disabled={!canGoNext() || isSubmitting}
                 className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Submit
+                {isSubmitting ? "Submitting..." : "Submit"}
                 <HiCheck className="size-4" aria-hidden />
               </button>
             )}
