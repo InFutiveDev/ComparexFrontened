@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { HiArrowRight, HiEye, HiEyeSlash } from "react-icons/hi2";
+import { useEffect, useRef, useState } from "react";
+import { HiArrowRight, HiCheck, HiChevronDown, HiEye, HiEyeSlash } from "react-icons/hi2";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiError } from "@/lib/api";
 import { validateEmail } from "@/lib/validation";
@@ -12,11 +12,93 @@ import { validateEmail } from "@/lib/validation";
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20";
 
+const accountTypeOptions = [
+  { value: "merchant", label: "Merchant" },
+  { value: "reseller", label: "Reseller" },
+  { value: "payment-gateway", label: "Payment Gateway" },
+];
+
+function AccountTypeSelect({ id, value, onChange, options }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+  const selected = options.find((option) => option.value === value);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function handleClickOutside(event) {
+      if (!containerRef.current?.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        id={id}
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className={`${inputClass} flex cursor-pointer items-center justify-between gap-3 text-left ${
+          open ? "border-[#2D4CC8] ring-2 ring-[#2D4CC8]/20" : ""
+        }`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span className="font-medium text-[#13203F]">{selected?.label}</span>
+        <HiChevronDown
+          className={`size-5 shrink-0 text-[#2D4CC8] transition-transform duration-200 ${
+            open ? "rotate-180" : ""
+          }`}
+          aria-hidden
+        />
+      </button>
+
+      {open ? (
+        <ul
+          role="listbox"
+          aria-labelledby={id}
+          className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl shadow-slate-900/10"
+        >
+          {options.map((option) => {
+            const isSelected = value === option.value;
+            return (
+              <li key={option.value} role="option" aria-selected={isSelected}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange(option.value);
+                    setOpen(false);
+                  }}
+                  className={`flex w-full cursor-pointer items-center justify-between gap-2 px-4 py-2.5 text-left text-sm transition ${
+                    isSelected
+                      ? "bg-[#EEF2FC] font-semibold text-[#2D4CC8]"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-[#2D4CC8]"
+                  }`}
+                >
+                  <span>{option.label}</span>
+                  {isSelected ? <HiCheck className="size-4 shrink-0" aria-hidden /> : null}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+
+      <input type="hidden" name="accountType" value={value} />
+    </div>
+  );
+}
+
 export function RegisterFormSection() {
   const router = useRouter();
   const { register } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [accountType, setAccountType] = useState("merchant");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -110,7 +192,7 @@ export function RegisterFormSection() {
             </ul>
           </div>
 
-          <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-12">
+          <div className="flex flex-col justify-center p-4 sm:p-4 lg:p-5">
             <div className="lg:hidden">
               <Link href="/">
                 <Image
@@ -170,6 +252,18 @@ export function RegisterFormSection() {
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="you@company.com"
                   className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="accountType" className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Account type
+                </label>
+                <AccountTypeSelect
+                  id="accountType"
+                  value={accountType}
+                  onChange={setAccountType}
+                  options={accountTypeOptions}
                 />
               </div>
 

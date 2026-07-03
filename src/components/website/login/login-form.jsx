@@ -12,9 +12,12 @@ import { validateEmail } from "@/lib/validation";
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20";
 
+const accountTypes = ["Merchant", "Reseller", "Payment Gateway"];
+
 export function LoginFormSection() {
   const router = useRouter();
   const { login } = useAuth();
+  const [accountType, setAccountType] = useState("Merchant");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -101,7 +104,7 @@ export function LoginFormSection() {
             </ul>
           </div>
 
-          <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-12">
+          <div className="flex flex-col justify-center p-4 sm:p-4 lg:p-5">
             <div className="lg:hidden">
               <Link href="/">
                 <Image
@@ -121,9 +124,30 @@ export function LoginFormSection() {
               <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
                 Enter your credentials to access your CompareX dashboard.
               </p>
+              <div className="flex justify-center items-center"> 
+              <div className="mt-4 inline-flex w-full items-center justify-center flex-wrap rounded-full border border-slate-200 bg-slate-50 p-1 sm:w-fit">
+                {accountTypes.map((type) => {
+                  const active = accountType === type;
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setAccountType(type)}
+                      className={`flex-1 cursor-pointer rounded-full px-3 py-2 text-center text-xs font-medium transition sm:flex-none sm:px-4 sm:text-sm ${
+                        active
+                          ? "bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] text-white shadow-sm"
+                          : "text-[#13203F]/70 hover:bg-white hover:text-[#13203F]"
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  );
+                })}
+              </div>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            <form onSubmit={handleSubmit} className="mt-5 space-y-5">
               {error ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   {error}

@@ -13,7 +13,7 @@ const CalculationResults = dynamic(() => import('./calculation-results'), { ssr:
 const Calculator = () => {
   const [amount, setAmount] = useState('10000');
   const [mode, setMode] = useState('singleTransaction');
-  const [useCustomRates, setUseCustomRates] = useState(false);
+  const [useCustomRates, setUseCustomRates] = useState(true);
   const [useInstantSettlement, setUseInstantSettlement] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState(() =>
     PAYMENT_METHODS.map((method) => ({ ...method }))
@@ -216,13 +216,16 @@ const Calculator = () => {
                     </span>
                     Select Payment Methods
                   </h3>
+                  <div className="flex items-center gap-2 border border-slate-300 bg-slate-50 p-3 rounded-lg">
+                    <label className="text-sm font-bold text-[#13203F]">Use Custom Rates</label>
                   <ToggleSwitch
                     id="custom-rates-toggle"
-                    label="Custom Rates"
+                    // label="Custom Rates"
                     isChecked={useCustomRates}
                     onChange={setUseCustomRates}
                     labelClassName="text-sm font-bold"
                   />
+                  </div>
                 </div>
 
                 {totalDistribution > 1 && (

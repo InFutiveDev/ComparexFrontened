@@ -2,25 +2,41 @@
 
 import Link from "next/link";
 import { HiArrowRight } from "react-icons/hi2";
+import { useTalkToExpert } from "@/components/website/talk-to-expert/talk-to-expert-provider";
 
-function CtaButton({ href, label }) {
-  return (
-    <Link
-      href={href}
-      className="group relative flex h-[calc(48px+8px)] w-full cursor-pointer items-center justify-center rounded-full bg-[#2D4CC8] py-1 pl-6 pr-14 font-medium text-white"
-      style={{ color: "#fff" }}
-    >
+const ctaClassName =
+  "group relative flex h-[calc(48px+8px)] w-full cursor-pointer items-center justify-center rounded-full bg-[#2D4CC8] py-1 pl-6 pr-14 font-medium text-white";
+
+function CtaButton({ href, label, onClick }) {
+  const content = (
+    <>
       <span className="z-10 pr-2 text-white">{label}</span>
       <div className="absolute right-1 inline-flex h-12 w-12 items-center justify-end rounded-full bg-[#25a36f] transition-[width] group-hover:w-[calc(100%-8px)]">
         <div className="mr-3.5 flex items-center justify-center">
           <HiArrowRight className="size-5 text-neutral-50" />
         </div>
       </div>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={ctaClassName} style={{ color: "#fff" }}>
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link href={href} className={ctaClassName} style={{ color: "#fff" }}>
+      {content}
     </Link>
   );
 }
 
 export function ContactUsSection() {
+  const { openTalkToExpert } = useTalkToExpert();
+
   return (
     <section className="bg-slate-50 px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -54,7 +70,7 @@ export function ContactUsSection() {
 
             <div className="mt-8 grid w-full max-w-xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
               <CtaButton href="/merchant/form" label="Get Recommendations" />
-              <CtaButton href="/talk-to-expert" label="Talk to Expert" />
+              <CtaButton onClick={openTalkToExpert} label="Talk to Expert" />
             </div>
           </div>
         </div>

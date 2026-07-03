@@ -28,6 +28,15 @@ export const stripExtensionScript = `
     } catch (e) {}
   };
   strip();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", strip, { once: true });
+  }
+  if (typeof requestAnimationFrame === "function") {
+    requestAnimationFrame(strip);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(strip);
+    });
+  }
   if (typeof MutationObserver !== "undefined") {
     new MutationObserver(function (records) {
       for (var i = 0; i < records.length; i++) {
@@ -37,7 +46,11 @@ export const stripExtensionScript = `
         }
       }
       strip();
-    }).observe(document.documentElement, { attributes: true, subtree: true });
+    }).observe(document.documentElement, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: attrs,
+    });
   }
 })();
 `;

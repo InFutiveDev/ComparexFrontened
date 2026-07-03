@@ -66,7 +66,78 @@ export const merchantStats = [
     previousValue: "98",
     cardClass: "from-[#EEF2FC] to-[#f5f8ff]",
   },
-];  
+];
+
+export const resellerStats = [
+  {
+    label: "Total Active Resellers",
+    value: "48",
+    trend: "+6.2%",
+    previousLabel: "vs last month",
+    previousValue: "45",
+    cardClass: "from-[#ecfdf9] to-[#f2fcfa]",
+  },
+  {
+    label: "Total Inactive Resellers",
+    value: "12",
+    trend: "+2.1%",
+    previousLabel: "vs last month",
+    previousValue: "11",
+    cardClass: "from-[#ecfdf5] to-[#f3fdf8]",
+  },
+  {
+    label: "Total Resellers",
+    value: "60",
+    trend: "+9.8%",
+    previousLabel: "vs last month",
+    previousValue: "55",
+    cardClass: "from-[#EEF2FC] to-[#f5f8ff]",
+  },
+  {
+    label: "Partner Revenue",
+    value: "₹24.6L",
+    trend: "+11.3%",
+    previousLabel: "vs last month",
+    previousValue: "₹22.1L",
+    cardClass: "from-[#eef0f8] to-[#f6f7fc]",
+  },
+];
+
+export const paymentGatewayStats = [
+  {
+    label: "Total Active PG Partners",
+    value: "18",
+    trend: "+5.4%",
+    previousLabel: "vs last month",
+    previousValue: "17",
+    cardClass: "from-[#ecfdf9] to-[#f2fcfa]",
+  },
+  {
+    label: "Total PG Applications",
+    value: "34",
+    trend: "+7.9%",
+    previousLabel: "vs last month",
+    previousValue: "31",
+    cardClass: "from-[#ecfdf5] to-[#f3fdf8]",
+  },
+  {
+    label: "Total Payment Gateways",
+    value: "22",
+    trend: "+4.2%",
+    previousLabel: "vs last month",
+    previousValue: "21",
+    cardClass: "from-[#EEF2FC] to-[#f5f8ff]",
+  },
+  {
+    label: "PG Merchant Onboardings",
+    value: "156",
+    trend: "+10.1%",
+    previousLabel: "vs last month",
+    previousValue: "142",
+    cardClass: "from-[#eef0f8] to-[#f6f7fc]",
+  },
+];
+
 export const merchants = [
   {
     id: "LD-101",

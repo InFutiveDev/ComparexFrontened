@@ -21,6 +21,8 @@ export function MerchantTable({ variant = "overview", workTypeFilter = "Merchant
       lockWorkTypeFilter={Boolean(workTypeFilter)}
       labels={merchantLabels}
       searchType="merchant"
+      detailsBasePath="/dashboard/merchants"
+      detailsWorkType="Merchant"
     />
   );
 }

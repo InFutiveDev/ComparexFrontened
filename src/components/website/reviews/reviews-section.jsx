@@ -1157,7 +1157,7 @@ function Step2LeaveReview({
       ) : null}
 
       <SectionBlock title="Verify Your Identity">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <IdentityButton
             icon={FaGoogle}
             label="Continue with Google"
@@ -1179,13 +1179,13 @@ function Step2LeaveReview({
             connected={form.identityMethod === "email" && form.identityConnected}
             onClick={() => onIdentitySelect("email")}
           />
-          <IdentityButton
+          {/* <IdentityButton
             icon={HiUser}
             label="Enter Details Manually"
             active={form.identityMethod === "manual"}
             connected={form.identityMethod === "manual" && form.identityConnected}
             onClick={() => onIdentitySelect("manual")}
-          />
+          /> */}
         </div>
 
         {form.identityMethod && form.identityConnected ? (

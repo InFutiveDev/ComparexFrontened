@@ -5,6 +5,7 @@ import { HiArrowLeft, HiArrowRight, HiCheck } from "react-icons/hi2";
 import { heroFormStepOneFields } from "@/lib/mock-data";
 import Image from "next/image";
 import Link from "next/link";
+import { FormSuccessScreen } from "@/components/website/shared/form-success-screen";
 import { ApiError } from "@/lib/api";
 import { submitMerchantLead } from "@/lib/merchant";
 import {
@@ -232,26 +233,44 @@ export function HeroAdviceForm() {
 
   if (submitted) {
     return (
-      <div className="w-full max-w-xl rounded-2xl border border-white/30 bg-white p-2 text-center shadow-xl shadow-slate-950/15 sm:p-4">
-        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-[#25a36f] text-white">
-          <HiCheck className="size-7" aria-hidden />
-        </div>
-        <h3 className="mt-5 text-xl font-bold text-slate-900">You’re One Step Closer to Choosing the Right PG</h3>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
-         Our team is reviewing the best-fit payment gateway options based on your business needs. Our team will connect with you shortly to help with comparisons, onboarding guidance, and activation support.
+      <FormSuccessScreen>
+        <h3 className="mt-6 text-2xl text-center font-bold tracking-tight text-[#13203F] sm:text-[25px]">
+          You&apos;re One Step Closer to Choosing the Right PG
+        </h3>
+        <p className="mx-auto mt-3 max-w-xl text-start text-sm leading-relaxed text-slate-600 sm:text-base">
+          Our team is reviewing the best-fit payment gateway options based on your business needs.
+          Our team will connect with you shortly to help with comparisons, onboarding guidance,
+          and activation support.
         </p>
-        <p className="mt-2 text-[16px] font-semibold leading-relaxed text-slate-600">Meanwhile, Explore:</p>
+        <p className="mx-auto mt-4 max-w-xl text-start text-base font-semibold text-slate-600 sm:text-[16px]">
+          Meanwhile, Explore:
+        </p>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-        <Link href="/" className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-2.5 text-xs font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 sm:py-3 sm:text-sm">PG Comparison Tools</Link>
-        <Link href="/" className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-2.5 text-xs font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 sm:py-3 sm:text-sm">Merchant Reviews</Link>
-        <Link href="/" className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-2.5 text-xs font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 sm:py-3 sm:text-sm">Payment Cost Calculator</Link>
+          <Link
+            href="/"
+            className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-2.5 text-xs font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 sm:py-3 sm:text-sm"
+          >
+            PG Comparison Tools
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-2.5 text-xs font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 sm:py-3 sm:text-sm"
+          >
+            Merchant Reviews
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-2.5 text-xs font-medium !text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 sm:py-3 sm:text-sm"
+          >
+            Payment Cost Calculator
+          </Link>
         </div>
-      </div>
+      </FormSuccessScreen>
     );
   }
 
   return (
-    <div className="relative z-50 w-full max-w-xl rounded-[28px] border border-slate-200 bg-[#eef2fa] p-4 shadow-2xl shadow-[#13203F]/10 sm:p-5">
+    <div className="relative z-50 w-full max-w-2xl rounded-[28px] border border-slate-200 bg-[#eef2fa] p-4 shadow-2xl shadow-[#13203F]/10 sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-4 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
         <span>Step {step} of {steps.length}</span>
         <span className="text-[#13203F]">{activeStep.label}</span>

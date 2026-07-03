@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useTalkToExpert } from "@/components/website/talk-to-expert/talk-to-expert-provider";
 
 const cards = [
   {
@@ -31,7 +32,7 @@ const cards = [
     description3:
       "Because choosing a payment gateway isn't just about MDRs - it's about finding the right long-term fit.",
     button: "Talk to an Expert",
-    href: "/contact",
+    action: "talk-to-expert",
   },
   {
     id: 3,
@@ -48,7 +49,28 @@ const cards = [
   },
 ];
 
-function CardContent({ card }) {
+const ctaClassName =
+  "mt-5 inline-flex cursor-pointer items-center gap-3 border-0 bg-transparent p-0 text-base font-semibold text-[#2D4CC8] transition hover:!text-[#2542b6] sm:text-lg";
+
+function CtaArrow() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="9"
+      height="12"
+      viewBox="0 0 8 12"
+      fill="none"
+      aria-hidden
+    >
+      <path
+        d="M7 6.5L2.25 11.25C1.83579 11.6642 1.16421 11.6642 0.75 11.25C0.335787 10.8358 0.335786 10.1642 0.749999 9.75L4.5 6L0.75 2.25C0.335786 1.83579 0.335787 1.16421 0.75 0.75C1.16421 0.335787 1.83579 0.335787 2.25 0.75L7 5.5C7.27614 5.77614 7.27614 6.22386 7 6.5Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function CardContent({ card, onTalkToExpert }) {
   return (
     <div className="w-full">
       <p className="mb-2 text-base font-medium leading-tight text-[#2D4CC8] sm:text-lg lg:text-[22px]">
@@ -66,32 +88,25 @@ function CardContent({ card }) {
       <p className="text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
         {card.description3}
       </p>
-      {card.button && card.href ? (
-        <Link
-          href={card.href}
-          className="mt-5 inline-flex items-center gap-3 text-base font-semibold text-[#2D4CC8] transition hover:!text-[#2542b6] sm:text-lg"
-        >
-          {card.button}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="9"
-            height="12"
-            viewBox="0 0 8 12"
-            fill="none"
-            aria-hidden
-          >
-            <path
-              d="M7 6.5L2.25 11.25C1.83579 11.6642 1.16421 11.6642 0.75 11.25C0.335787 10.8358 0.335786 10.1642 0.749999 9.75L4.5 6L0.75 2.25C0.335786 1.83579 0.335787 1.16421 0.75 0.75C1.16421 0.335787 1.83579 0.335787 2.25 0.75L7 5.5C7.27614 5.77614 7.27614 6.22386 7 6.5Z"
-              fill="currentColor"
-            />
-          </svg>
-        </Link>
+      {card.button ? (
+        card.action === "talk-to-expert" ? (
+          <button type="button" onClick={onTalkToExpert} className={ctaClassName}>
+            {card.button}
+            <CtaArrow />
+          </button>
+        ) : card.href ? (
+          <Link href={card.href} className={ctaClassName}>
+            {card.button}
+            <CtaArrow />
+          </Link>
+        ) : null
       ) : null}
     </div>
   );
 }
 
 export function HoneExploreSection() {
+  const { openTalkToExpert } = useTalkToExpert();
   const [activeCard, setActiveCard] = useState(0);
   const contentRefs = useRef([]);
 
@@ -149,7 +164,7 @@ export function HoneExploreSection() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
-              <CardContent card={card} />
+              <CardContent card={card} onTalkToExpert={openTalkToExpert} />
             </article>
           ))}
         </div>
@@ -195,7 +210,7 @@ export function HoneExploreSection() {
                   contentRefs.current[index] = el;
                 }}
               >
-                <CardContent card={card} />
+                <CardContent card={card} onTalkToExpert={openTalkToExpert} />
               </div>
             ))}
           </div>

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HiArrowLeft, HiArrowRight, HiCheck } from "react-icons/hi2";
+import { HiArrowLeft, HiArrowRight } from "react-icons/hi2";
 import Image from "next/image";
+import { FormSuccessScreen } from "@/components/website/shared/form-success-screen";
 import { ApiError } from "@/lib/api";
 import { submitPaymentProvider } from "@/lib/payment";
 import {
@@ -240,30 +241,29 @@ export function PaymentAdviceForm() {
 
   if (submitted) {
     return (
-      <div className="w-full max-w-xl rounded-2xl border border-white/30 bg-white p-4 text-center shadow-xl shadow-slate-950/15 sm:p-6">
-        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-[#25a36f] text-white">
-          <HiCheck className="size-7" aria-hidden />
-        </div>
-        <h3 className="mt-5 text-xl font-bold text-slate-900">Thank You for Your Interest</h3>
-        <p className="mt-3 text-sm leading-relaxed text-slate-600">
+      <FormSuccessScreen>
+        <h3 className="mt-6 text-2xl text-center font-bold tracking-tight text-[#13203F] sm:text-[25px]">
+          Thank You for Your Interest
+        </h3>
+        <p className="mx-auto mt-3 max-w-xl text-start text-sm leading-relaxed text-slate-600 sm:text-base">
           We appreciate your interest in partnering with CompareX.
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+        <p className="mx-auto mt-2 max-w-xl text-start text-sm leading-relaxed text-slate-600 sm:text-base">
           Our team will review the information provided and connect with you to better understand
           your solutions, business priorities, and partnership objectives.
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+        <p className="mx-auto mt-2 max-w-xl text-start text-sm leading-relaxed text-slate-600 sm:text-base">
           If additional information is required, a member of our team may reach out to you.
         </p>
-        <p className="mt-4 text-sm font-semibold text-slate-700">
+        <p className="mx-auto mt-4 max-w-xl text-start text-sm font-semibold text-slate-700 sm:text-base">
           We look forward to exploring potential opportunities together.
         </p>
-      </div>
+      </FormSuccessScreen>
     );
   }
 
   return (
-    <div className="relative z-50 w-full max-w-xl rounded-[28px] border border-slate-200 bg-[#eef2fa] p-4 shadow-2xl shadow-[#13203F]/10 sm:p-5">
+    <div className="relative z-50 w-full max-w-2xl rounded-[28px] border border-slate-200 bg-[#eef2fa] p-4 shadow-2xl shadow-[#13203F]/10 sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-4 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
         <span>
           Step {step} of {steps.length}
@@ -284,7 +284,7 @@ export function PaymentAdviceForm() {
           </div>
         ) : null}
 
-        <div className="max-h-[min(26rem,50vh)] space-y-4 overflow-y-auto overscroll-y-contain pr-3 [-ms-overflow-style:none] [scrollbar-color:#cbd5e1_transparent] [scrollbar-width:thin] sm:pr-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-track]:bg-transparent">
+        <div className="max-h-[min(26rem,54vh)] space-y-4 overflow-y-auto overscroll-y-contain pr-3 [scrollbar-color:#2D4CC8_#EEF2FC] [scrollbar-width:thin] sm:pr-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#2D4CC8] [&::-webkit-scrollbar-thumb]:hover:bg-[#2542b6] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-[#EEF2FC]">
           {step === 1 && (
             <>
               <StepHeader

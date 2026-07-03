@@ -1,0 +1,218 @@
+import { pgNameToSlug } from "@/lib/pg-slug";
+
+export const paymentModes = [
+  "UPI Payments",
+  "Credit Card",
+  "Debit Card",
+  "Net Banking",
+  "Wallet Payments",
+  "International",
+];
+
+export const pgFirms = [
+  {
+    name: "Razorpay",
+    logo: "RP",
+    bestForTags: ["🚀 Startup Friendly", "💸 Easy Integration", "💸 Low Failure Rate"],
+    businessAge: "10 Years",
+    location: "Bangalore",
+    pricing: "1.9%",
+    settlement: "T+2",
+    onboarding: "24 Hours",
+    products: ["UPI", "Cards", "Subscription Billing"],
+    platforms: [
+      { icon: "/logos/shopy.webp", alt: "Shopify", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Google", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
+    ],
+    platformsExtra: 1,
+    offer: { headline: "Zero Setup", code: "RAZFREE" },
+    review: "4.8",
+    reviewCount: 1250,
+    trust: "9.2",
+    featured: true,
+    overview:
+      "Razorpay is one of India's most widely adopted payment gateways, known for developer-friendly APIs, fast onboarding, and strong support for startups and growing D2C brands.",
+  },
+  {
+    name: "Cashfree",
+    logo: "CF",
+    bestForTags: ["💸 Instant Settlement", "💸 Payouts", "💸 High Success Rate"],
+    businessAge: "8 Years",
+    location: "Bangalore",
+    pricing: "1.75%",
+    settlement: "Instant",
+    onboarding: "12 Hours",
+    products: ["Payouts", "Smart Routing"],
+    platforms: [
+      { icon: "/logos/shopy.webp", alt: "Microsoft", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Google", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Filmora", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Swipe", tone: "light" },
+    ],
+    platformsExtra: 0,
+    offer: { headline: "Startup Offer", code: "CFSTART" },
+    review: "4.7",
+    reviewCount: 980,
+    trust: "9.0",
+    featured: false,
+    overview:
+      "Cashfree is a strong fit for businesses prioritising instant settlements, payout automation, and competitive MDR across cards, UPI, and net banking.",
+  },
+  {
+    name: "PhonePe PG",
+    logo: "PP",
+    bestForTags: ["🇮🇳 UPI Strong", "💸 Fast Checkout", "💸 Enterprise Ready", "💸 Low Failure Rate"],
+    businessAge: "7 Years",
+    location: "Bangalore",
+    pricing: "1.8%",
+    settlement: "Instant",
+    onboarding: "18 Hours",
+    products: ["UPI", "QR", "Payment Links"],
+    platforms: [
+      { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
+    ],
+    platformsExtra: 1,
+    offer: { headline: "Special Pricing", code: "PPDEAL" },
+    review: "4.9",
+    reviewCount: 850,
+    trust: "9.5",
+    featured: false,
+    overview:
+      "PhonePe PG offers deep UPI coverage, fast checkout experiences, and enterprise-grade reliability for high-volume Indian merchants.",
+  },
+  {
+    name: "PayU PG",
+    logo: "PU",
+    bestForTags: ["🇮🇳 UPI Strong", "💸 Fast Checkout", "💸 Enterprise Ready"],
+    businessAge: "7 Years",
+    location: "Bangalore",
+    pricing: "1.8%",
+    settlement: "Instant",
+    onboarding: "18 Hours",
+    products: ["UPI", "QR", "Payment Links"],
+    platforms: [
+      { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
+    ],
+    platformsExtra: 1,
+    offer: { headline: "Special Pricing", code: "PPDEAL" },
+    review: "4.9",
+    reviewCount: 850,
+    trust: "9.5",
+    featured: false,
+    overview:
+      "PayU PG is suited for mid-market and enterprise merchants looking for broad payment method coverage, stable success rates, and scalable checkout flows.",
+  },
+  {
+    name: "Paytm PG",
+    logo: "PT",
+    bestForTags: ["🇮🇳 UPI Strong", "💸 Fast Checkout", "💸 Enterprise Ready"],
+    businessAge: "7 Years",
+    location: "Bangalore",
+    pricing: "1.8%",
+    settlement: "Instant",
+    onboarding: "18 Hours",
+    products: ["UPI", "QR", "Payment Links"],
+    platforms: [
+      { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
+    ],
+    platformsExtra: 1,
+    offer: { headline: "Special Pricing", code: "PPDEAL" },
+    review: "4.9",
+    reviewCount: 850,
+    trust: "9.5",
+    featured: false,
+    overview:
+      "Paytm PG combines wallet-led checkout strength with competitive pricing for UPI, cards, and QR-led collections across retail and online businesses.",
+  },
+  {
+    name: "GPay PG",
+    logo: "GP",
+    bestForTags: ["🇮🇳 UPI Strong", "💸 Fast Checkout", "💸 Enterprise Ready"],
+    businessAge: "7 Years",
+    location: "Bangalore",
+    pricing: "1.8%",
+    settlement: "Instant",
+    onboarding: "18 Hours",
+    products: ["UPI", "QR", "Payment Links"],
+    platforms: [
+      { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
+      { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
+    ],
+    platformsExtra: 1,
+    offer: { headline: "Special Pricing", code: "PPDEAL" },
+    review: "4.9",
+    reviewCount: 850,
+    trust: "9.5",
+    featured: false,
+    overview:
+      "GPay PG is ideal for businesses that want frictionless UPI-first checkout, strong consumer trust, and quick activation for digital sales channels.",
+  },
+];
+
+export const firmModePricing = {
+  Razorpay: {
+    "UPI Payments": "0%",
+    "Credit Card": "1.9%",
+    "Debit Card": "1.5%",
+    "Net Banking": "1.5%",
+    "Wallet Payments": "1.8%",
+    International: "3%",
+  },
+  Cashfree: {
+    "UPI Payments": "0%",
+    "Credit Card": "1.75%",
+    "Debit Card": "1.4%",
+    "Net Banking": "1.45%",
+    "Wallet Payments": "1.7%",
+    International: "2.9%",
+  },
+  "PhonePe PG": {
+    "UPI Payments": "0%",
+    "Credit Card": "1.8%",
+    "Debit Card": "1.45%",
+    "Net Banking": "1.5%",
+    "Wallet Payments": "1.75%",
+    International: "2.95%",
+  },
+  "PayU PG": {
+    "UPI Payments": "0%",
+    "Credit Card": "1.85%",
+    "Debit Card": "1.5%",
+    "Net Banking": "1.55%",
+    "Wallet Payments": "1.8%",
+    International: "3.1%",
+  },
+  "Paytm PG": {
+    "UPI Payments": "0%",
+    "Credit Card": "1.7%",
+    "Debit Card": "1.35%",
+    "Net Banking": "1.4%",
+    "Wallet Payments": "1.65%",
+    International: "2.85%",
+  },
+  "GPay PG": {
+    "UPI Payments": "0%",
+    "Credit Card": "1.82%",
+    "Debit Card": "1.48%",
+    "Net Banking": "1.52%",
+    "Wallet Payments": "1.72%",
+    International: "3%",
+  },
+};
+
+export function getPgBySlug(slug) {
+  return pgFirms.find((firm) => pgNameToSlug(firm.name) === slug) ?? null;
+}
+
+export function getOtherPgFirms(slug, limit = 3) {
+  return pgFirms.filter((firm) => pgNameToSlug(firm.name) !== slug).slice(0, limit);
+}

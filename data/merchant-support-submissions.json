@@ -1,0 +1,28 @@
+[
+  {
+    "id": "MS-1001",
+    "businessName": "FreshCart Retail",
+    "email": "ops@freshcart.in",
+    "phone": "+91 98765 11001",
+    "industry": "ecommerce-d2c",
+    "priority": "faster-settlements",
+    "industryLabel": "Ecommerce / D2C",
+    "priorityLabel": "Faster Settlements",
+    "status": "New",
+    "source": "Home Page Form",
+    "submittedAt": "2026-06-14T10:30:00.000Z"
+  },
+  {
+    "id": "MS-1002",
+    "businessName": "LearnHub Academy",
+    "email": "billing@learnhub.com",
+    "phone": "+91 98112 22002",
+    "industry": "education-healthcare",
+    "priority": "easy-onboarding-approval",
+    "industryLabel": "Education / Healthcare Services",
+    "priorityLabel": "Easy Onboarding & Approval",
+    "status": "Qualified",
+    "source": "Home Page Form",
+    "submittedAt": "2026-06-15T14:15:00.000Z"
+  }
+]

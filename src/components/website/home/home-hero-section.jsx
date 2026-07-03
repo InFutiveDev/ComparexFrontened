@@ -126,10 +126,10 @@ export function HomeHeroSection() {
                     /> */}
                   </div>
 
-                  <div className="mt-7 w-full sm:max-w-[520px]">
+                  <div className="mt-7 w-full sm:max-w-2xl">
                     <form
                       onSubmit={handleSearchSubmit}
-                      className="flex h-12 w-full items-center rounded-full border border-white/40 bg-white/95 px-4 text-sm text-slate-600 shadow-[0_12px_32px_-16px_rgba(0,0,0,0.45)] ring-1 ring-white/50 transition focus-within:border-[#25a36f]/50 focus-within:ring-[#25a36f]/30"
+                      className="flex h-12 w-full items-start rounded-full border border-white/40 bg-white/95 px-4 text-sm text-slate-600 shadow-[0_12px_32px_-16px_rgba(0,0,0,0.45)] ring-1 ring-white/50 transition focus-within:border-[#25a36f]/50 focus-within:ring-[#25a36f]/30"
                     >
                       <IoSearch className="mr-2 shrink-0 cursor-pointer text-2xl text-[#2d4cc8]" aria-hidden="true" />
                       <input
@@ -170,7 +170,7 @@ export function HomeHeroSection() {
                         href="/merchant"
                         className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
                       >
-                        <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
+                        <span className="absolute left-0 block w-full h-0 transition-all bg-[#2D4CC8] opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
                         <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         </span>
@@ -180,7 +180,7 @@ export function HomeHeroSection() {
                         href="/reseller"
                         className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
                       >
-                        <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
+                        <span className="absolute left-0 block w-full h-0 transition-all bg-[#2D4CC8] opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
                         <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         </span>
@@ -190,7 +190,7 @@ export function HomeHeroSection() {
                         href="/payment"
                         className="group relative inline-flex items-center overflow-hidden rounded-full border-2 border-white px-5 py-2 text-sm font-semibold text-indigo-600 hover:text-white hover:bg-gray-50 sm:px-8 sm:text-base lg:px-12 lg:text-lg"
                       >
-                        <span className="absolute left-0 block w-full h-0 transition-all bg-indigo-600 opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
+                        <span className="absolute left-0 block w-full h-0 transition-all bg-[#2D4CC8] opacity-100 group-hover:h-full top-1/2 group-hover:top-0 duration-400 ease"></span>
                         <span className="absolute right-0 flex items-center justify-start w-10 h-10 duration-300 transform translate-x-full group-hover:translate-x-0 ease">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         </span>

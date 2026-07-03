@@ -60,8 +60,8 @@ export function PaymentHomeHeroSection() {
                   </h1>
 
                   <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
-                  Most acquisition channels generate enquiries. CompareX connects you with businesses that are actively evaluating providers and searching for the right partner, helping you reduce acquisition costs, improve conversion rates, and accelerate merchant onboarding.{" "}
-                    <span className="font-semibold text-[#2D4CC8]">merchant onboarding.</span>
+                  Most acquisition channels generate enquiries. CompareX connects you with businesses that are actively evaluating providers and searching for the right partner, helping you reduce acquisition costs, {" "}
+                    <span className="font-semibold text-[#2D4CC8]">improve conversion rates, and accelerate merchant onboarding.</span>
                   </p>
 
                   <div className="mt-8 rounded-2xl border border-[#2D4CC8]/15 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-5">

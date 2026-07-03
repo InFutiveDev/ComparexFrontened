@@ -49,10 +49,16 @@ const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   async rewrites() {
-    return websiteRoutes.map((route) => ({
-      source: `/${route}`,
-      destination: `/website/${route}`,
-    }));
+    return [
+      ...websiteRoutes.map((route) => ({
+        source: `/${route}`,
+        destination: `/website/${route}`,
+      })),
+      {
+        source: "/compare-pg/:slug",
+        destination: "/website/compare-pg/:slug",
+      },
+    ];
   },
 };
 

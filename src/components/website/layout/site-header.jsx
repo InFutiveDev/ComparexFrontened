@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { HiXMark } from "react-icons/hi2";
+import { useTalkToExpert } from "@/components/website/talk-to-expert/talk-to-expert-provider";
 
 const routes = {
   home: "/",
@@ -16,7 +17,7 @@ const headerNavItems = [
   { href: "/how-it-works", label: "How it Works" },
   { href: "/why-comparex", label: "Why CompareX" },
   { href: "/compare-pg", label: "Compare" },
-  { href: "/talk-to-expert", label: "Talk to Expert" },
+  { action: "talk-to-expert", label: "Talk to Expert" },
   { href: "/tools", label: "Tools" },
   // { href: "/resources", label: "Resources" },
   { href: "/#merchant-assistance-desk", label: "Merchant Support" },
@@ -52,6 +53,7 @@ export function SiteHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [playScrollIntro, setPlayScrollIntro] = useState(false);
   const [hash, setHash] = useState("");
+  const { openTalkToExpert } = useTalkToExpert();
   const pathname = usePathname();
   const isHome = pathname === "/";
 
@@ -128,6 +130,19 @@ export function SiteHeader() {
 
           <nav className="hidden items-center gap-5 md:flex">
             {headerNavItems.map((item) => {
+              if (item.action === "talk-to-expert") {
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={openTalkToExpert}
+                    className={desktopNavLinkClass}
+                  >
+                    {item.label}
+                  </button>
+                );
+              }
+
               const isActive = isNavItemActive(pathname, item.href, hash);
 
               return (
@@ -231,6 +246,23 @@ export function SiteHeader() {
           </p>
           <ul className="space-y-1">
             {headerNavItems.map((item) => {
+              if (item.action === "talk-to-expert") {
+                return (
+                  <li key={item.label}>
+                    <button
+                      type="button"
+                      className="block w-full rounded-xl px-4 py-3.5 text-left text-[15px] font-medium text-[#13203F] transition hover:bg-[#f2f6fb] hover:text-[#2D4CC8]"
+                      onClick={() => {
+                        openTalkToExpert();
+                        setOpen(false);
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                );
+              }
+
               const isActive = isNavItemActive(pathname, item.href, hash);
 
               return (

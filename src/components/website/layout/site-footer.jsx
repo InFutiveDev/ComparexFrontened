@@ -4,6 +4,7 @@ import { FaFacebookF, FaLinkedinIn, FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
 import { FooterLegalBar } from "@/components/website/layout/footer-legal-bar";
+import { SiteFooterLink } from "@/components/website/layout/site-footer-link";
 
 const routes = {
   home: "/",
@@ -113,12 +114,11 @@ export function SiteFooter() {
                   <ul className="mt-5 space-y-3.5">
                     {column.links.map((item) => (
                       <li key={item.href}>
-                        <Link
+                        <SiteFooterLink
                           href={item.href}
+                          label={item.label}
                           className="text-sm font-semibold text-neutral-950 transition hover:!text-[#0a27c9] sm:text-base"
-                        >
-                          {item.label}
-                        </Link>
+                        />
                       </li>
                     ))}
                   </ul>

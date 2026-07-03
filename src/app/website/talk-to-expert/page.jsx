@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
 import { MarketingPageShell } from "@/components/website/layout/marketing-page-shell";
 import HeroSection from "@/components/website/talk-to-expert/hero";
-import TalkToExpertSection from "@/components/website/talk-to-expert/talk-to-expert-section";
+import { useTalkToExpert } from "@/components/website/talk-to-expert/talk-to-expert-provider";
+
+function TalkToExpertPageContent() {
+  const { openTalkToExpert } = useTalkToExpert();
+  return <HeroSection onTalkToExpert={openTalkToExpert} />;
+}
 
 export default function Page() {
-  const [modalOpen, setModalOpen] = useState(false);
-
   return (
     <MarketingPageShell>
-      <HeroSection onTalkToExpert={() => setModalOpen(true)} />
-      <TalkToExpertSection isOpen={modalOpen} onOpenChange={setModalOpen} />
+      <TalkToExpertPageContent />
     </MarketingPageShell>
   );
 }

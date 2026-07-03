@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   HiArrowDownTray,
   HiArrowUpTray,
@@ -206,20 +208,77 @@ function CrmFilterModal({ open, labels, draftFilters, options, lockWorkTypeFilte
   );
 }
 
-function RowActionsMenu({ row, labels, isOpen, onToggle, onClose }) {
+function RowActionsMenu({ row, labels, isOpen, onToggle, onClose, detailsHref }) {
+  const triggerRef = useRef(null);
   const menuRef = useRef(null);
+  const [menuStyle, setMenuStyle] = useState(null);
+
+  function updateMenuPosition() {
+    const trigger = triggerRef.current;
+    const menu = menuRef.current;
+    if (!trigger) return;
+
+    const rect = trigger.getBoundingClientRect();
+    const menuWidth = menu?.offsetWidth ?? 176;
+    const menuHeight = menu?.offsetHeight ?? 220;
+    const gap = 6;
+    const padding = 8;
+
+    let left = rect.right - menuWidth;
+    let top = rect.bottom + gap;
+
+    left = Math.max(padding, Math.min(left, window.innerWidth - menuWidth - padding));
+
+    if (top + menuHeight > window.innerHeight - padding) {
+      top = Math.max(padding, rect.top - menuHeight - gap);
+    }
+
+    setMenuStyle({ top, left });
+  }
+
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      setMenuStyle(null);
+      return;
+    }
+
+    updateMenuPosition();
+    const frame = requestAnimationFrame(() => updateMenuPosition());
+
+    return () => cancelAnimationFrame(frame);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
 
     function handleClickOutside(event) {
-      if (!menuRef.current?.contains(event.target)) {
+      if (
+        !triggerRef.current?.contains(event.target) &&
+        !menuRef.current?.contains(event.target)
+      ) {
         onClose();
       }
     }
 
+    function handleEscape(event) {
+      if (event.key === "Escape") onClose();
+    }
+
+    function handleReposition() {
+      updateMenuPosition();
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", handleReposition, true);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", handleReposition, true);
+    };
   }, [isOpen, onClose]);
 
   const menuItems = [
@@ -240,9 +299,10 @@ function RowActionsMenu({ row, labels, isOpen, onToggle, onClose }) {
       iconClassName: "text-[#40C3CF]",
     },
     {
-      type: "button",
+      type: detailsHref ? "link" : "button",
       label: "View Details",
       icon: HiEye,
+      href: detailsHref,
       className: "text-[#13203F] hover:bg-slate-50",
       iconClassName: "text-[#2D4CC8]",
     },
@@ -262,9 +322,70 @@ function RowActionsMenu({ row, labels, isOpen, onToggle, onClose }) {
     },
   ];
 
+  const menuContent = isOpen ? (
+    <div
+      ref={menuRef}
+      role="menu"
+      style={menuStyle ? { top: menuStyle.top, left: menuStyle.left } : undefined}
+      className={`fixed z-[200] w-44 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl shadow-slate-900/10 ${
+        menuStyle ? "visible" : "invisible"
+      }`}
+    >
+      {menuItems.map((item) => {
+        const Icon = item.icon;
+
+        if (item.type === "link") {
+          const className = `flex cursor-pointer items-center gap-2 px-3 py-2.5 text-sm transition ${item.className}`;
+
+          if (item.href?.startsWith("/")) {
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                role="menuitem"
+                onClick={onClose}
+                className={className}
+              >
+                <Icon className={`size-4 ${item.iconClassName}`} aria-hidden />
+                {item.label}
+              </Link>
+            );
+          }
+
+          return (
+            <a
+              key={item.label}
+              href={item.href}
+              role="menuitem"
+              onClick={onClose}
+              className={className}
+            >
+              <Icon className={`size-4 ${item.iconClassName}`} aria-hidden />
+              {item.label}
+            </a>
+          );
+        }
+
+        return (
+          <button
+            key={item.label}
+            type="button"
+            role="menuitem"
+            onClick={onClose}
+            className={`flex w-full cursor-pointer items-center gap-2 px-3 py-2.5 text-left text-sm transition ${item.className}`}
+          >
+            <Icon className={`size-4 ${item.iconClassName}`} aria-hidden />
+            {item.label}
+          </button>
+        );
+      })}
+    </div>
+  ) : null;
+
   return (
-    <div className="relative flex justify-end" ref={menuRef}>
+    <div className="flex justify-end">
       <button
+        ref={triggerRef}
         type="button"
         onClick={onToggle}
         className="flex size-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-[#2D4CC8]/30 hover:bg-slate-50 hover:text-[#13203F]"
@@ -275,44 +396,9 @@ function RowActionsMenu({ row, labels, isOpen, onToggle, onClose }) {
         <HiEllipsisVertical className="size-5" aria-hidden />
       </button>
 
-      {isOpen ? (
-        <div
-          role="menu"
-          className="absolute right-0 z-50 mt-1 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl shadow-slate-900/10"
-        >
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-
-            if (item.type === "link") {
-              return (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  role="menuitem"
-                  onClick={onClose}
-                  className={`flex cursor-pointer items-center gap-2 px-3 py-2.5 text-sm transition ${item.className}`}
-                >
-                  <Icon className={`size-4 ${item.iconClassName}`} aria-hidden />
-                  {item.label}
-                </a>
-              );
-            }
-
-            return (
-              <button
-                key={item.label}
-                type="button"
-                role="menuitem"
-                onClick={onClose}
-                className={`flex w-full cursor-pointer items-center gap-2 px-3 py-2.5 text-left text-sm transition ${item.className}`}
-              >
-                <Icon className={`size-4 ${item.iconClassName}`} aria-hidden />
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
+      {typeof document !== "undefined" && menuContent
+        ? createPortal(menuContent, document.body)
+        : null}
     </div>
   );
 }
@@ -326,6 +412,8 @@ export function CrmDataTable({
   searchType = "merchant",
   headerTitle,
   headerTabs,
+  detailsBasePath,
+  detailsWorkType,
 }) {
   const labels = { ...defaultLabels, ...labelsProp };
   const { merchantSearch, setMerchantSearch, leadSearch, setLeadSearch } = useDashboard();
@@ -425,6 +513,12 @@ export function CrmDataTable({
 
   function clearDraftFilters() {
     setDraftFilters(emptyFilters);
+  }
+
+  function getRowDetailsHref(row) {
+    if (!detailsBasePath) return undefined;
+    if (detailsWorkType && row.workType !== detailsWorkType) return undefined;
+    return `${detailsBasePath}/${encodeURIComponent(row.id)}`;
   }
 
   return (
@@ -639,6 +733,7 @@ export function CrmDataTable({
                           setOpenActionMenuId((current) => (current === row.id ? null : row.id))
                         }
                         onClose={() => setOpenActionMenuId(null)}
+                        detailsHref={getRowDetailsHref(row)}
                       />
                     </td>
                   </tr>

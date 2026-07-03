@@ -26,6 +26,9 @@ import {
   prominentPgs,
 } from "./talk-to-expert-data";
 
+const allPgs = [...prominentPgs, ...morePgs];
+const allExperts = [...prominentExperts, ...moreExperts];
+
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#40C3CF] focus:ring-2 focus:ring-[#40C3CF]/20";
 
@@ -57,7 +60,7 @@ function ModalShell({ open, onClose, children, title }) {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
       <button
         type="button"
-        className="absolute inset-0 bg-[#13203F]/50 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-[#13203F]/50"
         aria-label="Close dialog"
         onClick={onClose}
       />
@@ -65,7 +68,7 @@ function ModalShell({ open, onClose, children, title }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="talk-expert-modal-title"
-        className="relative flex max-h-[min(92vh,820px)] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-[#eef2fa] shadow-2xl shadow-[#13203F]/20"
+        className="relative flex max-h-[min(92vh,820px)] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-[#eef2fa] shadow-2xl shadow-[#13203F]/20"
       >
         <div className="flex items-center justify-between border-b border-slate-200/80 bg-white px-5 py-4">
           <h2 id="talk-expert-modal-title" className="text-lg font-bold text-[#13203F] sm:text-xl">
@@ -120,6 +123,8 @@ function SearchableSelect({
   onChange,
   options,
   placeholder = "Search...",
+  onQueryChange,
+  inputClassName = "",
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -212,17 +217,20 @@ function SearchableSelect({
   function handleSelect(optionValue, optionLabel) {
     onChange(optionValue);
     setQuery(optionLabel);
+    onQueryChange?.(optionLabel);
     setOpen(false);
   }
 
   function handleInputChange(event) {
     setQuery(event.target.value);
+    onQueryChange?.(event.target.value);
     if (!open) setOpen(true);
     if (value) onChange("");
   }
 
   function handleClear() {
     setQuery("");
+    onQueryChange?.("");
     onChange("");
     inputRef.current?.focus();
     openDropdown();
@@ -295,9 +303,9 @@ function SearchableSelect({
         aria-expanded={open}
         aria-controls={`${id}-listbox`}
         aria-autocomplete="list"
-        className={`w-full rounded-xl border bg-white py-3 pl-10 pr-10 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:ring-2 focus:ring-[#2D4CC8]/20 ${
-          open ? "border-[#2D4CC8] ring-2 ring-[#2D4CC8]/15" : "border-slate-200 focus:border-[#2D4CC8]"
-        }`}
+        className={`w-full border bg-white py-3 pl-10 pr-10 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:ring-2 focus:ring-[#2D4CC8]/20 ${
+          inputClassName || "rounded-xl border-slate-200 focus:border-[#2D4CC8]"
+        } ${open ? "border-[#2D4CC8] ring-2 ring-[#2D4CC8]/15" : ""}`}
       />
       {query ? (
         <button
@@ -317,29 +325,6 @@ function SearchableSelect({
         />
       )}
       {menu}
-    </div>
-  );
-}
-
-function SearchField({ id, value, onChange, placeholder }) {
-  return (
-    <div className="relative">
-      <label htmlFor={id} className="sr-only">
-        {placeholder}
-      </label>
-      <HiOutlineMagnifyingGlass
-        className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#2D4CC8]"
-        aria-hidden
-      />
-      <input
-        id={id}
-        type="text"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-full border border-[#2D4CC8] bg-white py-3 pl-10 pr-4 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20"
-        autoComplete="off"
-      />
     </div>
   );
 }
@@ -384,7 +369,7 @@ function ProviderLogo({ name, logo, initials }) {
   );
 }
 
-function TalkToExpertModal({ open, onClose }) {
+export function TalkToExpertModal({ open, onClose }) {
   const [flow, setFlow] = useState("type");
   const [consultType, setConsultType] = useState("");
   const [selectedTargetId, setSelectedTargetId] = useState("");
@@ -510,11 +495,14 @@ function TalkToExpertModal({ open, onClose }) {
         <div className="space-y-5">
           <p className="text-sm text-slate-600">Select a payment gateway to connect with their nominated representative.</p>
 
-          <SearchField
+          <SearchableSelect
             id="pg-search"
-            value={providerSearch}
-            onChange={setProviderSearch}
+            value={selectedTargetId}
+            onChange={setSelectedTargetId}
+            onQueryChange={setProviderSearch}
             placeholder="Search payment gateways..."
+            inputClassName="rounded-full border-[#2D4CC8] focus:border-[#2D4CC8]"
+            options={allPgs.map((pg) => ({ value: pg.id, label: pg.name }))}
           />
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -542,19 +530,6 @@ function TalkToExpertModal({ open, onClose }) {
               No popular gateways match your search.
             </p>
           ) : null}
-
-          <div>
-            <label htmlFor="more-pg" className={labelClass}>
-              More payment gateways
-            </label>
-            <SearchableSelect
-              id="more-pg"
-              value={morePgs.some((pg) => pg.id === selectedTargetId) ? selectedTargetId : ""}
-              onChange={setSelectedTargetId}
-              placeholder="Type to search more PGs..."
-              options={morePgs.map((pg) => ({ value: pg.id, label: pg.name }))}
-            />
-          </div>
         </div>
       ) : null}
 
@@ -562,11 +537,17 @@ function TalkToExpertModal({ open, onClose }) {
         <div className="space-y-5">
           <p className="text-sm text-slate-600">Choose an industry expert for unbiased platform guidance.</p>
 
-          <SearchField
+          <SearchableSelect
             id="expert-search"
-            value={providerSearch}
-            onChange={setProviderSearch}
+            value={selectedTargetId}
+            onChange={setSelectedTargetId}
+            onQueryChange={setProviderSearch}
             placeholder="Search industry experts..."
+            inputClassName="rounded-full border-[#2D4CC8] focus:border-[#2D4CC8]"
+            options={allExperts.map((expert) => ({
+              value: expert.id,
+              label: `${expert.name} — ${expert.title}`,
+            }))}
           />
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -615,22 +596,6 @@ function TalkToExpertModal({ open, onClose }) {
               No experts match your search.
             </p>
           ) : null}
-
-          <div>
-            <label htmlFor="more-expert" className={labelClass}>
-              More industry experts
-            </label>
-            <SearchableSelect
-              id="more-expert"
-              value={moreExperts.some((expert) => expert.id === selectedTargetId) ? selectedTargetId : ""}
-              onChange={setSelectedTargetId}
-              placeholder="Type to search more experts..."
-              options={moreExperts.map((expert) => ({
-                value: expert.id,
-                label: `${expert.name} — ${expert.title}`,
-              }))}
-            />
-          </div>
         </div>
       ) : null}
 

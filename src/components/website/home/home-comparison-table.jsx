@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import React, { useState } from "react";
 import {
   HiOutlineChevronDown,
@@ -8,6 +9,8 @@ import {
   HiOutlineClipboardDocument,
   HiOutlineMagnifyingGlass,
 } from "react-icons/hi2";
+import { useTalkToExpert } from "@/components/website/talk-to-expert/talk-to-expert-provider";
+import { pgNameToSlug } from "@/lib/pg-slug";
 const firms = [
   {
     name: "Razorpay",
@@ -351,7 +354,10 @@ const stickyCellShadow =
 
 function FirmPgName({ name, logo }) {
   return (
-    <div className="flex w-[130px] max-w-[130px] items-center gap-1.5 sm:w-[155px] sm:max-w-[155px] sm:gap-2">
+    <Link
+      href={`/compare-pg/${pgNameToSlug(name)}`}
+      className="flex w-[130px] max-w-[130px] items-center gap-1.5 transition-opacity hover:opacity-90 sm:w-[155px] sm:max-w-[155px] sm:gap-2"
+    >
       <div className="relative shrink-0">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-[#2D4CC8] bg-white/80 text-xs font-bold text-black sm:h-10 sm:w-10 sm:text-sm">
           {logo}
@@ -359,9 +365,11 @@ function FirmPgName({ name, logo }) {
       </div>
 
       <div className="min-w-0">
-        <h3 className="truncate text-[12px] font-bold leading-tight text-[#13203F] sm:text-[13px]">{name}</h3>
+        <h3 className="truncate text-[12px] font-bold leading-tight text-[#13203F] transition-colors hover:text-[#2D4CC8] sm:text-[13px]">
+          {name}
+        </h3>
       </div>
-    </div>
+    </Link>
   );
 }
 function SmartTags({ labels, compact = false }) {
@@ -499,17 +507,15 @@ function OfferCoupon({
 
 function FirmReview({ rating, reviewCount }) {
   return (
-    <div
+    <Link
+      href="/reviews"
       className="flex flex-col items-center gap-1.5"
-      aria-label={`${rating} out of 5, ${reviewCount} reviews`}
+      aria-label={`${rating} out of 5, ${reviewCount} reviews — open reviews page`}
     >
-      <button
-        type="button"
-        className="mt-1 cursor-pointer rounded-full border border-[#2D4CC8] px-3 py-1 text-[12px] font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white"
-      >
+      <span className="mt-1 cursor-pointer rounded-full border border-[#2D4CC8] px-3 py-1 text-[12px] font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white">
         Add Review
-      </button>
-    </div>
+      </span>
+    </Link>
   );
 }
 
@@ -801,6 +807,7 @@ function ComparePgCell({
 }
 
 export function HomeComparisonTable() {
+  const { openTalkToExpert } = useTalkToExpert();
   const [activeFilter, setActiveFilter] = useState(0);
   const [activeSubFilter, setActiveSubFilter] = useState(null);
   const [compareModeOpen, setCompareModeOpen] = useState(false);
@@ -888,7 +895,7 @@ export function HomeComparisonTable() {
                   role="tablist"
                   aria-label="Selected payment gateways to compare"
                 >
-                  {selectedCompareFirms.map((firmName, index) => {
+                  {selectedCompareFirms.map((firmName) => {
                     const firm = firms.find((item) => item.name === firmName);
                     if (!firm) return null;
 
@@ -903,7 +910,7 @@ export function HomeComparisonTable() {
                         <span className="flex size-6 items-center justify-center rounded-md border border-white/30 bg-white/15 text-[10px] font-bold">
                           {firm.logo}
                         </span>
-                        PG {index + 1}
+                        {firm.name}
                       </button>
                     );
                   })}
@@ -1069,6 +1076,7 @@ export function HomeComparisonTable() {
                     <td className={tdBase}>
                       <button
                         type="button"
+                        onClick={openTalkToExpert}
                         className="whitespace-nowrap cursor-pointer rounded-full border border-[#2D4CC8] px-3 py-1 text-[12px] font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white"
                       >
                         Talk to Expert
@@ -1076,12 +1084,12 @@ export function HomeComparisonTable() {
                     </td>
 
                     <td className={tdBase}>
-                      <button
-                        type="button"
-                        className="whitespace-nowrap cursor-pointer rounded-full border border-[#2D4CC8] px-3 py-1 text-[12px] font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:text-white"
+                      <Link
+                        href="/login"
+                        className="inline-block whitespace-nowrap cursor-pointer rounded-full border border-[#2D4CC8] px-3 py-1 text-[12px] font-semibold text-[#2D4CC8] transition-colors hover:bg-[#2D4CC8] hover:!text-white"
                       >
                         Signup
-                      </button>
+                      </Link>
                     </td>
 
                     <td className={tdBase}>

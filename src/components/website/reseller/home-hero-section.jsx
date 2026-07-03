@@ -85,7 +85,7 @@ export function ResellerHomeHeroSection() {
                 </div>
               </div>
 
-              <div className="relative z-40 w-full lg:col-span-6 lg:flex lg:justify-end lg:self-center">
+              <div className="relative z-40 w-full lg:col-span-6 lg:flex lg:justify-start lg:self-center">
                 <ResellerAdviceForm />
               </div>
             </div>
