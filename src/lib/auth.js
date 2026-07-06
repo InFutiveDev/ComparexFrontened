@@ -9,13 +9,16 @@ function canUseStorage() {
 
 export function getStoredToken() {
   if (!canUseStorage()) return null;
-  return window.localStorage.getItem(TOKEN_KEY);
+  return (
+    window.localStorage.getItem(TOKEN_KEY) || window.sessionStorage.getItem(TOKEN_KEY)
+  );
 }
 
 export function getStoredUser() {
   if (!canUseStorage()) return null;
 
-  const raw = window.localStorage.getItem(USER_KEY);
+  const raw =
+    window.localStorage.getItem(USER_KEY) || window.sessionStorage.getItem(USER_KEY);
   if (!raw) return null;
 
   try {

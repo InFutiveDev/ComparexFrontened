@@ -81,7 +81,8 @@ function buildStats(submissions) {
   today.setHours(0, 0, 0, 0);
 
   const todayCount = submissions.filter((item) => {
-    const submitted = new Date(item.submittedAt);
+    const submitted = new Date(item.submittedAt || item.createdAt);
+    if (Number.isNaN(submitted.getTime())) return false;
     submitted.setHours(0, 0, 0, 0);
     return submitted.getTime() === today.getTime();
   }).length;

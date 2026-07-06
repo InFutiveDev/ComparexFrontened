@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HiArrowLeft, HiArrowRight } from "react-icons/hi2";
+import { HiArrowLeft, HiArrowRight, HiCheck } from "react-icons/hi2";
 import { FormSuccessScreen } from "@/components/website/shared/form-success-screen";
 import Image from "next/image";
 import { ApiError } from "@/lib/api";

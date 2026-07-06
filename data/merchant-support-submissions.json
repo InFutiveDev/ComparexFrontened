@@ -1,5 +1,31 @@
 [
   {
+    "id": "MS-1004",
+    "businessName": "Arum awasthi",
+    "email": "vikashkumarsingh9811@gmail.com",
+    "phone": "9822988822",
+    "industry": "ecommerce-d2c",
+    "priority": "lower-transaction-fees",
+    "industryLabel": "Ecommerce / D2C",
+    "priorityLabel": "Lower Transaction Fees",
+    "status": "New",
+    "source": "Home Page Form",
+    "submittedAt": "2026-07-06T09:23:32.010Z"
+  },
+  {
+    "id": "MS-1003",
+    "businessName": "Arum awasthi",
+    "email": "Arun@infutive.com",
+    "phone": "8882283917",
+    "industry": "ecommerce-d2c",
+    "priority": "easy-onboarding-approval",
+    "industryLabel": "Ecommerce / D2C",
+    "priorityLabel": "Easy Onboarding & Approval",
+    "status": "New",
+    "source": "Home Page Form",
+    "submittedAt": "2026-07-06T09:20:54.270Z"
+  },
+  {
     "id": "MS-1001",
     "businessName": "FreshCart Retail",
     "email": "ops@freshcart.in",

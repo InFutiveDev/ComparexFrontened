@@ -1,5 +1,9 @@
+"use client";
+
 import { CrmDataTable } from "@/components/dashboard/shared/crm-data-table";
-import { merchants } from "@/lib/mock-data";
+import { DashboardListState, useDashboardList } from "@/hooks/use-dashboard-list";
+import { fetchMerchants } from "@/lib/dashboard-api";
+import { mapMerchantListResponse } from "@/lib/dashboard-mappers";
 
 const merchantLabels = {
   search: "Search merchants",
@@ -13,16 +17,28 @@ const merchantLabels = {
 };
 
 export function MerchantTable({ variant = "overview", workTypeFilter = "Merchant" }) {
+  const { data, isLoading, error, reload } = useDashboardList(
+    fetchMerchants,
+    mapMerchantListResponse,
+  );
+
   return (
-    <CrmDataTable
-      data={merchants}
-      variant={variant}
-      workTypeFilter={workTypeFilter}
-      lockWorkTypeFilter={Boolean(workTypeFilter)}
-      labels={merchantLabels}
-      searchType="merchant"
-      detailsBasePath="/dashboard/merchants"
-      detailsWorkType="Merchant"
-    />
+    <DashboardListState
+      isLoading={isLoading}
+      error={error}
+      onRetry={reload}
+      emptyMessage="No merchants found"
+    >
+      <CrmDataTable
+        data={data}
+        variant={variant}
+        workTypeFilter={workTypeFilter}
+        lockWorkTypeFilter={Boolean(workTypeFilter)}
+        labels={merchantLabels}
+        searchType="merchant"
+        detailsBasePath="/dashboard/merchants"
+        detailsWorkType="Merchant"
+      />
+    </DashboardListState>
   );
 }
