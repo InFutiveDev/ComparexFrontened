@@ -37,6 +37,13 @@ function CtaButton({ href, label, onClick }) {
 export function ContactUsSection() {
   const { openTalkToExpert } = useTalkToExpert();
 
+  function scrollToBannerForm() {
+    document.getElementById("merchant-banner-form")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
   return (
     <section className="bg-slate-50 px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -69,7 +76,7 @@ export function ContactUsSection() {
            
 
             <div className="mt-8 grid w-full max-w-xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-              <CtaButton href="/merchant/form" label="Get Recommendations" />
+              <CtaButton onClick={scrollToBannerForm} label="Get Recommendations" />
               <CtaButton onClick={openTalkToExpert} label="Talk to Expert" />
             </div>
           </div>

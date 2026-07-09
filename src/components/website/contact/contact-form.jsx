@@ -232,7 +232,7 @@ export default function ContactForm() {
                           type="tel"
                           id="phone"
                           name="phone"
-                          placeholder="+91 98765 43210"
+                          placeholder="10-digit (WhatsApp preferred)"
                           className={inputClass}
                         />
                       </div>

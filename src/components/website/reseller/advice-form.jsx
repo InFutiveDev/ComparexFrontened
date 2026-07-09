@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HiArrowLeft, HiArrowRight, HiCheck } from "react-icons/hi2";
+import { HiArrowLeft, HiArrowRight, HiCheck, HiEye, HiEyeSlash } from "react-icons/hi2";
 import { FormSuccessScreen } from "@/components/website/shared/form-success-screen";
 import Image from "next/image";
 import { ApiError } from "@/lib/api";
@@ -59,6 +59,7 @@ const initialForm = {
   businessTypes: [],
   monthlyBusinessCount: "",
   paymentFamiliarity: "",
+  password: "",
   consent: false,
 };
 
@@ -177,6 +178,37 @@ function StepHeader({ title, subtitle }) {
   );
 }
 
+function PasswordInput({ id, label, value, onChange, placeholder = "Minimum 8 characters" }) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div>
+      <label htmlFor={id} className={labelClass}>
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          type={visible ? "text" : "password"}
+          value={value ?? ""}
+          onChange={onChange}
+          className={`${inputClass} pr-12`}
+          placeholder={placeholder}
+          required
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((prev) => !prev)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 transition hover:text-slate-600"
+          aria-label={visible ? "Hide password" : "Show password"}
+        >
+          {visible ? <HiEyeSlash className="size-5" aria-hidden /> : <HiEye className="size-5" aria-hidden />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function ResellerAdviceForm() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
@@ -195,11 +227,15 @@ export function ResellerAdviceForm() {
           form.businessName.trim() &&
           form.phone.trim() &&
           form.email.trim() &&
-          form.partnerType
+          form.password.trim()
       );
     }
     if (step === 2) {
-      return form.businessTypes.length > 0 && Boolean(form.monthlyBusinessCount);
+      return (
+        form.businessTypes.length > 0 &&
+        Boolean(form.monthlyBusinessCount) &&
+        Boolean(form.partnerType)
+      );
     }
     return Boolean(form.paymentFamiliarity && form.consent);
   }
@@ -212,6 +248,11 @@ export function ResellerAdviceForm() {
 
     if (contactError) {
       setError(contactError);
+      return false;
+    }
+
+    if (form.password.trim().length < 8) {
+      setError("Password must be at least 8 characters");
       return false;
     }
 
@@ -247,6 +288,11 @@ export function ResellerAdviceForm() {
       return;
     }
 
+    if (form.password.trim().length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+
     setError("");
     setIsSubmitting(true);
 
@@ -257,6 +303,7 @@ export function ResellerAdviceForm() {
         phone: form.phone.trim(),
         email: form.email.trim(),
         website: form.website.trim(),
+        password: form.password.trim(),
         partnerType: form.partnerType,
         businessTypes: form.businessTypes,
         monthlyBusinessCount: form.monthlyBusinessCount,
@@ -377,7 +424,7 @@ export function ResellerAdviceForm() {
                     value={form.phone}
                     onChange={(e) => updateField("phone", sanitizePhoneInput(e.target.value))}
                     className={inputClass}
-                    placeholder="10-digit mobile number"
+                    placeholder="10-digit (WhatsApp preferred)"
                     required
                   />
                 </div>
@@ -395,7 +442,7 @@ export function ResellerAdviceForm() {
                     required
                   />
                 </div>
-                <div className="sm:col-span-2">
+                <div>
                   <label htmlFor="website-linkedin" className={labelClass}>
                     Website / LinkedIn Profile{" "}
                     <span className="font-normal text-slate-500">(Optional)</span>
@@ -409,19 +456,15 @@ export function ResellerAdviceForm() {
                     className={inputClass}
                   />
                 </div>
-              </div>
-
-              <div className="pt-2">
-                <p className="mb-3 text-left text-base font-medium text-slate-700">
-                  Which best describes your business?
-                </p>
-                <OptionButtons
-                  name="partnerType"
-                  value={form.partnerType}
-                  options={partnerTypeOptions}
-                  onChange={(value) => updateField("partnerType", value)}
+                <PasswordInput
+                  id="password"
+                  label="Password *"
+                  value={form.password}
+                  onChange={(e) => updateField("password", e.target.value)}
                 />
               </div>
+
+              
             </>
           )}
 
@@ -437,6 +480,17 @@ export function ResellerAdviceForm() {
                   options={businessTypeOptions}
                   values={form.businessTypes}
                   onChange={(values) => updateField("businessTypes", values)}
+                />
+              </div>
+              <div className="pt-2">
+                <p className="mb-3 text-left text-base font-medium text-slate-700">
+                  Which best describes your business?
+                </p>
+                <OptionButtons
+                  name="partnerType"
+                  value={form.partnerType}
+                  options={partnerTypeOptions}
+                  onChange={(value) => updateField("partnerType", value)}
                 />
               </div>
 

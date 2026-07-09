@@ -716,7 +716,7 @@ function PgQuoteSidebar({ firm, onSubmit }) {
                 value={form.phone}
                 onChange={(e) => handleChange("phone", e.target.value)}
                 className={inputClass}
-                placeholder="+91 98765 43210"
+                placeholder="10-digit (WhatsApp preferred)"
                 required
               />
             </div>

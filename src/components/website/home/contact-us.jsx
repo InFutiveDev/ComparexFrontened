@@ -311,7 +311,7 @@ export const ContactUs = () => {
                                     </div>
                                     <div className="lg:col-span-2">
                                         <label htmlFor="contact-number" className={labelClass}>
-                                        Phone number (WhatsApp preferred)
+                                        Phone number 
                                         </label>
                                         <input
                                             id="contact-number"
@@ -319,7 +319,7 @@ export const ContactUs = () => {
                                             type="tel"
                                             inputMode="numeric"
                                             maxLength={11}
-                                            placeholder="10-digit mobile number"
+                                            placeholder="10-digit (WhatsApp preferred)"
                                             onChange={(event) => {
                                                 event.target.value = sanitizePhoneInput(event.target.value);
                                             }}

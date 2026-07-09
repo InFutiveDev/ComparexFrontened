@@ -11,23 +11,17 @@ import {
   HiOutlineChevronDown,
   HiOutlineMagnifyingGlass,
   HiOutlineXMark,
-  HiUserGroup,
-  HiBuildingOffice2,
 } from "react-icons/hi2";
 import { heroFormStepOneFields } from "@/lib/mock-data";
 import {
   buildTimeSlots,
   businessPriorityOptions,
-  getExpertById,
   getPgById,
-  moreExperts,
   morePgs,
-  prominentExperts,
   prominentPgs,
 } from "./talk-to-expert-data";
 
 const allPgs = [...prominentPgs, ...morePgs];
-const allExperts = [...prominentExperts, ...moreExperts];
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#40C3CF] focus:ring-2 focus:ring-[#40C3CF]/20";
@@ -370,8 +364,7 @@ function ProviderLogo({ name, logo, initials }) {
 }
 
 export function TalkToExpertModal({ open, onClose }) {
-  const [flow, setFlow] = useState("type");
-  const [consultType, setConsultType] = useState("");
+  const [flow, setFlow] = useState("select");
   const [selectedTargetId, setSelectedTargetId] = useState("");
   const [visitorStep, setVisitorStep] = useState(1);
   const [visitor, setVisitor] = useState(initialVisitor);
@@ -379,12 +372,10 @@ export function TalkToExpertModal({ open, onClose }) {
   const [providerSearch, setProviderSearch] = useState("");
   const slots = useMemo(() => buildTimeSlots(), []);
 
-  const selectedPg = consultType === "tpr" ? getPgById(selectedTargetId) : null;
-  const selectedExpert = consultType === "tir" ? getExpertById(selectedTargetId) : null;
+  const selectedPg = getPgById(selectedTargetId);
 
   function resetModal() {
-    setFlow("type");
-    setConsultType("");
+    setFlow("select");
     setSelectedTargetId("");
     setVisitorStep(1);
     setVisitor(initialVisitor);
@@ -405,16 +396,14 @@ export function TalkToExpertModal({ open, onClose }) {
     if (flow === "success") return "Booking Confirmed";
     if (flow === "schedule") return "Schedule Your Call";
     if (flow === "details") return "Your Details";
-    if (flow === "select") {
-      return consultType === "tpr" ? "Select Payment Gateway" : "Select Industry Expert";
-    }
+    if (flow === "select") return "Select Payment Gateway";
     return "Talk to an Expert";
-  }, [flow, consultType]);
+  }, [flow]);
 
   const progress = useMemo(() => {
-    const map = { type: 1, select: 2, details: 3, schedule: 6, success: 6 };
-    if (flow === "details") return { step: 2 + visitorStep, total: 6 };
-    return { step: map[flow] ?? 1, total: 6 };
+    const map = { select: 1, details: 2, schedule: 5, success: 5 };
+    if (flow === "details") return { step: 1 + visitorStep, total: 5 };
+    return { step: map[flow] ?? 1, total: 5 };
   }, [flow, visitorStep]);
 
   function canContinueDetails() {
@@ -435,63 +424,7 @@ export function TalkToExpertModal({ open, onClose }) {
     <ModalShell open={open} onClose={handleClose} title={modalTitle}>
       {flow !== "success" ? <ProgressBar step={progress.step} total={progress.total} /> : null}
 
-      {flow === "type" ? (
-        <div className="space-y-5">
-          <p className="text-sm text-slate-600">
-            Choose how you&apos;d like to get expert guidance. Both options include scheduling a call
-            at a time that works for you.
-          </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => {
-                setConsultType("tpr");
-                setFlow("select");
-              }}
-              className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-[#2D4CC8]/40 hover:shadow-md"
-            >
-              <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-[#EEF2FC] text-[#2D4CC8]">
-                <HiBuildingOffice2 className="size-6" aria-hidden />
-              </div>
-              <p className="text-xs font-bold uppercase tracking-wide text-[#2D4CC8]">TPR</p>
-              <h3 className="mt-1 text-lg font-bold text-[#13203F]">Talk to PG Representatives</h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Speak directly with nominated payment gateway representatives for onboarding and
-                pricing guidance.
-              </p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#2D4CC8]">
-                <HiCalendarDays className="size-4" aria-hidden />
-                Schedule a call
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setConsultType("tir");
-                setFlow("select");
-              }}
-              className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-[#2D4CC8]/40 hover:shadow-md"
-            >
-              <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-[#EEF2FC] text-[#2D4CC8]">
-                <HiUserGroup className="size-6" aria-hidden />
-              </div>
-              <p className="text-xs font-bold uppercase tracking-wide text-[#2D4CC8]">TIR</p>
-              <h3 className="mt-1 text-lg font-bold text-[#13203F]">Talk to Industry Expert</h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Get unbiased advice from CompareX-verified experts who help you choose the right
-                platform.
-              </p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#2D4CC8]">
-                <HiCalendarDays className="size-4" aria-hidden />
-                Schedule a call
-              </span>
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      {flow === "select" && consultType === "tpr" ? (
+      {flow === "select" ? (
         <div className="space-y-5">
           <p className="text-sm text-slate-600">Select a payment gateway to connect with their nominated representative.</p>
 
@@ -533,72 +466,6 @@ export function TalkToExpertModal({ open, onClose }) {
         </div>
       ) : null}
 
-      {flow === "select" && consultType === "tir" ? (
-        <div className="space-y-5">
-          <p className="text-sm text-slate-600">Choose an industry expert for unbiased platform guidance.</p>
-
-          <SearchableSelect
-            id="expert-search"
-            value={selectedTargetId}
-            onChange={setSelectedTargetId}
-            onQueryChange={setProviderSearch}
-            placeholder="Search industry experts..."
-            inputClassName="rounded-full border-[#2D4CC8] focus:border-[#2D4CC8]"
-            options={allExperts.map((expert) => ({
-              value: expert.id,
-              label: `${expert.name} — ${expert.title}`,
-            }))}
-          />
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {prominentExperts
-              .filter(
-                (expert) =>
-                  matchesSearchText(expert.name, providerSearch) ||
-                  matchesSearchText(expert.title, providerSearch) ||
-                  matchesSearchText(expert.focus, providerSearch)
-              )
-              .map((expert) => (
-              <button
-                key={expert.id}
-                type="button"
-                onClick={() => setSelectedTargetId(expert.id)}
-                className={`cursor-pointer rounded-2xl border bg-white p-4 text-left transition ${
-                  selectedTargetId === expert.id
-                    ? "border-[#2D4CC8] bg-[#EEF2FC] ring-2 ring-[#2D4CC8]/20"
-                    : "border-slate-200 hover:border-[#2D4CC8]/30"
-                }`}
-              >
-                <p className="font-bold text-[#13203F]">{expert.name}</p>
-                <p className="text-sm text-[#2D4CC8]">{expert.title}</p>
-                <p className="mt-2 text-xs text-slate-500">{expert.focus}</p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {expert.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {prominentExperts.filter(
-            (expert) =>
-              matchesSearchText(expert.name, providerSearch) ||
-              matchesSearchText(expert.title, providerSearch) ||
-              matchesSearchText(expert.focus, providerSearch)
-          ).length === 0 ? (
-            <p className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-500">
-              No experts match your search.
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
       {flow === "details" ? (
         <div className="space-y-5">
           {visitorStep === 1 ? (
@@ -629,7 +496,7 @@ export function TalkToExpertModal({ open, onClose }) {
                     autoComplete="tel"
                     maxLength={10}
                     pattern="[0-9]{10}"
-                    placeholder="10-digit mobile number"
+                    placeholder="10-digit (WhatsApp preferred)"
                     value={visitor.phone}
                     onChange={(e) => updateVisitor("phone", sanitizePhoneDigits(e.target.value))}
                     className={inputClass}
@@ -675,7 +542,7 @@ export function TalkToExpertModal({ open, onClose }) {
 
       {flow === "schedule" ? (
         <div className="space-y-5">
-          {consultType === "tpr" && selectedPg ? (
+          {selectedPg ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                 <ProviderLogo name={selectedPg.name} logo={selectedPg.logo} initials={selectedPg.initials} />
@@ -685,23 +552,6 @@ export function TalkToExpertModal({ open, onClose }) {
                   <p className="text-sm text-slate-600">{selectedPg.rep.title} · {selectedPg.name}</p>
                   <p className="mt-2 text-sm text-slate-600">{selectedPg.rep.bio}</p>
                 </div>
-              </div>
-            </div>
-          ) : null}
-
-          {consultType === "tir" && selectedExpert ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#2D4CC8]">Industry Expert Profile</p>
-              <h3 className="mt-1 text-lg font-bold text-[#13203F]">{selectedExpert.name}</h3>
-              <p className="text-sm text-[#2D4CC8]">{selectedExpert.title}</p>
-              <p className="mt-1 text-xs text-slate-500">{selectedExpert.experience} · {selectedExpert.focus}</p>
-              <p className="mt-3 text-sm text-slate-600">{selectedExpert.bio}</p>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {(selectedExpert.tags ?? []).map((tag) => (
-                  <span key={tag} className="rounded-full bg-[#EEF2FC] px-2.5 py-1 text-xs font-semibold text-[#2D4CC8]">
-                    {tag}
-                  </span>
-                ))}
               </div>
             </div>
           ) : null}
@@ -737,8 +587,7 @@ export function TalkToExpertModal({ open, onClose }) {
           <h3 className="mt-6 text-2xl font-bold text-[#13203F]">Booking Confirmed 🎉</h3>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-600">
             Your call has been scheduled. A confirmation email has been sent to{" "}
-            <span className="font-semibold text-[#13203F]">{visitor.email}</span> and the{" "}
-            {consultType === "tpr" ? "PG representative" : "industry expert"}.
+            <span className="font-semibold text-[#13203F]">{visitor.email}</span> and the PG representative.
           </p>
           <p className="mt-2 text-xs text-slate-500">Demo mode — Calendly & email integration coming soon.</p>
           <button
@@ -757,14 +606,8 @@ export function TalkToExpertModal({ open, onClose }) {
           <button
             type="button"
             onClick={() => {
-              if (flow === "type") {
-                handleClose();
-                return;
-              }
               if (flow === "select") {
-                setFlow("type");
-                setSelectedTargetId("");
-                setProviderSearch("");
+                handleClose();
                 return;
               }
               if (flow === "details") {

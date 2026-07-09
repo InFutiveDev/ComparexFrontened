@@ -257,7 +257,7 @@ export default function CareersSection() {
                         id="career-phone"
                         name="phone"
                         required
-                        placeholder="+91 98765 43210"
+                        placeholder="10-digit (WhatsApp preferred)"
                         className={inputClass}
                       />
                     </div>

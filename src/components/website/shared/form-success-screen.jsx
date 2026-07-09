@@ -18,7 +18,7 @@ function SuccessIllustration() {
 
 export function FormSuccessScreen({ children }) {
   return (
-    <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
+    <div className="mx-auto w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
       <div className="h-1 bg-gradient-to-r from-[#25a36f] via-[#40C3CF] to-[#25a36f]" aria-hidden />
 
       <div className="px-6 py-8 text-center sm:px-10 sm:py-10">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HiArrowLeft, HiArrowRight } from "react-icons/hi2";
+import { HiArrowLeft, HiArrowRight, HiEye, HiEyeSlash } from "react-icons/hi2";
 import Image from "next/image";
 import { FormSuccessScreen } from "@/components/website/shared/form-success-screen";
 import { ApiError } from "@/lib/api";
@@ -48,6 +48,7 @@ const initialForm = {
   email: "",
   phone: "",
   website: "",
+  password: "",
   paymentCapabilities: [],
   partnershipGoals: [],
   consent: false,
@@ -133,6 +134,37 @@ function StepHeader({ title, subtitle }) {
   );
 }
 
+function PasswordInput({ id, label, value, onChange, placeholder = "Minimum 8 characters" }) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div>
+      <label htmlFor={id} className={labelClass}>
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          type={visible ? "text" : "password"}
+          value={value ?? ""}
+          onChange={onChange}
+          className={`${inputClass} pr-12`}
+          placeholder={placeholder}
+          required
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((prev) => !prev)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 transition hover:text-slate-600"
+          aria-label={visible ? "Hide password" : "Show password"}
+        >
+          {visible ? <HiEyeSlash className="size-5" aria-hidden /> : <HiEye className="size-5" aria-hidden />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function PaymentAdviceForm() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
@@ -151,7 +183,8 @@ export function PaymentAdviceForm() {
           form.contactPerson.trim() &&
           form.designation.trim() &&
           form.email.trim() &&
-          form.phone.trim()
+          form.phone.trim() &&
+          form.password.trim()
       );
     }
     if (step === 2) {
@@ -168,6 +201,11 @@ export function PaymentAdviceForm() {
 
     if (contactError) {
       setError(contactError);
+      return false;
+    }
+
+    if (form.password.trim().length < 8) {
+      setError("Password must be at least 8 characters");
       return false;
     }
 
@@ -203,6 +241,11 @@ export function PaymentAdviceForm() {
       return;
     }
 
+    if (form.password.trim().length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+
     setError("");
     setIsSubmitting(true);
 
@@ -214,6 +257,7 @@ export function PaymentAdviceForm() {
         email: form.email.trim(),
         phone: form.phone.trim(),
         website: form.website.trim(),
+        password: form.password.trim(),
         paymentCapabilities: form.paymentCapabilities,
         partnershipGoals: form.partnershipGoals,
         consent: form.consent,
@@ -317,7 +361,7 @@ export function PaymentAdviceForm() {
                     required
                   />
                 </div>
-                <div>
+                {/* <div>
                   <label htmlFor="designation" className={labelClass}>
                     Designation *
                   </label>
@@ -328,7 +372,7 @@ export function PaymentAdviceForm() {
                     className={inputClass}
                     required
                   />
-                </div>
+                </div> */}
                 <div>
                   <label htmlFor="business-email" className={labelClass}>
                     Business Email *
@@ -355,7 +399,7 @@ export function PaymentAdviceForm() {
                     value={form.phone}
                     onChange={(e) => updateField("phone", sanitizePhoneInput(e.target.value))}
                     className={inputClass}
-                    placeholder="10-digit mobile number"
+                    placeholder="10-digit (WhatsApp preferred)"
                     required
                   />
                 </div>
@@ -372,6 +416,12 @@ export function PaymentAdviceForm() {
                     className={inputClass}
                   />
                 </div>
+                <PasswordInput
+                  id="password"
+                  label="Password *"
+                  value={form.password}
+                  onChange={(e) => updateField("password", e.target.value)}
+                />
               </div>
             </>
           )}

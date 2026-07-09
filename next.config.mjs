@@ -20,6 +20,7 @@ const websiteRoutes = [
   "merchant",
   "merchant/form",
   "reseller",
+  "reseller/apply-as-reseller-form",
   "reseller/form",
   "payment",
   "payment/form",
@@ -29,6 +30,7 @@ const websiteRoutes = [
   "tools",
   "reviews",
   "talk-to-expert",
+  "pg-plugin",
 ];
 
 const nextConfig = {

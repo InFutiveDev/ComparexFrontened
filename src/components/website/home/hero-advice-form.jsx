@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HiArrowLeft, HiArrowRight, HiCheck } from "react-icons/hi2";
+import { HiArrowLeft, HiArrowRight, HiCheck, HiEye, HiEyeSlash } from "react-icons/hi2";
 import { heroFormStepOneFields } from "@/lib/mock-data";
 import Image from "next/image";
 import Link from "next/link";
@@ -37,6 +37,7 @@ const initialForm = {
   company: "",
   business: "",
   businessName: "",
+  password: "",
   industry: "",
   role: "",
   department: "",
@@ -131,6 +132,37 @@ function OptionButtons({
   );
 }
 
+function PasswordInput({ id, label, value, onChange, placeholder = "Minimum 8 characters" }) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div>
+      <label htmlFor={id} className={labelClass}>
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          type={visible ? "text" : "password"}
+          value={value ?? ""}
+          onChange={onChange}
+          className={`${inputClass} pr-12`}
+          placeholder={placeholder}
+          required
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((prev) => !prev)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 transition hover:text-slate-600"
+          aria-label={visible ? "Hide password" : "Show password"}
+        >
+          {visible ? <HiEyeSlash className="size-5" aria-hidden /> : <HiEye className="size-5" aria-hidden />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function HeroAdviceForm() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
@@ -146,8 +178,9 @@ export function HeroAdviceForm() {
     if (step === 1) {
       return Boolean(
         (form.businessName ?? "").trim() &&
-        (form.email ?? "").trim() &&
-        (form.phone ?? "").trim()
+          (form.email ?? "").trim() &&
+          (form.phone ?? "").trim() &&
+          (form.password ?? "").trim()
       );
     }
     if (step === 2) {
@@ -164,6 +197,11 @@ export function HeroAdviceForm() {
 
     if (contactError) {
       setError(contactError);
+      return false;
+    }
+
+    if ((form.password ?? "").trim().length < 8) {
+      setError("Password must be at least 8 characters");
       return false;
     }
 
@@ -199,6 +237,11 @@ export function HeroAdviceForm() {
       return;
     }
 
+    if ((form.password ?? "").trim().length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+
     setError("");
     setIsSubmitting(true);
 
@@ -207,6 +250,7 @@ export function HeroAdviceForm() {
         businessName: form.businessName.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
+        password: form.password.trim(),
         industry: form.industry,
         priority: form.business,
       });
@@ -325,11 +369,11 @@ export function HeroAdviceForm() {
                     value={form.phone}
                     onChange={(e) => updateField("phone", sanitizePhoneInput(e.target.value))}
                     className={inputClass}
-                    placeholder="10-digit mobile number"
+                    placeholder="10-digit (WhatsApp preferred)"
                     required
                   />
                 </div>
-                <div className="sm:col-span-2">
+                <div>
                   <label htmlFor="hero-email" className={labelClass}>
                     Email
                   </label>
@@ -343,6 +387,12 @@ export function HeroAdviceForm() {
                     required
                   />
                 </div>
+                <PasswordInput
+                  id="password"
+                  label="Password"
+                  value={form.password}
+                  onChange={(e) => updateField("password", e.target.value)}
+                />
               </div>
               <div className="mb-4 flex flex-col-3:2 gap-8">
                 <div className="flex items-center gap-2">

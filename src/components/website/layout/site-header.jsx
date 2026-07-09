@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { HiXMark } from "react-icons/hi2";
+import { useEffect, useRef, useState } from "react";
+import { HiChevronDown, HiXMark } from "react-icons/hi2";
 import { useTalkToExpert } from "@/components/website/talk-to-expert/talk-to-expert-provider";
 
 const routes = {
@@ -12,13 +12,18 @@ const routes = {
   login: "/login",
 };
 
+const toolsNavItems = [
+  { href: "/tools", label: "PG Calculator" },
+  { href: "/pg-plugin", label: "PG Plugin Finder" },
+];
+
 const headerNavItems = [
   { href: "/about", label: "About Us" },
   { href: "/how-it-works", label: "How it Works" },
   { href: "/why-comparex", label: "Why CompareX" },
   { href: "/compare-pg", label: "Compare" },
   { action: "talk-to-expert", label: "Talk to Expert" },
-  { href: "/tools", label: "Tools" },
+  { label: "Tools", children: toolsNavItems },
   // { href: "/resources", label: "Resources" },
   { href: "/#merchant-assistance-desk", label: "Merchant Support" },
 ];
@@ -45,6 +50,130 @@ function MenuIcon({ className }) {
       <path d="M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       <path d="M4 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
+  );
+}
+
+function isToolsNavActive(pathname) {
+  return pathname === "/tools" || pathname.startsWith("/tools/");
+}
+
+function DesktopToolsDropdown({ pathname, onNavigate }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+  const isActive = isToolsNavActive(pathname);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className={`${desktopNavLinkClass} inline-flex items-center gap-1 ${isActive ? desktopNavLinkActiveClass : ""}`}
+        aria-expanded={open}
+        aria-haspopup="menu"
+      >
+        Tools
+        <HiChevronDown
+          className={`size-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          aria-hidden
+        />
+      </button>
+
+      <div
+        className={`absolute left-1/2 top-full z-50 min-w-[220px] -translate-x-1/2 pt-3 transition-all duration-200 ${
+          open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-1 opacity-0"
+        }`}
+        role="menu"
+      >
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white py-2 shadow-[0_16px_40px_-20px_rgba(19,32,63,0.35)]">
+          {toolsNavItems.map((child) => {
+            const childActive = isNavItemActive(pathname, child.href);
+
+            return (
+              <Link
+                key={child.href}
+                href={child.href}
+                role="menuitem"
+                className={`block px-4 py-2.5 text-[15px] font-medium transition hover:bg-[#f2f6fb] hover:text-[#2D4CC8] ${
+                  childActive ? "bg-[#2D4CC8]/10 text-[#2D4CC8]" : "text-[#13203F]"
+                }`}
+                onClick={() => {
+                  setOpen(false);
+                  onNavigate?.();
+                }}
+              >
+                {child.label}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MobileToolsNav({ pathname, onNavigate }) {
+  const [expanded, setExpanded] = useState(false);
+  const isActive = isToolsNavActive(pathname);
+
+  return (
+    <li>
+      <button
+        type="button"
+        className={`flex w-full items-center justify-between rounded-xl px-4 py-3.5 text-left text-[15px] font-medium transition ${
+          isActive
+            ? "bg-[#2D4CC8]/10 font-semibold text-[#2D4CC8]"
+            : "text-[#13203F] hover:bg-[#f2f6fb] hover:text-[#2D4CC8]"
+        }`}
+        onClick={() => setExpanded((prev) => !prev)}
+        aria-expanded={expanded}
+      >
+        Tools
+        <HiChevronDown
+          className={`size-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+          aria-hidden
+        />
+      </button>
+
+      {expanded ? (
+        <ul className="mt-1 space-y-1 pl-3">
+          {toolsNavItems.map((child) => {
+            const childActive = isNavItemActive(pathname, child.href);
+
+            return (
+              <li key={child.href}>
+                <Link
+                  href={child.href}
+                  className={`block rounded-xl px-4 py-3 text-[14px] font-medium transition ${
+                    childActive
+                      ? "bg-[#2D4CC8]/10 font-semibold text-[#2D4CC8]"
+                      : "text-[#13203F] hover:bg-[#f2f6fb] hover:text-[#2D4CC8]"
+                  }`}
+                  onClick={onNavigate}
+                >
+                  {child.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+    </li>
   );
 }
 
@@ -141,6 +270,10 @@ export function SiteHeader() {
                     {item.label}
                   </button>
                 );
+              }
+
+              if (item.children) {
+                return <DesktopToolsDropdown key={item.label} pathname={pathname} />;
               }
 
               const isActive = isNavItemActive(pathname, item.href, hash);
@@ -260,6 +393,16 @@ export function SiteHeader() {
                       {item.label}
                     </button>
                   </li>
+                );
+              }
+
+              if (item.children) {
+                return (
+                  <MobileToolsNav
+                    key={item.label}
+                    pathname={pathname}
+                    onNavigate={() => setOpen(false)}
+                  />
                 );
               }
 
