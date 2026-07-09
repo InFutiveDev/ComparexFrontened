@@ -6,3 +6,10 @@ export async function submitMerchantLead(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+export async function updateMerchantLead(id, payload) {
+  return apiFetch(`/merchant/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}

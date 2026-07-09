@@ -5,7 +5,7 @@ import { HiArrowLeft, HiArrowRight, HiCheck, HiEye, HiEyeSlash } from "react-ico
 import { FormSuccessScreen } from "@/components/website/shared/form-success-screen";
 import Image from "next/image";
 import { ApiError } from "@/lib/api";
-import { submitResellerPartner } from "@/lib/reseller";
+import { submitResellerPartner, updateResellerPartner } from "@/lib/reseller";
 import {
   sanitizePhoneInput,
   validateContactFields,
@@ -212,8 +212,10 @@ function PasswordInput({ id, label, value, onChange, placeholder = "Minimum 8 ch
 export function ResellerAdviceForm() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
+  const [recordId, setRecordId] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSavingStep, setIsSavingStep] = useState(false);
   const [error, setError] = useState("");
 
   function updateField(key, value) {
@@ -260,13 +262,71 @@ export function ResellerAdviceForm() {
     return true;
   }
 
-  function handleNext() {
+  async function saveCurrentStep() {
+    setIsSavingStep(true);
+    setError("");
+
+    try {
+      if (step === 1) {
+        const stepOnePayload = {
+          step: 1,
+          fullName: form.fullName.trim(),
+          businessName: form.businessName.trim(),
+          phone: form.phone.trim(),
+          email: form.email.trim(),
+          website: form.website.trim(),
+        };
+
+        if (recordId) {
+          await updateResellerPartner(recordId, stepOnePayload);
+        } else {
+          const data = await submitResellerPartner({
+            fullName: stepOnePayload.fullName,
+            businessName: stepOnePayload.businessName,
+            phone: stepOnePayload.phone,
+            email: stepOnePayload.email,
+            website: stepOnePayload.website,
+            password: form.password.trim(),
+          });
+          setRecordId(data.id);
+        }
+        return true;
+      }
+
+      if (!recordId) {
+        setError("Please complete step 1 first");
+        return false;
+      }
+
+      if (step === 2) {
+        await updateResellerPartner(recordId, {
+          step: 2,
+          partnerType: form.partnerType,
+          businessTypes: form.businessTypes,
+          monthlyBusinessCount: form.monthlyBusinessCount,
+        });
+        return true;
+      }
+
+      return true;
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to save your progress");
+      return false;
+    } finally {
+      setIsSavingStep(false);
+    }
+  }
+
+  async function handleNext() {
     if (step === 1) {
       if (!canGoNext()) return;
       if (!validateStepOne()) return;
     } else if (!canGoNext()) {
       return;
     }
+
+    const saved = await saveCurrentStep();
+    if (!saved) return;
 
     setStep((s) => Math.min(s + 1, 3));
   }
@@ -277,19 +337,11 @@ export function ResellerAdviceForm() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (step !== 3) return;
     if (!canGoNext()) return;
 
-    const contactError = validateContactFields({
-      email: form.email,
-      phone: form.phone,
-    });
-    if (contactError) {
-      setError(contactError);
-      return;
-    }
-
-    if (form.password.trim().length < 8) {
-      setError("Password must be at least 8 characters");
+    if (!recordId) {
+      setError("Please complete step 1 first");
       return;
     }
 
@@ -297,16 +349,8 @@ export function ResellerAdviceForm() {
     setIsSubmitting(true);
 
     try {
-      await submitResellerPartner({
-        fullName: form.fullName.trim(),
-        businessName: form.businessName.trim(),
-        phone: form.phone.trim(),
-        email: form.email.trim(),
-        website: form.website.trim(),
-        password: form.password.trim(),
-        partnerType: form.partnerType,
-        businessTypes: form.businessTypes,
-        monthlyBusinessCount: form.monthlyBusinessCount,
+      await updateResellerPartner(recordId, {
+        step: 3,
         paymentFamiliarity: form.paymentFamiliarity,
         consent: form.consent,
       });
@@ -323,6 +367,7 @@ export function ResellerAdviceForm() {
     const timer = window.setTimeout(() => {
       setSubmitted(false);
       setForm(initialForm);
+      setRecordId("");
       setStep(1);
     }, 30000);
     return () => window.clearTimeout(timer);
@@ -349,6 +394,9 @@ export function ResellerAdviceForm() {
         </p>
         <p className="mx-auto mt-2 max-w-xl text-start text-sm leading-relaxed text-slate-600 sm:text-base">
           If additional information is required, a member of our team may reach out to you.
+        </p>
+        <p className="mx-auto mt-2 max-w-xl text-start text-sm leading-relaxed text-slate-600 sm:text-base">
+          Your dashboard login will be enabled once an admin activates your account.
         </p>
         <p className="mx-auto mt-4 max-w-xl text-start text-sm font-semibold text-slate-700 sm:text-base">
           We look forward to exploring how we can create value together.
@@ -560,10 +608,10 @@ export function ResellerAdviceForm() {
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={!canGoNext()}
+                disabled={!canGoNext() || isSavingStep}
                 className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-10 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {step === 2 ? "Continue" : "Next"}
+                {isSavingStep ? "Saving..." : step === 2 ? "Continue" : "Next"}
                 <HiArrowRight className="size-4" aria-hidden />
               </button>
             ) : (

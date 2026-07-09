@@ -83,8 +83,9 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      establishSession: applySession,
     }),
-    [user, token, isLoading, login, register, logout],
+    [user, token, isLoading, login, register, logout, applySession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

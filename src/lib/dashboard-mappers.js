@@ -25,6 +25,8 @@ export function mapMerchantToTableRow(item) {
     priority: formatLabel(item.priority),
     category: formatLabel(item.industry),
     workType: "Merchant",
+    userId: item.userId ?? null,
+    accountStatus: item.accountStatus ?? "inactive",
     createdAt: item.createdAt,
     ...defaultRowMeta,
   };
@@ -41,6 +43,8 @@ export function mapResellerToTableRow(item) {
     priority: formatLabel(item.paymentFamiliarity),
     category: formatLabel(item.partnerType),
     workType: "Reseller",
+    userId: item.userId ?? null,
+    accountStatus: item.accountStatus ?? "inactive",
     createdAt: item.createdAt,
     ...defaultRowMeta,
   };
@@ -57,6 +61,8 @@ export function mapPaymentGatewayToTableRow(item) {
     priority: item.partnershipGoals?.[0] ? formatLabel(item.partnershipGoals[0]) : "—",
     category: item.paymentCapabilities?.[0] ? formatLabel(item.paymentCapabilities[0]) : "Payment Provider",
     workType: "Payment Gateway",
+    userId: item.userId ?? null,
+    accountStatus: item.accountStatus ?? "inactive",
     createdAt: item.createdAt,
     ...defaultRowMeta,
   };

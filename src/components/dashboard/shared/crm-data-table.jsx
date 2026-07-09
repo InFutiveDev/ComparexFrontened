@@ -21,6 +21,7 @@ import {
   HiUserPlus,
   HiViewColumns,
 } from "react-icons/hi2";
+import { AccountStatusCell } from "@/components/dashboard/shared/account-status-cell";
 import { useDashboard } from "@/components/dashboard/layout/dashboard-context";
 
 const perPageOptions = [5, 10, 20];
@@ -75,6 +76,7 @@ function matchesRowSearch(row, query) {
     row.email,
     row.phone,
     row.status,
+    row.accountStatus,
     row.source,
     row.assignee,
     row.category,
@@ -414,6 +416,9 @@ export function CrmDataTable({
   headerTabs,
   detailsBasePath,
   detailsWorkType,
+  showAccountStatus = false,
+  accountStatusResource,
+  onAccountStatusUpdated,
 }) {
   const labels = { ...defaultLabels, ...labelsProp };
   const { merchantSearch, setMerchantSearch, leadSearch, setLeadSearch } = useDashboard();
@@ -675,6 +680,7 @@ export function CrmDataTable({
                   <th className="px-3 py-3">Category</th>
                   <th className="px-3 py-3">Work Type</th>
                   <th className="px-3 py-3">Status</th>
+                  {showAccountStatus ? <th className="px-3 py-3">Login Access</th> : null}
                   <th className="px-4 py-3 text-right sm:px-5">Actions</th>
                 </tr>
               </thead>
@@ -724,6 +730,15 @@ export function CrmDataTable({
                     <td className="px-3 py-3.5">
                       <StatusBadge status={row.status} />
                     </td>
+                    {showAccountStatus ? (
+                      <td className="px-3 py-3.5">
+                        <AccountStatusCell
+                          row={row}
+                          resource={accountStatusResource}
+                          onUpdated={onAccountStatusUpdated}
+                        />
+                      </td>
+                    ) : null}
                     <td className="relative overflow-visible px-4 py-3.5 sm:px-5">
                       <RowActionsMenu
                         row={row}

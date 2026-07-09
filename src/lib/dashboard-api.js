@@ -41,3 +41,24 @@ export function fetchPaymentGateways({ page = 1, limit = 50 } = {}) {
 export function fetchMerchantSupport({ page = 1, limit = 50 } = {}) {
   return authFetch(`/support?${withPagination({ page, limit })}`);
 }
+
+export function updateMerchantAccountStatus(id, status) {
+  return authFetch(`/merchant/${id}/account-status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function updateResellerAccountStatus(id, status) {
+  return authFetch(`/reseller/${id}/account-status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function updatePaymentAccountStatus(id, status) {
+  return authFetch(`/payment/${id}/account-status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}

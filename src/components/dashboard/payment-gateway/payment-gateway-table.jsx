@@ -41,6 +41,9 @@ export function PaymentGatewayTable({
         searchType="merchant"
         detailsBasePath="/dashboard/payment-gateways"
         detailsWorkType="Payment Gateway"
+        showAccountStatus
+        accountStatusResource="payment"
+        onAccountStatusUpdated={reload}
       />
     </DashboardListState>
   );

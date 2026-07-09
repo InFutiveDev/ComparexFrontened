@@ -38,6 +38,9 @@ export function ResellerTable({ variant = "overview", workTypeFilter = "Reseller
         searchType="merchant"
         detailsBasePath="/dashboard/resellers"
         detailsWorkType="Reseller"
+        showAccountStatus
+        accountStatusResource="reseller"
+        onAccountStatusUpdated={reload}
       />
     </DashboardListState>
   );

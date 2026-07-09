@@ -38,6 +38,9 @@ export function MerchantTable({ variant = "overview", workTypeFilter = "Merchant
         searchType="merchant"
         detailsBasePath="/dashboard/merchants"
         detailsWorkType="Merchant"
+        showAccountStatus
+        accountStatusResource="merchant"
+        onAccountStatusUpdated={reload}
       />
     </DashboardListState>
   );

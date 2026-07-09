@@ -6,3 +6,10 @@ export async function submitPaymentProvider(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+export async function updatePaymentProvider(id, payload) {
+  return apiFetch(`/payment/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}

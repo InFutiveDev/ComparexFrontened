@@ -6,3 +6,10 @@ export async function submitResellerPartner(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+export async function updateResellerPartner(id, payload) {
+  return apiFetch(`/reseller/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
