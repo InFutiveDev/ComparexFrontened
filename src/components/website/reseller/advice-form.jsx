@@ -6,6 +6,7 @@ import { FormSuccessScreen } from "@/components/website/shared/form-success-scre
 import Image from "next/image";
 import { ApiError } from "@/lib/api";
 import { submitResellerPartner, updateResellerPartner } from "@/lib/reseller";
+import { extractFormRecordId } from "@/lib/form-record-id";
 import {
   sanitizePhoneInput,
   validateContactFields,
@@ -288,7 +289,11 @@ export function ResellerAdviceForm() {
             website: stepOnePayload.website,
             password: form.password.trim(),
           });
-          setRecordId(data.id);
+          const id = extractFormRecordId(data);
+          if (!id) {
+            throw new ApiError("Failed to save your details. Please try again.");
+          }
+          setRecordId(id);
         }
         return true;
       }
@@ -318,10 +323,20 @@ export function ResellerAdviceForm() {
   }
 
   async function handleNext() {
+    if (isSavingStep) return;
+
     if (step === 1) {
-      if (!canGoNext()) return;
+      if (!canGoNext()) {
+        setError("Please fill in all required fields");
+        return;
+      }
       if (!validateStepOne()) return;
     } else if (!canGoNext()) {
+      setError(
+        step === 2
+          ? "Please complete partner type, business types, and monthly business count"
+          : "Please select payment familiarity and provide consent",
+      );
       return;
     }
 
@@ -608,7 +623,7 @@ export function ResellerAdviceForm() {
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={!canGoNext() || isSavingStep}
+                disabled={isSavingStep}
                 className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-10 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSavingStep ? "Saving..." : step === 2 ? "Continue" : "Next"}
@@ -617,7 +632,7 @@ export function ResellerAdviceForm() {
             ) : (
               <button
                 type="submit"
-                disabled={!canGoNext() || isSubmitting}
+                disabled={isSubmitting}
                 className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? "Submitting..." : "Apply as Partner"}

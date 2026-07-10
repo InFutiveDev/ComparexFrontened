@@ -38,7 +38,7 @@ export function LoginFormSection() {
     setIsSubmitting(true);
 
     try {
-      await login({ email, password, remember: rememberMe });
+      await login({ email, password, accountType, remember: rememberMe });
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to sign in");

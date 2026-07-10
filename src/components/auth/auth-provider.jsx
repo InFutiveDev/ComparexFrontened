@@ -51,8 +51,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(
-    async ({ email, password, remember = true }) => {
-      const session = await loginAccount({ email, password });
+    async ({ email, password, accountType, remember = true }) => {
+      const session = await loginAccount({ email, password, accountType });
       applySession(session, remember);
       return session;
     },

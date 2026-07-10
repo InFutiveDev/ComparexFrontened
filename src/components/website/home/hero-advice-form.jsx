@@ -8,6 +8,7 @@ import Link from "next/link";
 import { FormSuccessScreen } from "@/components/website/shared/form-success-screen";
 import { ApiError } from "@/lib/api";
 import { submitMerchantLead, updateMerchantLead } from "@/lib/merchant";
+import { extractFormRecordId } from "@/lib/form-record-id";
 import {
   sanitizePhoneInput,
   validateContactFields,
@@ -218,6 +219,7 @@ export function HeroAdviceForm() {
     try {
       if (step === 1) {
         const stepOnePayload = {
+          step: 1,
           businessName: form.businessName.trim(),
           email: form.email.trim(),
           phone: form.phone.trim(),
@@ -230,7 +232,11 @@ export function HeroAdviceForm() {
             ...stepOnePayload,
             password: form.password.trim(),
           });
-          setRecordId(data.id);
+          const id = extractFormRecordId(data);
+          if (!id) {
+            throw new ApiError("Failed to save your details. Please try again.");
+          }
+          setRecordId(id);
         }
         return true;
       }
@@ -241,7 +247,7 @@ export function HeroAdviceForm() {
       }
 
       if (step === 2) {
-        await updateMerchantLead(recordId, { industry: form.industry });
+        await updateMerchantLead(recordId, { step: 2, industry: form.industry });
         return true;
       }
 
@@ -255,10 +261,16 @@ export function HeroAdviceForm() {
   }
 
   async function handleNext() {
+    if (isSavingStep) return;
+
     if (step === 1) {
-      if (!canGoNext()) return;
+      if (!canGoNext()) {
+        setError("Please fill in all required fields");
+        return;
+      }
       if (!validateStepOne()) return;
     } else if (!canGoNext()) {
+      setError(step === 2 ? "Please select your business type" : "Please select your priority");
       return;
     }
 
@@ -285,7 +297,7 @@ export function HeroAdviceForm() {
     setIsSubmitting(true);
 
     try {
-      await updateMerchantLead(recordId, { priority: form.business });
+      await updateMerchantLead(recordId, { step: 3, priority: form.business });
       setSubmitted(true);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to submit your request");
@@ -513,7 +525,7 @@ export function HeroAdviceForm() {
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={!canGoNext() || isSavingStep}
+                disabled={isSavingStep}
                 className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-10 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSavingStep ? "Saving..." : "Next"}
@@ -522,7 +534,7 @@ export function HeroAdviceForm() {
             ) : (
               <button
                 type="submit"
-                disabled={!canGoNext() || isSubmitting}
+                disabled={isSubmitting}
                 className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? "Submitting..." : "Submit"}

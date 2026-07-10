@@ -60,10 +60,10 @@ export async function registerAccount({ name, email, password }) {
   });
 }
 
-export async function loginAccount({ email, password }) {
+export async function loginAccount({ email, password, accountType }) {
   return apiFetch("/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, accountType }),
   });
 }
 

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { FormSuccessScreen } from "@/components/website/shared/form-success-screen";
 import { ApiError } from "@/lib/api";
 import { submitPaymentProvider, updatePaymentProvider } from "@/lib/payment";
+import { bindField, extractFormRecordId } from "@/lib/form-record-id";
 import {
   sanitizePhoneInput,
   validateContactFields,
@@ -134,7 +135,7 @@ function StepHeader({ title, subtitle }) {
   );
 }
 
-function PasswordInput({ id, label, value, onChange, placeholder = "Minimum 8 characters" }) {
+function PasswordInput({ id, label, value, onChange, onInput, placeholder = "Minimum 8 characters" }) {
   const [visible, setVisible] = useState(false);
 
   return (
@@ -148,6 +149,7 @@ function PasswordInput({ id, label, value, onChange, placeholder = "Minimum 8 ch
           type={visible ? "text" : "password"}
           value={value ?? ""}
           onChange={onChange}
+          onInput={onInput}
           className={`${inputClass} pr-12`}
           placeholder={placeholder}
           required
@@ -183,7 +185,6 @@ export function PaymentAdviceForm() {
       return Boolean(
         form.companyName.trim() &&
           form.contactPerson.trim() &&
-          form.designation.trim() &&
           form.email.trim() &&
           form.phone.trim() &&
           form.password.trim()
@@ -222,9 +223,10 @@ export function PaymentAdviceForm() {
     try {
       if (step === 1) {
         const stepOnePayload = {
+          step: 1,
           companyName: form.companyName.trim(),
           contactPerson: form.contactPerson.trim(),
-          designation: form.designation.trim(),
+          designation: form.designation.trim() || "Not specified",
           email: form.email.trim(),
           phone: form.phone.trim(),
           website: form.website.trim(),
@@ -234,10 +236,19 @@ export function PaymentAdviceForm() {
           await updatePaymentProvider(recordId, stepOnePayload);
         } else {
           const data = await submitPaymentProvider({
-            ...stepOnePayload,
+            companyName: stepOnePayload.companyName,
+            contactPerson: stepOnePayload.contactPerson,
+            designation: stepOnePayload.designation,
+            email: stepOnePayload.email,
+            phone: stepOnePayload.phone,
+            website: stepOnePayload.website,
             password: form.password.trim(),
           });
-          setRecordId(data.id);
+          const id = extractFormRecordId(data);
+          if (!id) {
+            throw new ApiError("Failed to save your details. Please try again.");
+          }
+          setRecordId(id);
         }
         return true;
       }
@@ -249,6 +260,7 @@ export function PaymentAdviceForm() {
 
       if (step === 2) {
         await updatePaymentProvider(recordId, {
+          step: 2,
           paymentCapabilities: form.paymentCapabilities,
         });
         return true;
@@ -264,10 +276,20 @@ export function PaymentAdviceForm() {
   }
 
   async function handleNext() {
+    if (isSavingStep) return;
+
     if (step === 1) {
-      if (!canGoNext()) return;
+      if (!canGoNext()) {
+        setError("Please fill in all required fields");
+        return;
+      }
       if (!validateStepOne()) return;
     } else if (!canGoNext()) {
+      setError(
+        step === 2
+          ? "Please select at least one payment capability"
+          : "Please select partnership goals and provide consent",
+      );
       return;
     }
 
@@ -283,6 +305,7 @@ export function PaymentAdviceForm() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (step !== 3) return;
     if (!canGoNext()) return;
 
     if (!recordId) {
@@ -295,6 +318,7 @@ export function PaymentAdviceForm() {
 
     try {
       await updatePaymentProvider(recordId, {
+        step: 3,
         partnershipGoals: form.partnershipGoals,
         consent: form.consent,
       });
@@ -384,7 +408,7 @@ export function PaymentAdviceForm() {
                   <input
                     id="company-name"
                     value={form.companyName}
-                    onChange={(e) => updateField("companyName", e.target.value)}
+                    {...bindField(updateField, "companyName")}
                     className={inputClass}
                     required
                   />
@@ -396,7 +420,7 @@ export function PaymentAdviceForm() {
                   <input
                     id="contact-person"
                     value={form.contactPerson}
-                    onChange={(e) => updateField("contactPerson", e.target.value)}
+                    {...bindField(updateField, "contactPerson")}
                     className={inputClass}
                     required
                   />
@@ -421,7 +445,7 @@ export function PaymentAdviceForm() {
                     id="business-email"
                     type="email"
                     value={form.email}
-                    onChange={(e) => updateField("email", e.target.value)}
+                    {...bindField(updateField, "email")}
                     className={inputClass}
                     placeholder="you@company.com"
                     required
@@ -438,6 +462,7 @@ export function PaymentAdviceForm() {
                     maxLength={11}
                     value={form.phone}
                     onChange={(e) => updateField("phone", sanitizePhoneInput(e.target.value))}
+                    onInput={(e) => updateField("phone", sanitizePhoneInput(e.target.value))}
                     className={inputClass}
                     placeholder="10-digit (WhatsApp preferred)"
                     required
@@ -461,6 +486,7 @@ export function PaymentAdviceForm() {
                   label="Password *"
                   value={form.password}
                   onChange={(e) => updateField("password", e.target.value)}
+                  onInput={(e) => updateField("password", e.target.value)}
                 />
               </div>
             </>
@@ -531,7 +557,7 @@ export function PaymentAdviceForm() {
             <button
               type="button"
               onClick={handleNext}
-              disabled={!canGoNext() || isSavingStep}
+              disabled={isSavingStep}
               className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-10 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSavingStep ? "Saving..." : step === 2 ? "Continue" : "Next"}
@@ -540,7 +566,7 @@ export function PaymentAdviceForm() {
           ) : (
             <button
               type="submit"
-              disabled={!canGoNext() || isSubmitting}
+              disabled={isSubmitting}
               className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? "Submitting..." : "Explore Partnership Opportunities"}

@@ -1,228 +1,263 @@
 "use client";
 
-import Link from "next/link";
+import { use } from "react";
 import {
-  HiArrowLeft,
-  HiBuildingOffice2,
-  HiCalendarDays,
-  HiEnvelope,
-  HiPhone,
-  HiSparkles,
+  HiArrowTopRightOnSquare,
+  HiDocumentText,
+  HiGlobeAlt,
+  HiPaperClip,
   HiTag,
   HiUserCircle,
-  HiUserPlus,
 } from "react-icons/hi2";
-import { getIndustryLabel, getPriorityLabel } from "@/lib/merchant-support-options";
+import {
+  DetailErrorState,
+  DetailField,
+  DetailHeader,
+  DetailLoadingState,
+  formatDetailDate,
+  formatDetailLabel,
+  getInitials,
+  InfoCard,
+  useDashboardDetail,
+} from "@/components/dashboard/shared/record-details";
+import { fetchMerchantSupportById } from "@/lib/dashboard-api";
+import { pickMerchantSupport } from "@/lib/dashboard-detail-pickers";
 
-const statusStyles = {
-  New: "bg-[#25a36f]/12 text-[#25a36f]",
-  Qualified: "bg-[#40C3CF]/15 text-[#0f766e]",
-  Proposal: "bg-amber-100 text-amber-700",
-  Won: "bg-[#2D4CC8]/10 text-[#2D4CC8]",
-};
+function formatFileSize(bytes) {
+  const size = Number(bytes);
+  if (!Number.isFinite(size) || size <= 0) return null;
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
 
-function StatusBadge({ status }) {
-  const className = statusStyles[status] ?? "bg-slate-100 text-slate-600";
+function normalizeAttachment(file, index) {
+  if (typeof file === "string") {
+    return {
+      url: file,
+      name: `Attachment ${index + 1}`,
+      mimeType: "",
+      sizeLabel: null,
+    };
+  }
+
+  const url = file?.url || file?.path || file?.location || "";
+  const name =
+    file?.fileName ||
+    file?.originalName ||
+    file?.originalname ||
+    file?.name ||
+    (file?.key ? String(file.key).split("/").pop() : null) ||
+    `Attachment ${index + 1}`;
+  const mimeType = file?.mimeType || file?.mimetype || "";
+
+  return {
+    url,
+    name,
+    mimeType,
+    sizeLabel: formatFileSize(file?.size),
+  };
+}
+
+function isImageAttachment(file) {
+  if (file.mimeType?.startsWith("image/")) return true;
+  return /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(file.name || "");
+}
+
+function SupportAttachments({ attachments }) {
+  if (!attachments.length) {
+    return <p className="mt-1 text-sm font-semibold text-[#13203F]">No attachments</p>;
+  }
 
   return (
-    <span className={`inline-flex rounded-md px-2.5 py-1 text-[11px] font-bold tracking-wide ${className}`}>
-      {status.toUpperCase()}
-    </span>
+    <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {attachments.map((raw, index) => {
+        const file = normalizeAttachment(raw, index);
+        const image = Boolean(file.url) && isImageAttachment(file);
+
+        return (
+          <li
+            key={`${file.name}-${index}`}
+            className="overflow-hidden rounded-xl border border-slate-200 bg-[#f8fafc]"
+          >
+            {image ? (
+              <a href={file.url} target="_blank" rel="noreferrer" className="block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={file.url}
+                  alt={file.name}
+                  className="h-40 w-full object-cover"
+                />
+              </a>
+            ) : (
+              <div className="flex h-28 items-center justify-center bg-white">
+                <HiPaperClip className="size-8 text-[#2D4CC8]" aria-hidden />
+              </div>
+            )}
+
+            <div className="space-y-2 p-3">
+              <p className="truncate text-sm font-semibold text-[#13203F]" title={file.name}>
+                {file.name}
+              </p>
+              <p className="text-xs text-slate-500">
+                {[file.mimeType || (image ? "Image" : "File"), file.sizeLabel]
+                  .filter(Boolean)
+                  .join(" · ") || "Uploaded file"}
+              </p>
+              {file.url ? (
+                <a
+                  href={file.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2D4CC8] hover:underline"
+                >
+                  Open file
+                  <HiArrowTopRightOnSquare className="size-4" aria-hidden />
+                </a>
+              ) : (
+                <p className="text-xs text-slate-400">File URL unavailable</p>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
-function DetailField({ label, children }) {
-  return (
-    <div>
-      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
-      <div className="mt-1 text-sm font-semibold text-[#13203F]">{children}</div>
-    </div>
+export function MerchantSupportDetails({ id }) {
+  const { data, isLoading, error, reload } = useDashboardDetail(
+    id,
+    fetchMerchantSupportById,
+    pickMerchantSupport,
   );
-}
 
-function InfoCard({ title, icon: Icon, children }) {
-  return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-center gap-2">
-        <span className="flex size-9 items-center justify-center rounded-xl bg-[#EEF2FC] text-[#2D4CC8]">
-          <Icon className="size-5" aria-hidden />
-        </span>
-        <h2 className="text-base font-bold text-[#13203F]">{title}</h2>
-      </div>
-      {children}
-    </section>
-  );
-}
+  if (isLoading) return <DetailLoadingState />;
+  if (error || !data) {
+    return (
+      <DetailErrorState
+        message={error || "Support request not found"}
+        onRetry={reload}
+        backHref="/dashboard/merchant-support"
+        backLabel="Back to Merchant Support"
+      />
+    );
+  }
 
-function formatSubmittedAt(value) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat("en-IN", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
-
-export function MerchantSupportDetails({ submission }) {
-  const industryLabel = submission.industryLabel ?? getIndustryLabel(submission.industry);
-  const priorityLabel = submission.priorityLabel ?? getPriorityLabel(submission.priority);
+  const attachments = Array.isArray(data.attachments) ? data.attachments : [];
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center gap-3">
-        <Link
-          href="/dashboard/merchant-support"
-          className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-[#13203F] transition hover:border-[#2D4CC8]/30 hover:bg-slate-50"
-        >
-          <HiArrowLeft className="size-4 text-[#2D4CC8]" aria-hidden />
-          Back to Merchant Support
-        </Link>
-      </div>
+      <DetailHeader
+        backHref="/dashboard/merchant-support"
+        backLabel="Back to Merchant Support"
+        title={data.businessName}
+        subtitle="Merchant Support Desk"
+        initials={getInitials(data.businessName)}
+        badges={[
+          <span
+            key="category"
+            className="inline-flex rounded-full bg-[#EEF2FC] px-3 py-1 text-xs font-medium text-[#2D4CC8] ring-1 ring-[#2D4CC8]/10"
+          >
+            {formatDetailLabel(data.issueCategory)}
+          </span>,
+          <span
+            key="gateway"
+            className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-100"
+          >
+            {formatDetailLabel(data.paymentGateway)}
+          </span>,
+        ]}
+      />
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 bg-gradient-to-r from-[#EEF2FC] via-white to-[#ecfdf5] px-5 py-6 sm:px-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex items-start gap-4">
-              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-[#2D4CC8] text-lg font-bold text-white shadow-md">
-                {submission.businessName
-                  .split(" ")
-                  .map((part) => part[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Request ID: {submission.id}
-                </p>
-                <h1 className="mt-1 text-2xl font-bold text-[#13203F] sm:text-3xl">
-                  {submission.businessName}
-                </h1>
-                <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-600">
-                  <HiBuildingOffice2 className="size-4 text-[#2D4CC8]" aria-hidden />
-                  Home page PG advice form
-                </p>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <StatusBadge status={submission.status} />
-                  <span className="inline-flex rounded-full bg-[#EEF2FC] px-3 py-1 text-xs font-medium text-[#2D4CC8] ring-1 ring-[#2D4CC8]/10">
-                    {industryLabel}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <a
-                href={`tel:${submission.phone}`}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#2D4CC8] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2542b6]"
-              >
-                <HiPhone className="size-4" aria-hidden />
-                Call
-              </a>
-              <a
-                href={`mailto:${submission.email}`}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#13203F] transition hover:bg-slate-50"
-              >
-                <HiEnvelope className="size-4 text-[#40C3CF]" aria-hidden />
-                Email
-              </a>
-              <button
-                type="button"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#25a36f]/30 bg-[#25a36f]/10 px-4 py-2.5 text-sm font-semibold text-[#25a36f] transition hover:bg-[#25a36f]/15"
-              >
-                <HiUserPlus className="size-4" aria-hidden />
-                Assign Request
-              </button>
-            </div>
-          </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-medium text-slate-500">Payment Gateway</p>
+          <p className="mt-1 text-lg font-bold text-[#13203F]">
+            {formatDetailLabel(data.paymentGateway)}
+          </p>
         </div>
-
-        <div className="grid gap-4 px-5 py-5 sm:grid-cols-2 sm:px-6 xl:grid-cols-4">
-          <div className="rounded-xl border border-slate-100 bg-[#f8fafc] p-4">
-            <p className="text-xs font-medium text-slate-500">Industry</p>
-            <p className="mt-1 text-lg font-bold text-[#13203F]">{industryLabel}</p>
-          </div>
-          <div className="rounded-xl border border-slate-100 bg-[#f8fafc] p-4">
-            <p className="text-xs font-medium text-slate-500">Top Priority</p>
-            <p className="mt-1 text-lg font-bold text-[#13203F]">{priorityLabel}</p>
-          </div>
-          <div className="rounded-xl border border-slate-100 bg-[#f8fafc] p-4">
-            <p className="text-xs font-medium text-slate-500">Source</p>
-            <p className="mt-1 text-lg font-bold text-[#13203F]">{submission.source}</p>
-          </div>
-          <div className="rounded-xl border border-slate-100 bg-[#f8fafc] p-4">
-            <p className="text-xs font-medium text-slate-500">Submitted</p>
-            <p className="mt-1 text-lg font-bold text-[#13203F]">
-              {formatSubmittedAt(submission.submittedAt)}
-            </p>
-          </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-medium text-slate-500">Issue Category</p>
+          <p className="mt-1 text-lg font-bold text-[#13203F]">
+            {formatDetailLabel(data.issueCategory)}
+          </p>
         </div>
-      </section>
-
-      <div className="grid gap-5 lg:grid-cols-3">
-        <div className="space-y-5 lg:col-span-2">
-          <InfoCard title="Contact Information" icon={HiUserCircle}>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <DetailField label="Business Name">{submission.businessName}</DetailField>
-              <DetailField label="Phone Number">
-                <a href={`tel:${submission.phone}`} className="text-[#2D4CC8] hover:underline">
-                  {submission.phone}
-                </a>
-              </DetailField>
-              <DetailField label="Email Address">
-                <a href={`mailto:${submission.email}`} className="text-[#40C3CF] hover:underline">
-                  {submission.email}
-                </a>
-              </DetailField>
-              <DetailField label="Submitted At">
-                {formatSubmittedAt(submission.submittedAt)}
-              </DetailField>
-            </div>
-          </InfoCard>
-
-          <InfoCard title="Form Responses" icon={HiTag}>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <DetailField label="Industry">{industryLabel}</DetailField>
-              <DetailField label="Business Priority">{priorityLabel}</DetailField>
-              <DetailField label="Form Source">{submission.source}</DetailField>
-              <DetailField label="Status">
-                <StatusBadge status={submission.status} />
-              </DetailField>
-            </div>
-          </InfoCard>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-medium text-slate-500">Attachments</p>
+          <p className="mt-1 text-lg font-bold text-[#13203F]">{attachments.length}</p>
         </div>
-
-        <div className="space-y-5">
-          <InfoCard title="Assignment" icon={HiUserPlus}>
-            <div className="rounded-xl border border-slate-100 bg-[#f8fafc] p-4">
-              <p className="text-sm font-bold text-[#13203F]">Unassigned</p>
-              <p className="text-xs text-slate-500">Awaiting support team review</p>
-            </div>
-            <button
-              type="button"
-              className="mt-4 w-full cursor-pointer rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-[#13203F] transition hover:bg-slate-50"
-            >
-              Assign to Agent
-            </button>
-          </InfoCard>
-
-          <InfoCard title="Support Notes" icon={HiSparkles}>
-            <p className="text-sm leading-relaxed text-slate-600">
-              This request was submitted through the home page PG advice form. The merchant is
-              looking for recommendations in{" "}
-              <span className="font-semibold text-[#13203F]">{industryLabel}</span> with priority on{" "}
-              <span className="font-semibold text-[#13203F]">{priorityLabel}</span>.
-            </p>
-          </InfoCard>
-
-          <InfoCard title="Next Steps" icon={HiCalendarDays}>
-            <ul className="space-y-2 text-sm text-slate-600">
-              <li>Review business fit and transaction profile</li>
-              <li>Shortlist suitable payment gateways</li>
-              <li>Schedule a callback within SLA</li>
-            </ul>
-          </InfoCard>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-medium text-slate-500">Submitted</p>
+          <p className="mt-1 text-lg font-bold text-[#13203F]">{formatDetailDate(data.createdAt)}</p>
         </div>
       </div>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <InfoCard title="Contact Information" icon={HiUserCircle}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <DetailField label="Business Name">{data.businessName}</DetailField>
+            <DetailField label="Phone Number">
+              <a href={`tel:${data.contactNumber}`} className="text-[#2D4CC8] hover:underline">
+                {data.contactNumber}
+              </a>
+            </DetailField>
+            <DetailField label="Business Email">
+              <a href={`mailto:${data.businessEmail}`} className="text-[#40C3CF] hover:underline">
+                {data.businessEmail}
+              </a>
+            </DetailField>
+            <DetailField label="Disclaimer Accepted">
+              {formatDetailLabel(data.disclaimerAccepted)}
+            </DetailField>
+          </div>
+        </InfoCard>
+
+        <InfoCard title="Issue Details" icon={HiTag}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <DetailField label="Payment Gateway">
+              {formatDetailLabel(data.paymentGateway)}
+            </DetailField>
+            <DetailField label="Issue Category">
+              {formatDetailLabel(data.issueCategory)}
+            </DetailField>
+            <DetailField label="Source">{formatDetailLabel(data.source)}</DetailField>
+            <DetailField label="Created At">{formatDetailDate(data.createdAt)}</DetailField>
+          </div>
+        </InfoCard>
+
+        <InfoCard title="Issue Description" icon={HiDocumentText}>
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+            {data.issueDescription || "—"}
+          </p>
+        </InfoCard>
+
+        <InfoCard title="Website" icon={HiGlobeAlt}>
+          <DetailField label="Website">
+            {data.website ? (
+              <a
+                href={data.website}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[#2D4CC8] hover:underline"
+              >
+                {data.website}
+              </a>
+            ) : (
+              "Not provided"
+            )}
+          </DetailField>
+        </InfoCard>
+      </div>
+
+      <InfoCard title="Attachments" icon={HiPaperClip}>
+        <SupportAttachments attachments={attachments} />
+      </InfoCard>
     </div>
   );
+}
+
+export default function MerchantSupportDetailsPage({ params }) {
+  const { id } = use(params);
+  return <MerchantSupportDetails id={id} />;
 }
