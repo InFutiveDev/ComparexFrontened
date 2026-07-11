@@ -14,6 +14,8 @@ import { IoStar } from "react-icons/io5";
 import { FaGoogle, FaLinkedin } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { HiUser } from "react-icons/hi2";
+import { ApiError } from "@/lib/api";
+import { submitReview } from "@/lib/review";
 
 const steps = [
   { id: 1, label: "Select Provider" },
@@ -1737,6 +1739,8 @@ export default function ReviewsSection() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showValidation, setShowValidation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const formCardRef = useRef(null);
 
   const selectedProduct = products.find((item) => item.id === form.productId);
@@ -1859,7 +1863,77 @@ export default function ReviewsSection() {
     return false;
   }
 
-  function handleNext() {
+  async function submitReviewToApi() {
+    if (!selectedProduct) {
+      setSubmitError("Please select a provider");
+      return false;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      await submitReview({
+        productId: selectedProduct.id,
+        productName: selectedProduct.name,
+        productCompany: selectedProduct.company,
+        productCategory: selectedProduct.category,
+        identityMethod: form.identityMethod,
+        name: form.name.trim(),
+        businessName: form.businessName.trim(),
+        email: form.email.trim(),
+        jobTitle: form.jobTitle,
+        jobTitleOther: form.jobTitleOther.trim(),
+        monthlyVolume: form.monthlyVolume,
+        website: form.website.trim(),
+        usageDuration: form.usageDuration,
+        rating: form.rating,
+        recommendNps: form.recommendNps,
+        onboardingRating: form.onboardingRating,
+        supportRating: form.supportRating,
+        pricingRating: form.pricingRating,
+        dashboardRating: form.dashboardRating,
+        apiRating: form.apiRating,
+        reliabilityRating: form.reliabilityRating,
+        refundRating: form.refundRating,
+        settlementRating: form.settlementRating,
+        internationalRating: form.internationalRating,
+        deviceQuality: form.deviceQuality,
+        installationExperience: form.installationExperience,
+        soundboxReliability: form.soundboxReliability,
+        fieldSupport: form.fieldSupport,
+        fxTransparency: form.fxTransparency,
+        intlSettlementSpeed: form.intlSettlementSpeed,
+        exportDocSupport: form.exportDocSupport,
+        retryLogic: form.retryLogic,
+        subscriptionAnalytics: form.subscriptionAnalytics,
+        dunningExperience: form.dunningExperience,
+        verificationAccuracy: form.verificationAccuracy,
+        fraudDetection: form.fraudDetection,
+        apiResponseTime: form.apiResponseTime,
+        title: form.title.trim(),
+        reviewText: form.reviewText.trim(),
+        stoodOut: form.stoodOut,
+        idealFor: form.idealFor,
+        onboardingExperience: form.onboardingExperience,
+        businessTypesBenefit: form.businessTypesBenefit,
+        businessTypesOther: form.businessTypesOther.trim(),
+        doesWell: form.doesWell.trim(),
+        consentGenuine: form.consentGenuine,
+        consentGuidelines: form.consentGuidelines,
+        consentModeration: form.consentModeration,
+        shareOnLinkedIn: form.shareOnLinkedIn,
+      });
+      return true;
+    } catch (err) {
+      setSubmitError(err instanceof ApiError ? err.message : "Failed to submit review");
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleNext() {
     if (step === 1 && form.productId) {
       handleContinueToReview();
       return;
@@ -1870,10 +1944,14 @@ export default function ReviewsSection() {
       return;
     }
     setShowValidation(false);
+
     if (step === 3) {
+      const saved = await submitReviewToApi();
+      if (!saved) return;
       setStep(4);
       return;
     }
+
     setStep((s) => Math.min(s + 1, 5));
   }
 
@@ -1897,6 +1975,8 @@ export default function ReviewsSection() {
     setCategoryFilter("");
     setSearchQuery("");
     setShowValidation(false);
+    setSubmitError("");
+    setIsSubmitting(false);
     setStep(1);
   }
 
@@ -1996,12 +2076,19 @@ export default function ReviewsSection() {
           </div>
 
           {step > 0 && step < 4 ? (
-            <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-200/70 pt-5">
+            <div className="mt-6 space-y-3 border-t border-slate-200/70 pt-5">
+              {submitError ? (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {submitError}
+                </div>
+              ) : null}
+              <div className="flex items-center justify-end gap-3">
               {step > 1 ? (
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-[#2D4CC8]/40 hover:text-[#13203F]"
+                  disabled={isSubmitting}
+                  className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-[#2D4CC8]/40 hover:text-[#13203F] disabled:opacity-50"
                 >
                   <HiArrowLeft className="size-4" aria-hidden />
                   Back
@@ -2013,13 +2100,18 @@ export default function ReviewsSection() {
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={!canGoNext()}
+                disabled={!canGoNext() || isSubmitting}
                 className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                 style={{ color: "#fff" }}
               >
-                {step === 3 ? "Submit Review" : "Next"}
+                {step === 3
+                  ? isSubmitting
+                    ? "Submitting..."
+                    : "Submit Review"
+                  : "Next"}
                 <HiArrowRight className="size-4" aria-hidden />
               </button>
+              </div>
             </div>
           ) : null}
         </div>

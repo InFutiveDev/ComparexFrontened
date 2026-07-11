@@ -33,6 +33,16 @@ export function mapMerchantToTableRow(item) {
 }
 
 export function mapResellerToTableRow(item) {
+  const verificationStatus = item.verificationStatus || "incomplete";
+  const statusLabel =
+    verificationStatus === "pending_review"
+      ? "Pending Review"
+      : verificationStatus === "approved"
+        ? "Approved"
+        : verificationStatus === "rejected"
+          ? "Rejected"
+          : "Incomplete";
+
   return {
     id: item.id,
     name: item.fullName,
@@ -40,13 +50,16 @@ export function mapResellerToTableRow(item) {
     email: item.email,
     phone: item.phone,
     source: item.source || "Reseller Form",
-    priority: formatLabel(item.paymentFamiliarity),
+    priority: formatLabel(item.partnershipModel) || formatLabel(item.paymentFamiliarity),
     category: formatLabel(item.partnerType),
     workType: "Reseller",
     userId: item.userId ?? null,
     accountStatus: item.accountStatus ?? "inactive",
+    verificationStatus,
+    profileCompletionPercent: item.profileCompletionPercent ?? 0,
     createdAt: item.createdAt,
     ...defaultRowMeta,
+    status: statusLabel,
   };
 }
 
@@ -88,6 +101,52 @@ export function mapMerchantSupportToTableRow(item) {
   };
 }
 
+export function mapExpertBookingToTableRow(item) {
+  const isCalendly = item.bookingSource === "calendly" || Boolean(item.calendlyEventUri);
+  const hasRealDate =
+    item.slotDateLabel &&
+    !["scheduled via calendly", "see calendly confirmation"].includes(
+      String(item.slotDateLabel).trim().toLowerCase(),
+    );
+  const slotSummary = hasRealDate
+    ? [item.slotDateLabel, item.slotTime].filter(Boolean).join(" · ")
+    : isCalendly
+      ? "Calendly"
+      : null;
+
+  const gateway = item.paymentGatewayName || formatLabel(item.industry);
+
+  return {
+    id: item.id,
+    name: item.fullName,
+    company: item.businessName,
+    email: item.email,
+    phone: item.phone,
+    source: item.source || "Talk to Expert",
+    priority: formatLabel(item.priority),
+    category: [gateway, slotSummary].filter(Boolean).join(" · "),
+    workType: "Talk to Expert",
+    submittedAt: item.createdAt,
+    createdAt: item.createdAt,
+    slotDateLabel: item.slotDateLabel,
+    slotTime: item.slotTime,
+    bookingSource: item.bookingSource || (isCalendly ? "calendly" : "manual"),
+    representativeName: item.representativeName,
+    verificationStatus: item.status,
+    ...defaultRowMeta,
+    status:
+      item.status === "new"
+        ? "New"
+        : item.status === "contacted"
+          ? "Contacted"
+          : item.status === "completed"
+            ? "Completed"
+            : item.status === "cancelled"
+              ? "Cancelled"
+              : "New",
+  };
+}
+
 export function mapMerchantListResponse(response) {
   return {
     rows: (response.merchantGateways ?? []).map(mapMerchantToTableRow),
@@ -112,6 +171,47 @@ export function mapPaymentGatewayListResponse(response) {
 export function mapMerchantSupportListResponse(response) {
   return {
     rows: (response.merchantSupport ?? []).map(mapMerchantSupportToTableRow),
+    total: response.total ?? 0,
+  };
+}
+
+export function mapExpertBookingListResponse(response) {
+  return {
+    rows: (response.expertBookings ?? []).map(mapExpertBookingToTableRow),
+    total: response.total ?? 0,
+  };
+}
+
+export function mapReviewToTableRow(item) {
+  return {
+    id: item.id,
+    name: item.name,
+    company: item.businessName,
+    email: item.email,
+    phone: item.productName || "—",
+    source: item.source || "Write a Review",
+    priority: `${item.rating || 0}/5`,
+    category: item.productName || formatLabel(item.productCategory),
+    workType: "Reviews & Ratings",
+    submittedAt: item.createdAt,
+    createdAt: item.createdAt,
+    title: item.title,
+    reviewText: item.reviewText,
+    ...defaultRowMeta,
+    status:
+      item.status === "published"
+        ? "Published"
+        : item.status === "rejected"
+          ? "Rejected"
+          : item.status === "hidden"
+            ? "Hidden"
+            : "Pending",
+  };
+}
+
+export function mapReviewListResponse(response) {
+  return {
+    rows: (response.reviews ?? []).map(mapReviewToTableRow),
     total: response.total ?? 0,
   };
 }

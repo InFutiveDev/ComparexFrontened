@@ -58,6 +58,36 @@ export function fetchMerchantSupportById(id) {
   return authFetch(`/support/${id}`);
 }
 
+export function fetchExpertBookings({ page = 1, limit = 50 } = {}) {
+  return authFetch(`/expert?${withPagination({ page, limit })}`);
+}
+
+export function fetchExpertBookingById(id) {
+  return authFetch(`/expert/${id}`);
+}
+
+export function updateExpertBookingStatus(id, status) {
+  return authFetch(`/expert/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function fetchReviews({ page = 1, limit = 50 } = {}) {
+  return authFetch(`/review?${withPagination({ page, limit })}`);
+}
+
+export function fetchReviewById(id) {
+  return authFetch(`/review/${id}`);
+}
+
+export function updateReviewStatus(id, status) {
+  return authFetch(`/review/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
 export function updateMerchantAccountStatus(id, status) {
   return authFetch(`/merchant/${id}/account-status`, {
     method: "PATCH",
@@ -67,6 +97,13 @@ export function updateMerchantAccountStatus(id, status) {
 
 export function updateResellerAccountStatus(id, status) {
   return authFetch(`/reseller/${id}/account-status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function updateResellerVerificationStatus(id, status) {
+  return authFetch(`/reseller/${id}/verification-status`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
   });

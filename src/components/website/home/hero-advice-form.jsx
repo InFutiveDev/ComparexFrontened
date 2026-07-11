@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HiArrowLeft, HiArrowRight, HiCheck, HiEye, HiEyeSlash } from "react-icons/hi2";
+import { HiArrowLeft, HiArrowRight, HiCheck } from "react-icons/hi2";
 import { heroFormStepOneFields } from "@/lib/mock-data";
 import Image from "next/image";
 import Link from "next/link";
@@ -38,7 +38,6 @@ const initialForm = {
   company: "",
   business: "",
   businessName: "",
-  password: "",
   industry: "",
   role: "",
   department: "",
@@ -133,37 +132,6 @@ function OptionButtons({
   );
 }
 
-function PasswordInput({ id, label, value, onChange, placeholder = "Minimum 8 characters" }) {
-  const [visible, setVisible] = useState(false);
-
-  return (
-    <div>
-      <label htmlFor={id} className={labelClass}>
-        {label}
-      </label>
-      <div className="relative">
-        <input
-          id={id}
-          type={visible ? "text" : "password"}
-          value={value ?? ""}
-          onChange={onChange}
-          className={`${inputClass} pr-12`}
-          placeholder={placeholder}
-          required
-        />
-        <button
-          type="button"
-          onClick={() => setVisible((prev) => !prev)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 transition hover:text-slate-600"
-          aria-label={visible ? "Hide password" : "Show password"}
-        >
-          {visible ? <HiEyeSlash className="size-5" aria-hidden /> : <HiEye className="size-5" aria-hidden />}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export function HeroAdviceForm() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
@@ -182,8 +150,7 @@ export function HeroAdviceForm() {
       return Boolean(
         (form.businessName ?? "").trim() &&
           (form.email ?? "").trim() &&
-          (form.phone ?? "").trim() &&
-          (form.password ?? "").trim()
+          (form.phone ?? "").trim()
       );
     }
     if (step === 2) {
@@ -200,11 +167,6 @@ export function HeroAdviceForm() {
 
     if (contactError) {
       setError(contactError);
-      return false;
-    }
-
-    if ((form.password ?? "").trim().length < 8) {
-      setError("Password must be at least 8 characters");
       return false;
     }
 
@@ -228,10 +190,7 @@ export function HeroAdviceForm() {
         if (recordId) {
           await updateMerchantLead(recordId, stepOnePayload);
         } else {
-          const data = await submitMerchantLead({
-            ...stepOnePayload,
-            password: form.password.trim(),
-          });
+          const data = await submitMerchantLead(stepOnePayload);
           const id = extractFormRecordId(data);
           if (!id) {
             throw new ApiError("Failed to save your details. Please try again.");
@@ -330,9 +289,6 @@ export function HeroAdviceForm() {
           Our team is reviewing the best-fit payment gateway options based on your business needs.
           Our team will connect with you shortly to help with comparisons, onboarding guidance,
           and activation support.
-        </p>
-        <p className="mx-auto mt-2 max-w-xl text-start text-sm leading-relaxed text-slate-600 sm:text-base">
-          Your dashboard login will be enabled once an admin activates your account.
         </p>
         <p className="mx-auto mt-4 max-w-xl text-start text-base font-semibold text-slate-600 sm:text-[16px]">
           Meanwhile, Explore:
@@ -435,12 +391,6 @@ export function HeroAdviceForm() {
                     required
                   />
                 </div>
-                <PasswordInput
-                  id="password"
-                  label="Password"
-                  value={form.password}
-                  onChange={(e) => updateField("password", e.target.value)}
-                />
               </div>
               <div className="mb-4 flex flex-col-3:2 gap-8">
                 <div className="flex items-center gap-2">

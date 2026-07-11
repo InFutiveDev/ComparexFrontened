@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { HiArrowRight, HiCheck, HiChevronDown, HiEye, HiEyeSlash } from "react-icons/hi2";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiError } from "@/lib/api";
+import { getDashboardPathForRole } from "@/lib/account-roles";
 import { validateEmail } from "@/lib/validation";
 
 const inputClass =
@@ -16,6 +17,7 @@ const accountTypeOptions = [
   { value: "merchant", label: "Merchant" },
   { value: "reseller", label: "Reseller" },
   { value: "payment-gateway", label: "Payment Gateway" },
+  { value: "admin", label: "Admin" },
 ];
 
 function AccountTypeSelect({ id, value, onChange, options }) {
@@ -128,8 +130,8 @@ export function RegisterFormSection() {
     setIsSubmitting(true);
 
     try {
-      await register({ name, email, password });
-      router.push("/dashboard");
+      const session = await register({ name, email, password, accountType });
+      router.push(getDashboardPathForRole(session?.user?.role));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to create account");
     } finally {

@@ -7,12 +7,13 @@ import { useState } from "react";
 import { HiArrowRight, HiEye, HiEyeSlash } from "react-icons/hi2";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiError } from "@/lib/api";
+import { getDashboardPathForRole } from "@/lib/account-roles";
 import { validateEmail } from "@/lib/validation";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20";
 
-const accountTypes = ["Merchant", "Reseller", "Payment Gateway"];
+const accountTypes = ["Merchant", "Reseller", "Payment Gateway", "Admin"];
 
 export function LoginFormSection() {
   const router = useRouter();
@@ -38,8 +39,8 @@ export function LoginFormSection() {
     setIsSubmitting(true);
 
     try {
-      await login({ email, password, accountType, remember: rememberMe });
-      router.push("/dashboard");
+      const session = await login({ email, password, accountType, remember: rememberMe });
+      router.push(getDashboardPathForRole(session?.user?.role));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to sign in");
     } finally {

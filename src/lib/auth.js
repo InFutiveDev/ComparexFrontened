@@ -53,10 +53,10 @@ export function clearAuthSession() {
   window.sessionStorage.removeItem(USER_KEY);
 }
 
-export async function registerAccount({ name, email, password }) {
+export async function registerAccount({ name, email, password, accountType }) {
   return apiFetch("/auth/register", {
     method: "POST",
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ name, email, password, accountType }),
   });
 }
 

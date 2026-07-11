@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   HiArrowRightOnRectangle,
@@ -18,6 +18,8 @@ import {
   HiStar,
   HiUserGroup,
 } from "react-icons/hi2";
+import { useAuth } from "@/components/auth/auth-provider";
+import { formatRoleLabel } from "@/lib/account-roles";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: HiSquares2X2 },
@@ -38,8 +40,16 @@ function isActive(pathname, href) {
 }
 
 function SidebarContent({ pathname, onNavigate }) {
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const [essentialsOpen, setEssentialsOpen] = useState(true);
   const activeCount = navItems.filter((item) => !item.comingSoon).length;
+  const initials = (user?.name || "CX")
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <div className="flex h-full flex-col bg-[#f4f7fc]">
@@ -115,14 +125,18 @@ function SidebarContent({ pathname, onNavigate }) {
       <div className="border-t border-slate-200/80 p-4">
         <div className="flex items-center gap-3 rounded-2xl bg-blue-500 p-3 shadow-lg shadow-[#2D4CC8]/20">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/20 text-sm font-bold text-white">
-            C
+            {initials}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-white">CompareX</p>
-            <p className="truncate text-xs text-white/80">Admin</p>
+            <p className="truncate text-sm font-bold text-white">{user?.name || "CompareX"}</p>
+            <p className="truncate text-xs text-white/80">{formatRoleLabel(user?.role)}</p>
           </div>
           <button
             type="button"
+            onClick={() => {
+              logout();
+              router.push("/login");
+            }}
             className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-white text-[#2D4CC8] transition hover:bg-white/90"
             aria-label="Log out"
           >

@@ -12,14 +12,16 @@ import {
   HiOutlineMagnifyingGlass,
   HiOutlineXMark,
 } from "react-icons/hi2";
+import { ApiError } from "@/lib/api";
+import { submitExpertBooking } from "@/lib/expert";
 import { heroFormStepOneFields } from "@/lib/mock-data";
 import {
-  buildTimeSlots,
   businessPriorityOptions,
   getPgById,
   morePgs,
   prominentPgs,
 } from "./talk-to-expert-data";
+import { CalendlyScheduleEmbed } from "./calendly-schedule-embed";
 
 const allPgs = [...prominentPgs, ...morePgs];
 
@@ -62,7 +64,7 @@ function ModalShell({ open, onClose, children, title }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="talk-expert-modal-title"
-        className="relative flex max-h-[min(92vh,820px)] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-[#eef2fa] shadow-2xl shadow-[#13203F]/20"
+        className="relative flex max-h-[min(94vh,920px)] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-[#eef2fa] shadow-2xl shadow-[#13203F]/20"
       >
         <div className="flex items-center justify-between border-b border-slate-200/80 bg-white px-5 py-4">
           <h2 id="talk-expert-modal-title" className="text-lg font-bold text-[#13203F] sm:text-xl">
@@ -368,19 +370,35 @@ export function TalkToExpertModal({ open, onClose }) {
   const [selectedTargetId, setSelectedTargetId] = useState("");
   const [visitorStep, setVisitorStep] = useState(1);
   const [visitor, setVisitor] = useState(initialVisitor);
-  const [selectedSlot, setSelectedSlot] = useState("");
   const [providerSearch, setProviderSearch] = useState("");
-  const slots = useMemo(() => buildTimeSlots(), []);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [calendlyBooked, setCalendlyBooked] = useState(false);
 
   const selectedPg = getPgById(selectedTargetId);
+
+  const calendlyPrefill = useMemo(
+    () => ({
+      name: visitor.fullName.trim(),
+      email: visitor.email.trim(),
+      customAnswers: {
+        a1: visitor.company.trim(),
+        a2: visitor.phone.trim(),
+        a3: selectedPg?.name || "",
+      },
+    }),
+    [visitor.fullName, visitor.email, visitor.company, visitor.phone, selectedPg?.name],
+  );
 
   function resetModal() {
     setFlow("select");
     setSelectedTargetId("");
     setVisitorStep(1);
     setVisitor(initialVisitor);
-    setSelectedSlot("");
     setProviderSearch("");
+    setIsSubmitting(false);
+    setSubmitError("");
+    setCalendlyBooked(false);
   }
 
   function handleClose() {
@@ -390,6 +408,78 @@ export function TalkToExpertModal({ open, onClose }) {
 
   function updateVisitor(key, value) {
     setVisitor((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function formatCalendlySlot(payload = {}) {
+    const event = payload.event || {};
+    const invitee = payload.invitee || {};
+    const startTime = event.start_time || invitee.start_time || null;
+
+    let slotDateLabel = null;
+    let slotTime = null;
+
+    if (startTime) {
+      const date = new Date(startTime);
+      if (!Number.isNaN(date.getTime())) {
+        slotDateLabel = date.toLocaleDateString("en-IN", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+        slotTime = date.toLocaleTimeString("en-IN", {
+          hour: "numeric",
+          minute: "2-digit",
+        });
+      }
+    }
+
+    return {
+      slotId: event.uri || invitee.uri || `calendly-${Date.now()}`,
+      slotDateLabel: slotDateLabel || "Scheduled via Calendly",
+      slotTime: slotTime || "See Calendly confirmation",
+      calendlyEventUri: event.uri || null,
+      calendlyInviteeUri: invitee.uri || null,
+      scheduledAt: startTime || null,
+    };
+  }
+
+  async function confirmBookingFromCalendly(payload) {
+    if (!selectedPg || isSubmitting || calendlyBooked) return;
+
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    const slot = formatCalendlySlot(payload);
+
+    try {
+      await submitExpertBooking({
+        fullName: visitor.fullName.trim(),
+        businessName: visitor.company.trim(),
+        email: visitor.email.trim(),
+        phone: visitor.phone.trim(),
+        website: visitor.website.trim(),
+        industry: visitor.industry,
+        priority: visitor.priority,
+        paymentGatewayId: selectedPg.id,
+        paymentGatewayName: selectedPg.name,
+        representativeName: selectedPg.rep?.name || null,
+        representativeTitle: selectedPg.rep?.title || null,
+        slotId: slot.slotId,
+        slotDateLabel: slot.slotDateLabel,
+        slotTime: slot.slotTime,
+        calendlyEventUri: slot.calendlyEventUri,
+        calendlyInviteeUri: slot.calendlyInviteeUri,
+        scheduledAt: slot.scheduledAt,
+        bookingSource: "calendly",
+      });
+      setCalendlyBooked(true);
+      setFlow("success");
+    } catch (err) {
+      setSubmitError(err instanceof ApiError ? err.message : "Failed to save your Calendly booking");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const modalTitle = useMemo(() => {
@@ -412,7 +502,7 @@ export function TalkToExpertModal({ open, onClose }) {
         visitor.fullName.trim() &&
           /^\d{10}$/.test(visitor.phone) &&
           visitor.email.trim() &&
-          visitor.company.trim()
+          visitor.company.trim(),
       );
     }
     if (visitorStep === 2) return Boolean(visitor.industry);
@@ -557,24 +647,19 @@ export function TalkToExpertModal({ open, onClose }) {
           ) : null}
 
           <div>
-            <h3 className="mb-3 text-sm font-semibold text-[#13203F]">Available slots (Calendly sync — demo)</h3>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {slots.map((slot) => (
-                <button
-                  key={slot.id}
-                  type="button"
-                  onClick={() => setSelectedSlot(slot.id)}
-                  className={`cursor-pointer rounded-xl border px-3 py-3 text-left text-sm transition ${
-                    selectedSlot === slot.id
-                      ? "border-[#2D4CC8] bg-[#EEF2FC] ring-2 ring-[#2D4CC8]/20"
-                      : "border-slate-200 bg-white hover:border-[#2D4CC8]/30"
-                  }`}
-                >
-                  <p className="font-semibold text-[#13203F]">{slot.dateLabel}</p>
-                  <p className="text-xs text-slate-500">{slot.time}</p>
-                </button>
-              ))}
-            </div>
+            <h3 className="mb-2 text-sm font-semibold text-[#13203F]">Pick a time with Calendly</h3>
+            <p className="mb-3 text-sm text-slate-600">
+              Choose a slot below. Your booking is confirmed automatically once you schedule.
+            </p>
+            {isSubmitting ? (
+              <div className="mb-3 rounded-xl border border-[#2D4CC8]/20 bg-[#EEF2FC] px-4 py-3 text-sm text-[#2D4CC8]">
+                Saving your booking…
+              </div>
+            ) : null}
+            <CalendlyScheduleEmbed
+              prefill={calendlyPrefill}
+              onEventScheduled={confirmBookingFromCalendly}
+            />
           </div>
         </div>
       ) : null}
@@ -584,12 +669,12 @@ export function TalkToExpertModal({ open, onClose }) {
           <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#25a36f] text-white shadow-lg shadow-[#25a36f]/30">
             <HiCheck className="size-8" aria-hidden />
           </div>
-          <h3 className="mt-6 text-2xl font-bold text-[#13203F]">Booking Confirmed 🎉</h3>
+          <h3 className="mt-6 text-2xl font-bold text-[#13203F]">Booking Confirmed</h3>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-600">
-            Your call has been scheduled. A confirmation email has been sent to{" "}
-            <span className="font-semibold text-[#13203F]">{visitor.email}</span> and the PG representative.
+            Your Calendly call is booked. A confirmation email will go to{" "}
+            <span className="font-semibold text-[#13203F]">{visitor.email}</span>. Our team and the
+            PG representative will follow up shortly.
           </p>
-          <p className="mt-2 text-xs text-slate-500">Demo mode — Calendly & email integration coming soon.</p>
           <button
             type="button"
             onClick={handleClose}
@@ -602,7 +687,13 @@ export function TalkToExpertModal({ open, onClose }) {
       ) : null}
 
       {flow !== "success" ? (
-        <div className="mt-6 flex items-center justify-between gap-3 border-t border-slate-200/70 pt-5">
+        <div className="mt-6 space-y-3 border-t border-slate-200/70 pt-5">
+          {submitError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {submitError}
+            </div>
+          ) : null}
+          <div className="flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => {
@@ -629,37 +720,40 @@ export function TalkToExpertModal({ open, onClose }) {
             Back
           </button>
 
-          <button
-            type="button"
-            disabled={
-              (flow === "select" && !selectedTargetId) ||
-              (flow === "details" && !canContinueDetails()) ||
-              (flow === "schedule" && !selectedSlot)
-            }
-            onClick={() => {
-              if (flow === "select" && selectedTargetId) {
-                setVisitorStep(1);
-                setFlow("details");
-                return;
+          {flow !== "schedule" ? (
+            <button
+              type="button"
+              disabled={
+                isSubmitting ||
+                (flow === "select" && !selectedTargetId) ||
+                (flow === "details" && !canContinueDetails())
               }
-              if (flow === "details") {
-                if (visitorStep < 3) {
-                  setVisitorStep((s) => s + 1);
+              onClick={() => {
+                if (flow === "select" && selectedTargetId) {
+                  setVisitorStep(1);
+                  setFlow("details");
                   return;
                 }
-                setFlow("schedule");
-                return;
-              }
-              if (flow === "schedule" && selectedSlot) {
-                setFlow("success");
-              }
-            }}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-6 py-3 text-sm font-semibold text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
-            style={{ color: "#fff" }}
-          >
-            {flow === "schedule" ? "Confirm Booking" : "Next"}
-            <HiArrowRight className="size-4" aria-hidden />
-          </button>
+                if (flow === "details") {
+                  if (visitorStep < 3) {
+                    setVisitorStep((s) => s + 1);
+                    return;
+                  }
+                  setFlow("schedule");
+                }
+              }}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-6 py-3 text-sm font-semibold text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+              style={{ color: "#fff" }}
+            >
+              Next
+              <HiArrowRight className="size-4" aria-hidden />
+            </button>
+          ) : (
+            <p className="text-right text-xs text-slate-500 sm:text-sm">
+              Schedule in Calendly to finish
+            </p>
+          )}
+          </div>
         </div>
       ) : null}
     </ModalShell>

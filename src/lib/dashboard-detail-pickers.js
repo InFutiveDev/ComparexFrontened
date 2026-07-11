@@ -13,3 +13,11 @@ export function pickPaymentGateway(response) {
 export function pickMerchantSupport(response) {
   return response.merchantSupport;
 }
+
+export function pickExpertBooking(response) {
+  return response.expertBooking;
+}
+
+export function pickReview(response) {
+  return response.review;
+}

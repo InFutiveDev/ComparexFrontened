@@ -60,8 +60,8 @@ export function AuthProvider({ children }) {
   );
 
   const register = useCallback(
-    async ({ name, email, password }) => {
-      const session = await registerAccount({ name, email, password });
+    async ({ name, email, password, accountType }) => {
+      const session = await registerAccount({ name, email, password, accountType });
       applySession(session, true);
       return session;
     },

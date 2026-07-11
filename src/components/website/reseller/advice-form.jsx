@@ -4,13 +4,11 @@ import { useEffect, useState } from "react";
 import { HiArrowLeft, HiArrowRight, HiCheck, HiEye, HiEyeSlash } from "react-icons/hi2";
 import { FormSuccessScreen } from "@/components/website/shared/form-success-screen";
 import Image from "next/image";
+import Link from "next/link";
 import { ApiError } from "@/lib/api";
 import { submitResellerPartner, updateResellerPartner } from "@/lib/reseller";
 import { extractFormRecordId } from "@/lib/form-record-id";
-import {
-  sanitizePhoneInput,
-  validateContactFields,
-} from "@/lib/validation";
+import { sanitizePhoneInput, validateContactFields } from "@/lib/validation";
 
 const steps = [
   { id: 1, label: "Partner profile" },
@@ -86,21 +84,13 @@ function SelectedCheckIcon() {
 
 function EmptyCheckIcon() {
   return (
-    <span
-      className="size-5 shrink-0 rounded-md border border-slate-300 bg-white"
-      aria-hidden
-    />
+    <span className="size-5 shrink-0 rounded-md border border-slate-300 bg-white" aria-hidden />
   );
 }
 
 function IconToggle({ checked, onToggle, children }) {
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-pressed={checked}
-      className={checkboxRowClass}
-    >
+    <button type="button" onClick={onToggle} aria-pressed={checked} className={checkboxRowClass}>
       {checked ? <SelectedCheckIcon /> : <EmptyCheckIcon />}
       {children}
     </button>
@@ -169,12 +159,10 @@ function MultiOptionButtons({ options, values, onChange }) {
 function StepHeader({ title, subtitle }) {
   return (
     <>
-      <h2 className="text-left text-lg mb-1 font-bold text-[#13203F] sm:text-xl lg:text-[22px]">
+      <h2 className="mb-1 text-left text-lg font-bold text-[#13203F] sm:text-xl lg:text-[22px]">
         {title}
       </h2>
-      {subtitle ? (
-        <p className=" text-left text-base font-normal text-slate-600">{subtitle}</p>
-      ) : null}
+      {subtitle ? <p className="text-left text-base font-normal text-slate-600">{subtitle}</p> : null}
     </>
   );
 }
@@ -230,7 +218,7 @@ export function ResellerAdviceForm() {
           form.businessName.trim() &&
           form.phone.trim() &&
           form.email.trim() &&
-          form.password.trim()
+          form.password.trim(),
       );
     }
     if (step === 2) {
@@ -394,28 +382,26 @@ export function ResellerAdviceForm() {
   if (submitted) {
     return (
       <FormSuccessScreen>
-        <h3 className="mt-6 text-2xl text-center font-bold tracking-tight text-[#13203F] sm:text-[25px]">
+        <h3 className="mt-6 text-center text-2xl font-bold tracking-tight text-[#13203F] sm:text-[25px]">
           Thank You for Your Interest in CompareX
         </h3>
-
         <p className="mx-auto mt-3 max-w-xl text-start text-sm leading-relaxed text-slate-600 sm:text-base">
-          We&apos;ve received your application and appreciate your interest in becoming a
-          CompareX Partner.
+          We&apos;ve received your application and appreciate your interest in becoming a CompareX
+          Partner.
         </p>
         <p className="mx-auto mt-2 max-w-xl text-start text-sm leading-relaxed text-slate-600 sm:text-base">
-          Our team will review the information provided and connect with you to better understand
-          your business, partnership objectives, and the types of solutions most relevant to your
-          network.
+          Sign in to your dashboard to complete remaining registration details (partnership model,
+          KYC, and agreements). Admin will verify your profile after that.
         </p>
-        <p className="mx-auto mt-2 max-w-xl text-start text-sm leading-relaxed text-slate-600 sm:text-base">
-          If additional information is required, a member of our team may reach out to you.
-        </p>
-        <p className="mx-auto mt-2 max-w-xl text-start text-sm leading-relaxed text-slate-600 sm:text-base">
-          Your dashboard login will be enabled once an admin activates your account.
-        </p>
-        <p className="mx-auto mt-4 max-w-xl text-start text-sm font-semibold text-slate-700 sm:text-base">
-          We look forward to exploring how we can create value together.
-        </p>
+        <div className="mt-6 flex justify-center">
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110"
+          >
+            Sign in to dashboard
+            <HiArrowRight className="size-4" aria-hidden />
+          </Link>
+        </div>
       </FormSuccessScreen>
     );
   }
@@ -451,7 +437,7 @@ export function ResellerAdviceForm() {
               />
 
               <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div >
+                <div>
                   <label htmlFor="full-name" className={labelClass}>
                     Full Name *
                   </label>
@@ -526,8 +512,6 @@ export function ResellerAdviceForm() {
                   onChange={(e) => updateField("password", e.target.value)}
                 />
               </div>
-
-              
             </>
           )}
 
@@ -602,43 +586,42 @@ export function ResellerAdviceForm() {
               </div>
             </>
           )}
-
         </div>
 
         <div className="mt-4 flex items-center justify-end gap-3 border-t border-slate-200/70 pt-4">
-            {step > 1 ? (
-              <button
-                type="button"
-                onClick={handleBack}
-                className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-[#2D4CC8]/40 hover:text-[#13203F]"
-              >
-                <HiArrowLeft className="size-4" aria-hidden />
-                Back
-              </button>
-            ) : (
-              <div className="h-fit w-fit" />
-            )}
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-[#2D4CC8]/40 hover:text-[#13203F]"
+            >
+              <HiArrowLeft className="size-4" aria-hidden />
+              Back
+            </button>
+          ) : (
+            <div className="h-fit w-fit" />
+          )}
 
-            {step < 3 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={isSavingStep}
-                className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-10 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isSavingStep ? "Saving..." : step === 2 ? "Continue" : "Next"}
-                <HiArrowRight className="size-4" aria-hidden />
-              </button>
-            ) : (
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isSubmitting ? "Submitting..." : "Apply as Partner"}
-                <HiCheck className="size-4" aria-hidden />
-              </button>
-            )}
+          {step < 3 ? (
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={isSavingStep}
+              className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-10 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSavingStep ? "Saving..." : step === 2 ? "Continue" : "Next"}
+              <HiArrowRight className="size-4" aria-hidden />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSubmitting ? "Submitting..." : "Apply as Partner"}
+              <HiCheck className="size-4" aria-hidden />
+            </button>
+          )}
         </div>
       </form>
     </div>

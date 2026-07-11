@@ -1,10 +1,13 @@
-import { RequireAuth } from "@/components/auth/require-auth";
+"use client";
+
+import { RequireRole } from "@/components/auth/require-role";
 import { DashboardShell } from "@/components/dashboard/layout/dashboard-shell";
+import { USER_ROLES } from "@/lib/account-roles";
 
 export default function DashboardLayout({ children }) {
   return (
-    <RequireAuth>
+    <RequireRole allowedRoles={USER_ROLES.ADMIN}>
       <DashboardShell>{children}</DashboardShell>
-    </RequireAuth>
+    </RequireRole>
   );
 }
