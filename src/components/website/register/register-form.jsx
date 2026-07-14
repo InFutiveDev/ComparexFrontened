@@ -17,6 +17,7 @@ const accountTypeOptions = [
   { value: "merchant", label: "Merchant" },
   { value: "reseller", label: "Reseller" },
   { value: "payment-gateway", label: "Payment Gateway" },
+  { value: "sub_admin", label: "Sub Admin" },
   { value: "admin", label: "Admin" },
 ];
 

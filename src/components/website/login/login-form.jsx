@@ -13,7 +13,7 @@ import { validateEmail } from "@/lib/validation";
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20";
 
-const accountTypes = ["Merchant", "Reseller", "Payment Gateway", "Admin"];
+const accountTypes = ["Merchant", "Reseller", "Payment Gateway", "Sub Admin", "Admin"];
 
 export function LoginFormSection() {
   const router = useRouter();

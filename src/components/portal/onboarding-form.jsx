@@ -12,6 +12,12 @@ import {
 } from "react-icons/hi2";
 import { savePgOnboardingProfile } from "@/lib/pg-onboarding-storage";
 import {
+  serializeOnboardingForApi,
+  updateMyPaymentProfile,
+  uploadPgOnboardingFile,
+} from "@/lib/payment";
+import { ApiError } from "@/lib/api";
+import {
   APPROVAL_COMPLEXITY_OPTIONS,
   BUSINESS_TYPE_OPTIONS,
   COUNTRY_OPTIONS,
@@ -272,7 +278,119 @@ function Field({ show, children }) {
   return children;
 }
 
-function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
+function getFileMeta(value) {
+  if (!value) return null;
+  if (typeof File !== "undefined" && value instanceof File) {
+    return { fileName: value.name };
+  }
+  if (typeof value === "string") {
+    return { fileName: value };
+  }
+  if (typeof value === "object") {
+    return {
+      fileName: value.fileName || value.name || null,
+      url: value.url || null,
+      key: value.key || null,
+      mimeType: value.mimeType || null,
+      size: value.size || null,
+    };
+  }
+  return null;
+}
+
+function formatFileSize(size) {
+  if (!size || Number.isNaN(Number(size))) return null;
+  const bytes = Number(size);
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function FileUploadField({
+  id,
+  label,
+  value,
+  accept,
+  hint,
+  uploading,
+  disabled,
+  onUpload,
+  onClear,
+  imagePreview = false,
+}) {
+  const meta = getFileMeta(value);
+  const isImage =
+    imagePreview &&
+    Boolean(
+      meta?.url &&
+        (meta.mimeType?.startsWith("image/") ||
+          /\.(png|jpe?g|webp|gif)$/i.test(meta.fileName || ""))
+    );
+
+  return (
+    <div>
+      <label htmlFor={id} className={labelClass}>
+        {label}
+      </label>
+      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-4">
+        <input
+          id={id}
+          type="file"
+          accept={accept}
+          disabled={disabled || uploading}
+          onChange={(e) => {
+            const file = e.target.files?.[0] || null;
+            e.target.value = "";
+            if (file) onUpload?.(file);
+          }}
+          className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-full file:border-0 file:bg-[#EEF2FC] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#2D4CC8] disabled:cursor-not-allowed disabled:opacity-60"
+        />
+        {hint ? <p className="mt-2 text-xs text-slate-500">{hint}</p> : null}
+        {uploading ? (
+          <p className="mt-2 text-xs font-medium text-[#2D4CC8]">Uploading…</p>
+        ) : null}
+        {meta?.fileName ? (
+          <div className="mt-3 flex items-start justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+            <div className="min-w-0 flex-1">
+              {isImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={meta.url}
+                  alt={meta.fileName}
+                  className="mb-2 h-16 w-16 rounded-lg border border-slate-200 object-contain bg-white"
+                />
+              ) : null}
+              <p className="truncate text-sm font-semibold text-[#13203F]">{meta.fileName}</p>
+              <p className="mt-0.5 text-xs text-slate-500">
+                {[formatFileSize(meta.size), "Uploaded"].filter(Boolean).join(" · ")}
+              </p>
+              {meta.url ? (
+                <a
+                  href={meta.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 inline-flex text-xs font-semibold text-[#2D4CC8] hover:underline"
+                >
+                  View file
+                </a>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={onClear}
+              disabled={disabled || uploading}
+              className="inline-flex shrink-0 items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 transition hover:border-red-200 hover:text-red-600 disabled:opacity-50"
+            >
+              Remove
+            </button>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi = true }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [form, setForm] = useState(() => ({
     ...initialOnboardingForm,
@@ -282,6 +400,10 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
   const [draftSaved, setDraftSaved] = useState(false);
   const [featureQuery, setFeatureQuery] = useState("");
   const [featureMenuOpen, setFeatureMenuOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [uploadingField, setUploadingField] = useState("");
+  const [uploadError, setUploadError] = useState("");
 
   const visibleSteps = useMemo(() => getVisibleSteps(form.serviceType), [form.serviceType]);
   const currentStep = visibleSteps[stepIndex] || visibleSteps[0];
@@ -322,13 +444,17 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
     setForm({
       ...initialOnboardingForm,
       ...(initialData || {}),
-      companyLogo: null,
-      onboardingChecklist: null,
+      companyLogo: getFileMeta(initialData?.companyLogo),
+      onboardingChecklist: getFileMeta(initialData?.onboardingChecklist),
     });
     setSubmitted(false);
     setDraftSaved(false);
     setFeatureQuery("");
     setFeatureMenuOpen(false);
+    setIsSaving(false);
+    setSaveError("");
+    setUploadingField("");
+    setUploadError("");
     // Only reset when modal opens, not when parent profile refreshes mid-submit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -378,17 +504,91 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
     return validateStep(currentStep?.id, form);
   }
 
-  function handleSaveDraft() {
-    const saved = savePgOnboardingProfile(form);
-    onSaved?.(saved);
-    setDraftSaved(true);
-    window.setTimeout(() => setDraftSaved(false), 2500);
+  async function handleFileUpload(field, file, folder) {
+    if (!file || isSaving) return;
+
+    setUploadingField(field);
+    setUploadError("");
+
+    try {
+      const uploaded = await uploadPgOnboardingFile(file, folder);
+      updateField(field, uploaded);
+    } catch (err) {
+      setUploadError(
+        err instanceof ApiError
+          ? err.message
+          : `Failed to upload ${field === "companyLogo" ? "company logo" : "onboarding checklist"}`
+      );
+    } finally {
+      setUploadingField("");
+    }
   }
 
-  function handleSubmit() {
-    const saved = savePgOnboardingProfile(form);
-    onSaved?.(saved);
-    setSubmitted(true);
+  function clearUploadedFile(field) {
+    updateField(field, null);
+    setUploadError("");
+  }
+
+  async function persistOnboarding({ submit = false } = {}) {
+    const localSaved = savePgOnboardingProfile(form);
+
+    if (!persistToApi) {
+      onSaved?.(localSaved);
+      return localSaved;
+    }
+
+    const response = await updateMyPaymentProfile({
+      section: submit ? "submit" : "draft",
+      submit,
+      onboarding: serializeOnboardingForApi(form),
+    });
+
+    const gateway = response?.paymentGateway;
+    const nextOnboarding = gateway?.onboarding || {};
+    const saved = {
+      ...form,
+      ...nextOnboarding,
+      companyLogo: getFileMeta(nextOnboarding.companyLogo ?? form.companyLogo),
+      onboardingChecklist: getFileMeta(
+        nextOnboarding.onboardingChecklist ?? form.onboardingChecklist
+      ),
+      verificationStatus: gateway?.verificationStatus,
+      profileCompletion: gateway?.profileCompletion,
+      updatedAt: new Date().toISOString(),
+    };
+
+    savePgOnboardingProfile(saved);
+    onSaved?.(saved, gateway);
+    return saved;
+  }
+
+  async function handleSaveDraft() {
+    if (isSaving) return;
+    setIsSaving(true);
+    setSaveError("");
+    try {
+      await persistOnboarding({ submit: false });
+      setDraftSaved(true);
+      window.setTimeout(() => setDraftSaved(false), 2500);
+    } catch (err) {
+      setSaveError(err instanceof ApiError ? err.message : "Failed to save draft");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleSubmit() {
+    if (isSaving) return;
+    setIsSaving(true);
+    setSaveError("");
+    try {
+      await persistOnboarding({ submit: true });
+      setSubmitted(true);
+    } catch (err) {
+      setSaveError(err instanceof ApiError ? err.message : "Failed to submit onboarding");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   function handleClose() {
@@ -437,7 +637,11 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
               <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#25a36f] text-white shadow-lg shadow-[#25a36f]/30">
                 <HiCheck className="size-8" aria-hidden />
               </div>
-              <h3 className="mt-6 text-2xl font-bold text-[#13203F]">Profile details submitted</h3>
+              <h3 className="mt-6 text-2xl font-bold text-[#13203F]">Onboarding submitted</h3>
+              <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-600">
+                Thanks — your payment gateway profile is saved and submitted for review. You can
+                track status from Complete Profile.
+              </p>
               <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-600">
                 We&apos;ve received your onboarding details and will use them to power comparison,
                 discovery, and Talk to Expert routing.
@@ -509,7 +713,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                   </div>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <label className={labelClass}>Legal Entity Name *</label>
+                      <label className={labelClass}>Legal Entity Name</label>
                       <input
                         className={inputClass}
                         value={form.legalEntityName}
@@ -518,7 +722,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Brand Name *</label>
+                      <label className={labelClass}>Brand Name</label>
                       <input
                         className={inputClass}
                         value={form.brandName}
@@ -526,17 +730,24 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                         placeholder="Enter company / product name"
                       />
                     </div>
-                    <div>
-                      <label className={labelClass}>Company Logo</label>
-                      <input
-                        type="file"
-                        accept="image/png,image/jpeg"
-                        className={`${inputClass} file:mr-3 file:rounded-full file:border-0 file:bg-[#EEF2FC] file:px-3 file:py-1 file:text-xs file:font-semibold file:text-[#2D4CC8]`}
-                        onChange={(e) => updateField("companyLogo", e.target.files?.[0] || null)}
+                    <div className="sm:col-span-2">
+                      <FileUploadField
+                        id="company-logo"
+                        label="Company Logo"
+                        value={form.companyLogo}
+                        accept="image/png,image/jpeg,image/webp,image/gif"
+                        hint="PNG, JPG, WEBP or GIF — max 10MB"
+                        uploading={uploadingField === "companyLogo"}
+                        disabled={isSaving}
+                        imagePreview
+                        onUpload={(file) =>
+                          handleFileUpload("companyLogo", file, "pg-onboarding/logos")
+                        }
+                        onClear={() => clearUploadedFile("companyLogo")}
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Website URL *</label>
+                      <label className={labelClass}>Website URL</label>
                       <input
                         type="url"
                         className={inputClass}
@@ -546,7 +757,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Headquarters Country *</label>
+                      <label className={labelClass}>Headquarters Country</label>
                       <FormSelect
                         value={form.headquartersCountry}
                         onChange={(v) => updateField("headquartersCountry", v)}
@@ -555,7 +766,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Headquarters City *</label>
+                      <label className={labelClass}>Headquarters City</label>
                       <input
                         className={inputClass}
                         value={form.headquartersCity}
@@ -564,7 +775,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Year Established *</label>
+                      <label className={labelClass}>Year Established</label>
                       <input
                         className={inputClass}
                         inputMode="numeric"
@@ -609,7 +820,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>PCI DSS Status *</label>
+                      <label className={labelClass}>PCI DSS Status</label>
                       <FormSelect
                         value={form.pciDssStatus}
                         onChange={(v) => updateField("pciDssStatus", v)}
@@ -618,7 +829,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className={labelClass}>Company Overview *</label>
+                      <label className={labelClass}>Company Overview</label>
                       <textarea
                         rows={4}
                         maxLength={150}
@@ -645,7 +856,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Field show={show("upiMdr")}>
                       <div>
-                        <label className={labelClass}>UPI MDR (%) *</label>
+                        <label className={labelClass}>UPI MDR (%)</label>
                         <input
                           className={inputClass}
                           value={form.upiMdr}
@@ -656,7 +867,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                     </Field>
                     <Field show={show("creditCardMdr")}>
                       <div>
-                        <label className={labelClass}>Credit Card MDR (%) *</label>
+                        <label className={labelClass}>Credit Card MDR (%)</label>
                         <input
                           className={inputClass}
                           value={form.creditCardMdr}
@@ -667,7 +878,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                     </Field>
                     <Field show={show("debitCardMdr")}>
                       <div>
-                        <label className={labelClass}>Debit Card MDR (%) *</label>
+                        <label className={labelClass}>Debit Card MDR (%)</label>
                         <input
                           className={inputClass}
                           value={form.debitCardMdr}
@@ -769,7 +980,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                     </Field>
                     <Field show={show("hardwareCost")}>
                       <div>
-                        <label className={labelClass}>Hardware Cost (₹) *</label>
+                        <label className={labelClass}>Hardware Cost (₹)</label>
                         <input
                           className={inputClass}
                           value={form.hardwareCost}
@@ -799,7 +1010,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                     </Field>
                     <Field show={show("forexMarkup")}>
                       <div>
-                        <label className={labelClass}>Forex Markup / Margin (%) *</label>
+                        <label className={labelClass}>Forex Markup / Margin (%)</label>
                         <input
                           className={inputClass}
                           value={form.forexMarkup}
@@ -809,7 +1020,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                     </Field>
                     <Field show={show("settlementCurrency")}>
                       <div>
-                        <label className={labelClass}>Settlement Currency *</label>
+                        <label className={labelClass}>Settlement Currency</label>
                         <FormSelect
                         value={form.settlementCurrency}
                         onChange={(v) => updateField("settlementCurrency", v)}
@@ -820,7 +1031,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                     </Field>
                     <Field show={show("settlementInfrastructure")}>
                       <div>
-                        <label className={labelClass}>Settlement Infrastructure *</label>
+                        <label className={labelClass}>Settlement Infrastructure</label>
                         <FormSelect
                         value={form.settlementInfrastructure}
                         onChange={(v) => updateField("settlementInfrastructure", v)}
@@ -831,7 +1042,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                     </Field>
                     <Field show={show("multiCurrencyWallet")}>
                       <div>
-                        <label className={labelClass}>Multi Currency Wallet *</label>
+                        <label className={labelClass}>Multi Currency Wallet</label>
                         <FormSelect
                         value={form.multiCurrencyWallet}
                         onChange={(v) => updateField("multiCurrencyWallet", v)}
@@ -842,7 +1053,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                     </Field>
                     <Field show={show("perTransactionFee")}>
                       <div>
-                        <label className={labelClass}>Per Transaction Fee (₹) *</label>
+                        <label className={labelClass}>Per Transaction Fee (₹)</label>
                         <input
                           className={inputClass}
                           value={form.perTransactionFee}
@@ -888,17 +1099,26 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                   </div>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="sm:col-span-2">
-                      <label className={labelClass}>Onboarding Checklist</label>
-                      <input
-                        type="file"
-                        className={`${inputClass} file:mr-3 file:rounded-full file:border-0 file:bg-[#EEF2FC] file:px-3 file:py-1 file:text-xs file:font-semibold file:text-[#2D4CC8]`}
-                        onChange={(e) =>
-                          updateField("onboardingChecklist", e.target.files?.[0] || null)
+                      <FileUploadField
+                        id="onboarding-checklist"
+                        label="Onboarding Checklist"
+                        value={form.onboardingChecklist}
+                        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp"
+                        hint="PDF, DOC, DOCX or image — max 10MB"
+                        uploading={uploadingField === "onboardingChecklist"}
+                        disabled={isSaving}
+                        onUpload={(file) =>
+                          handleFileUpload(
+                            "onboardingChecklist",
+                            file,
+                            "pg-onboarding/checklists"
+                          )
                         }
+                        onClear={() => clearUploadedFile("onboardingChecklist")}
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Onboarding TAT *</label>
+                      <label className={labelClass}>Onboarding TAT</label>
                       <FormSelect
                         value={form.onboardingTat}
                         onChange={(v) => updateField("onboardingTat", v)}
@@ -908,7 +1128,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                     </div>
                     <Field show={show("settlementCycle")}>
                       <div>
-                        <label className={labelClass}>Settlement Cycle *</label>
+                        <label className={labelClass}>Settlement Cycle</label>
                         <FormSelect
                         value={form.settlementCycle}
                         onChange={(v) => updateField("settlementCycle", v)}
@@ -948,7 +1168,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                     </div>
                     <Field show={show("averageResponseTime")}>
                       <div>
-                        <label className={labelClass}>Average Response Time *</label>
+                        <label className={labelClass}>Average Response Time</label>
                         <FormSelect
                         value={form.averageResponseTime}
                         onChange={(v) => updateField("averageResponseTime", v)}
@@ -1004,7 +1224,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                       </Field>
                     </div>
                     <div className="sm:col-span-2">
-                      <label className={labelClass}>Restricted Categories *</label>
+                      <label className={labelClass}>Restricted Categories</label>
                       <MultiSelectChips
                         options={RESTRICTED_CATEGORY_OPTIONS}
                         value={form.restrictedCategories}
@@ -1012,7 +1232,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className={labelClass}>Best Suited Business Types *</label>
+                      <label className={labelClass}>Best Suited Business Types</label>
                       <MultiSelectChips
                         options={BUSINESS_TYPE_OPTIONS}
                         value={form.bestSuitedBusinessTypes}
@@ -1132,7 +1352,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                     </p>
                   </div>
                   <div>
-                    <label className={labelClass}>Search & Add Features *</label>
+                    <label className={labelClass}>Search & Add Features</label>
                     <div className="relative">
                       <input
                         value={featureQuery}
@@ -1208,7 +1428,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                   </div>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="sm:col-span-2">
-                      <label className={labelClass}>API Documentation URL *</label>
+                      <label className={labelClass}>API Documentation URL</label>
                       <input
                         type="url"
                         className={inputClass}
@@ -1226,7 +1446,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className={labelClass}>Plugin Availability *</label>
+                      <label className={labelClass}>Plugin Availability</label>
                       <MultiSelectChips
                         options={PLUGIN_OPTIONS}
                         value={form.pluginAvailability}
@@ -1327,7 +1547,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                   {form.talkToExpertEnabled ? (
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
-                        <label className={labelClass}>Expert Name *</label>
+                        <label className={labelClass}>Expert Name</label>
                         <input
                           className={inputClass}
                           value={form.expertName}
@@ -1343,7 +1563,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                         />
                       </div>
                       <div>
-                        <label className={labelClass}>Expert Email *</label>
+                        <label className={labelClass}>Expert Email</label>
                         <input
                           type="email"
                           className={inputClass}
@@ -1352,7 +1572,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                         />
                       </div>
                       <div>
-                        <label className={labelClass}>Expert Mobile *</label>
+                        <label className={labelClass}>Expert Mobile</label>
                         <input
                           className={inputClass}
                           inputMode="numeric"
@@ -1365,7 +1585,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                         />
                       </div>
                       <div className="sm:col-span-2">
-                        <label className={labelClass}>Expert Description *</label>
+                        <label className={labelClass}>Expert Description</label>
                         <textarea
                           rows={3}
                           maxLength={100}
@@ -1378,7 +1598,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                       <div className="sm:col-span-2">
                         <ToggleField
                           id="calendar-synced"
-                          label="Calendar Sync with External Tool *"
+                          label="Calendar Sync with External Tool"
                           checked={form.calendarSynced}
                           onChange={(v) => updateField("calendarSynced", v)}
                         />
@@ -1472,6 +1692,12 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                       Draft saved. You can continue whenever you&apos;re ready.
                     </p>
                   ) : null}
+                  {uploadError ? (
+                    <p className="text-sm font-medium text-red-600">{uploadError}</p>
+                  ) : null}
+                  {saveError ? (
+                    <p className="text-sm font-medium text-red-600">{saveError}</p>
+                  ) : null}
                 </div>
               ) : null}
 
@@ -1480,18 +1706,20 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                   <>
                     <button
                       type="button"
+                      disabled={isSaving || Boolean(uploadingField)}
                       onClick={handleSaveDraft}
-                      className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-slate-200 px-5 py-3 text-sm font-bold text-[#13203F] transition hover:bg-slate-300"
+                      className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-slate-200 px-5 py-3 text-sm font-bold text-[#13203F] transition hover:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Save Draft
+                      {isSaving ? "Saving..." : "Save Draft"}
                     </button>
                     <button
                       type="button"
+                      disabled={isSaving || Boolean(uploadingField)}
                       onClick={handleSubmit}
-                      className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#13203F] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#1c2d52]"
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#13203F] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#1c2d52] disabled:cursor-not-allowed disabled:opacity-50"
                       style={{ color: "#fff" }}
                     >
-                      Continue
+                      {isSaving ? "Submitting..." : "Submit for Review"}
                       <HiArrowRight className="size-4" aria-hidden />
                     </button>
                   </>
@@ -1513,7 +1741,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
                     </button>
                     <button
                       type="button"
-                      disabled={!canContinue()}
+                      disabled={!canContinue() || Boolean(uploadingField)}
                       onClick={() => setStepIndex((s) => Math.min(s + 1, visibleSteps.length - 1))}
                       className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-6 py-3 text-sm font-semibold text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
                       style={{ color: "#fff" }}
@@ -1532,13 +1760,14 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved }) {
   );
 }
 
-export function OnboardingForm({ open, onClose, initialData, onSaved }) {
+export function OnboardingForm({ open, onClose, initialData, onSaved, persistToApi = true }) {
   return (
     <OnboardingFormModal
       open={open}
       onClose={onClose}
       initialData={initialData}
       onSaved={onSaved}
+      persistToApi={persistToApi}
     />
   );
 }

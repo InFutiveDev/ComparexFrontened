@@ -115,3 +115,76 @@ export function updatePaymentAccountStatus(id, status) {
     body: JSON.stringify({ status }),
   });
 }
+
+export function createAdminPaymentGateway(payload) {
+  return authFetch("/payment/admin", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updatePaymentVerificationStatus(id, status) {
+  return authFetch(`/payment/${id}/verification-status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function updatePaymentOnboardingDocuments(id, payload) {
+  return authFetch(`/payment/${id}/documents`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function createAdminReseller(payload) {
+  return authFetch("/reseller/admin", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateResellerOnboardingDocuments(id, payload) {
+  return authFetch(`/reseller/${id}/documents`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+/** Master Admin — Global System Settings (FR-MA-01 / 02 / 03) */
+export function fetchAdminSettings() {
+  return authFetch("/admin/settings");
+}
+
+export function fetchAdminFeeSettings() {
+  return authFetch("/admin/settings/fees");
+}
+
+export function updateAdminFeeSettings(payload) {
+  return authFetch("/admin/settings/fees", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchAdminPermissionSettings() {
+  return authFetch("/admin/settings/permissions");
+}
+
+export function updateAdminPermissionSettings(payload) {
+  return authFetch("/admin/settings/permissions", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchAdminPayoutSettings() {
+  return authFetch("/admin/settings/payouts");
+}
+
+export function updateAdminPayoutSettings(payload) {
+  return authFetch("/admin/settings/payouts", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}

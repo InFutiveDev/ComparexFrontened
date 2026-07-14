@@ -16,8 +16,7 @@ export const RESELLER_PORTAL_NAV = [
 
 export const PAYMENT_GATEWAY_PORTAL_NAV = [
   { href: "/payment-gateway-dashboard", label: "Overview", icon: "squares" },
-  { href: "/payment-gateway-dashboard/profile", label: "My Profile", icon: "user" },
-  { href: "/payment-gateway-dashboard/integrations", label: "Integrations", icon: "card" },
+  { href: "/payment-gateway-dashboard/profile", label: "Complete Profile", icon: "user" },
   { href: "/payment-gateway-dashboard/support", label: "Help & Support", icon: "lifebuoy" },
   { href: "/payment-gateway-dashboard/settings", label: "Settings", icon: "cog" },
 ];

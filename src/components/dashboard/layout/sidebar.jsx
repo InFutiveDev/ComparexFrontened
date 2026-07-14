@@ -11,18 +11,22 @@ import {
   HiChartBarSquare,
   HiChatBubbleLeftRight,
   HiChevronUp,
+  HiClipboardDocumentList,
   HiCog6Tooth,
   HiCreditCard,
   HiLifebuoy,
   HiSquares2X2,
   HiStar,
   HiUserGroup,
+  HiUserPlus,
 } from "react-icons/hi2";
 import { useAuth } from "@/components/auth/auth-provider";
 import { formatRoleLabel } from "@/lib/account-roles";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: HiSquares2X2 },
+  { href: "/sub-admin-dashboard", label: "Lead Ops (Sub Admin)", icon: HiClipboardDocumentList },
+  { href: "/dashboard/onboarding", label: "Onboarding", icon: HiUserPlus },
   { href: "/dashboard/merchants", label: "Merchants", icon: HiBuildingStorefront },
   { href: "/dashboard/resellers", label: "Resellers", icon: HiUserGroup },
   { href: "/dashboard/payment-gateways", label: "Payment Gateways", icon: HiCreditCard },
@@ -30,7 +34,7 @@ const navItems = [
   { href: "/dashboard/talk-to-expert", label: "Talk to Expert", icon: HiCalendarDays },
   { href: "/dashboard/reviews-ratings", label: "Reviews & Ratings", icon: HiStar },
   { href: "/dashboard/reports", label: "Reports", icon: HiChartBarSquare },
-  { href: "/dashboard/settings", label: "Settings", icon: HiCog6Tooth },
+  { href: "/dashboard/settings", label: "System Settings", icon: HiCog6Tooth },
   { href: "/dashboard/help-support", label: "Help & Support", icon: HiLifebuoy },
 ];
 

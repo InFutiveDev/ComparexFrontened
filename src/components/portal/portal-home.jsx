@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth/auth-provider";
-import { formatRoleLabel } from "@/lib/account-roles";
 import { OnboardingForm } from "@/components/portal/onboarding-form";
+import { USER_ROLES, formatRoleLabel } from "@/lib/account-roles";
+import { fetchMyPaymentProfile } from "@/lib/payment";
 
 export function PortalHome({
   role,
@@ -14,22 +15,69 @@ export function PortalHome({
 }) {
   const { user } = useAuth();
   const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [pgProfile, setPgProfile] = useState(null);
+  const isPaymentGateway = role === USER_ROLES.PAYMENT_PROVIDER;
+
+  useEffect(() => {
+    if (!isPaymentGateway) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await fetchMyPaymentProfile();
+        if (!cancelled) {
+          setPgProfile(data.paymentGateway || null);
+        }
+      } catch {
+        if (!cancelled) setPgProfile(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isPaymentGateway]);
+
+  const completionPercent = pgProfile?.profileCompletion?.percent ?? 0;
+  const verificationStatus = pgProfile?.verificationStatus || "incomplete";
 
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-4 flex w-fit items-center justify-between gap-2 rounded-full bg-[#EEF2FC] px-5 py-1.5">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#2D4CC8]">
-            complete your profile
-          </p>
-          <button
-            type="button"
-            onClick={() => setOnboardingOpen(true)}
-            className="inline-flex cursor-pointer items-center rounded-full border border-[#2D4CC8]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#2D4CC8] transition hover:border-[#2D4CC8] hover:bg-[#2D4CC8] hover:text-white"
-          >
-            Complete Profile
-          </button>
-        </div>
+        {isPaymentGateway ? (
+          <div className="mb-4 flex w-full flex-wrap items-center justify-between gap-2 rounded-2xl bg-[#EEF2FC] px-5 py-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#2D4CC8]">
+                complete your profile
+              </p>
+              <p className="mt-1 text-sm text-slate-600">
+                Onboarding {completionPercent}% ·{" "}
+                <span className="capitalize">
+                  {String(verificationStatus).replaceAll("_", " ")}
+                </span>
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/payment-gateway-dashboard/profile"
+                className="inline-flex cursor-pointer items-center rounded-full border border-[#2D4CC8]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#2D4CC8] transition hover:border-[#2D4CC8]"
+              >
+                View profile
+              </Link>
+              {verificationStatus !== "approved" ? (
+                <button
+                  type="button"
+                  onClick={() => setOnboardingOpen(true)}
+                  className="inline-flex cursor-pointer items-center rounded-full bg-[#2D4CC8] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#2542b6]"
+                  style={{ color: "#fff" }}
+                >
+                  {completionPercent > 0 ? "Continue Onboarding" : "Start Onboarding"}
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#2D4CC8]">
           {formatRoleLabel(role)} dashboard
         </p>
@@ -75,7 +123,16 @@ export function PortalHome({
         </section>
       ) : null}
 
-      <OnboardingForm open={onboardingOpen} onClose={() => setOnboardingOpen(false)} />
+      {isPaymentGateway ? (
+        <OnboardingForm
+          open={onboardingOpen}
+          onClose={() => setOnboardingOpen(false)}
+          initialData={pgProfile?.onboarding || undefined}
+          onSaved={(_saved, paymentGateway) => {
+            if (paymentGateway) setPgProfile(paymentGateway);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

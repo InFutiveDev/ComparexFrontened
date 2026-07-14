@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { HiPencilSquare } from "react-icons/hi2";
 import { OnboardingForm } from "@/components/portal/onboarding-form";
+import { ApiError } from "@/lib/api";
+import { fetchMyPaymentProfile } from "@/lib/payment";
 import {
   ONBOARDING_TAT_OPTIONS,
   PCI_DSS_OPTIONS,
@@ -13,7 +15,10 @@ import {
   SORT_BY_OPTIONS,
   isFieldVisible,
 } from "@/lib/pg-onboarding-config";
-import { loadPgOnboardingProfile } from "@/lib/pg-onboarding-storage";
+import {
+  loadPgOnboardingProfile,
+  savePgOnboardingProfile,
+} from "@/lib/pg-onboarding-storage";
 
 function LabelValue({ label, value }) {
   const display =
@@ -57,15 +62,84 @@ function show(profile, key) {
   return isFieldVisible(profile?.serviceType, key);
 }
 
+function hasOnboardingContent(profile) {
+  if (!profile) return false;
+  return Boolean(
+    profile.serviceType ||
+      profile.legalEntityName ||
+      profile.brandName ||
+      profile.websiteUrl ||
+      profile.companyOverview
+  );
+}
+
+function statusStyles(status) {
+  const map = {
+    incomplete: "bg-slate-100 text-slate-700 ring-slate-200",
+    pending_review: "bg-amber-50 text-amber-700 ring-amber-200",
+    approved: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    rejected: "bg-red-50 text-red-700 ring-red-200",
+  };
+  return map[status] || map.incomplete;
+}
+
 export function PgProviderProfile() {
   const [profile, setProfile] = useState(null);
+  const [gateway, setGateway] = useState(null);
   const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const [formOpen, setFormOpen] = useState(false);
 
-  useEffect(() => {
-    setProfile(loadPgOnboardingProfile());
-    setLoaded(true);
+  const applyGateway = useCallback((paymentGateway) => {
+    if (!paymentGateway) {
+      setGateway(null);
+      setProfile(null);
+      return;
+    }
+
+    setGateway(paymentGateway);
+    const onboarding = {
+      ...(paymentGateway.onboarding || {}),
+      companyName: paymentGateway.companyName,
+      contactPerson: paymentGateway.contactPerson,
+      email: paymentGateway.email,
+      phone: paymentGateway.phone,
+      websiteUrl:
+        paymentGateway.onboarding?.websiteUrl || paymentGateway.website || "",
+      brandName:
+        paymentGateway.onboarding?.brandName || paymentGateway.companyName || "",
+      legalEntityName:
+        paymentGateway.onboarding?.legalEntityName ||
+        paymentGateway.companyName ||
+        "",
+      verificationStatus: paymentGateway.verificationStatus,
+      profileCompletion: paymentGateway.profileCompletion,
+    };
+    setProfile(onboarding);
+    savePgOnboardingProfile(onboarding);
   }, []);
+
+  const loadProfile = useCallback(async () => {
+    setLoadError("");
+    try {
+      const data = await fetchMyPaymentProfile();
+      applyGateway(data.paymentGateway);
+    } catch (err) {
+      const cached = loadPgOnboardingProfile();
+      if (cached) {
+        setProfile(cached);
+      }
+      setLoadError(
+        err instanceof ApiError ? err.message : "Failed to load onboarding profile"
+      );
+    } finally {
+      setLoaded(true);
+    }
+  }, [applyGateway]);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const serviceType =
     SERVICE_TYPES.find((item) => item.value === profile?.serviceType) || null;
@@ -78,33 +152,75 @@ export function PgProviderProfile() {
     optionLabel(SORT_BY_OPTIONS, value)
   );
 
+  const completion = gateway?.profileCompletion || profile?.profileCompletion;
+  const verificationStatus =
+    gateway?.verificationStatus || profile?.verificationStatus || "incomplete";
+  const isApproved = verificationStatus === "approved";
+  const showProfile = hasOnboardingContent(profile);
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-[#13203F] sm:text-2xl">
-            My Profile
+            Complete Profile
           </h2>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-600">
-            Your payment gateway provider profile and partnership details.
+            Finish your onboarding form so merchants can discover your payment solution.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setFormOpen(true)}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#2D4CC8] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#3B5BDB]"
-          style={{ color: "#fff" }}
-        >
-          <HiPencilSquare className="size-4" aria-hidden />
-          {profile ? "Edit Profile" : "Complete Profile"}
-        </button>
+        {!isApproved ? (
+          <button
+            type="button"
+            onClick={() => setFormOpen(true)}
+            className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#2D4CC8] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#3B5BDB]"
+            style={{ color: "#fff" }}
+          >
+            <HiPencilSquare className="size-4" aria-hidden />
+            {showProfile ? "Edit Onboarding" : "Start Onboarding"}
+          </button>
+        ) : null}
       </div>
+
+      {completion ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Profile completion
+              </p>
+              <p className="mt-1 text-2xl font-bold text-[#13203F]">
+                {completion.percent ?? 0}%
+              </p>
+            </div>
+            <span
+              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold capitalize ring-1 ${statusStyles(
+                verificationStatus
+              )}`}
+            >
+              {String(verificationStatus).replaceAll("_", " ")}
+            </span>
+          </div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF]"
+              style={{ width: `${completion.percent ?? 0}%` }}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {loadError ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {loadError}
+        </div>
+      ) : null}
 
       {!loaded ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-sm text-slate-500">Loading profile...</p>
         </div>
-      ) : !profile ? (
+      ) : !showProfile ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-10 text-center shadow-sm">
           <h3 className="text-lg font-bold text-[#13203F]">Profile not completed yet</h3>
           <p className="mx-auto mt-2 max-w-lg text-sm text-slate-600">
@@ -141,6 +257,40 @@ export function PgProviderProfile() {
               <LabelValue label="Legal Entity Name" value={profile.legalEntityName} />
               <LabelValue label="Brand Name" value={profile.brandName} />
               <LabelValue label="Website URL" value={profile.websiteUrl} />
+              <div className="sm:col-span-2 lg:col-span-3">
+                {profile.companyLogo?.fileName || profile.companyLogo?.url ? (
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+                    <p className="text-xs font-medium text-slate-500">Company Logo</p>
+                    <div className="mt-2 flex items-center gap-3">
+                      {profile.companyLogo?.url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={profile.companyLogo.url}
+                          alt={profile.companyLogo.fileName || "Company logo"}
+                          className="h-14 w-14 rounded-lg border border-slate-200 bg-white object-contain"
+                        />
+                      ) : null}
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-[#13203F]">
+                          {profile.companyLogo.fileName || "Logo uploaded"}
+                        </p>
+                        {profile.companyLogo.url ? (
+                          <a
+                            href={profile.companyLogo.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs font-semibold text-[#2D4CC8] hover:underline"
+                          >
+                            View file
+                          </a>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <LabelValue label="Company Logo" value="—" />
+                )}
+              </div>
               <LabelValue
                 label="Headquarters"
                 value={
@@ -208,6 +358,28 @@ export function PgProviderProfile() {
 
           <Section title="Operational & Onboarding">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="sm:col-span-2 lg:col-span-3">
+                {profile.onboardingChecklist?.fileName || profile.onboardingChecklist?.url ? (
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+                    <p className="text-xs font-medium text-slate-500">Onboarding Checklist</p>
+                    <p className="mt-1 truncate text-sm font-semibold text-[#13203F]">
+                      {profile.onboardingChecklist.fileName || "Checklist uploaded"}
+                    </p>
+                    {profile.onboardingChecklist.url ? (
+                      <a
+                        href={profile.onboardingChecklist.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-1 inline-flex text-xs font-semibold text-[#2D4CC8] hover:underline"
+                      >
+                        View / download
+                      </a>
+                    ) : null}
+                  </div>
+                ) : (
+                  <LabelValue label="Onboarding Checklist" value="—" />
+                )}
+              </div>
               <LabelValue
                 label="Onboarding TAT"
                 value={optionLabel(ONBOARDING_TAT_OPTIONS, profile.onboardingTat)}
@@ -319,7 +491,13 @@ export function PgProviderProfile() {
         open={formOpen}
         onClose={() => setFormOpen(false)}
         initialData={profile || undefined}
-        onSaved={(saved) => setProfile(saved)}
+        onSaved={(saved, paymentGateway) => {
+          if (paymentGateway) {
+            applyGateway(paymentGateway);
+          } else {
+            setProfile(saved);
+          }
+        }}
       />
     </div>
   );

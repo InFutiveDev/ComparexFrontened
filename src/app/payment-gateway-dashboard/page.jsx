@@ -6,22 +6,22 @@ export default function PaymentGatewayDashboardPage() {
     <PortalHome
       role={USER_ROLES.PAYMENT_PROVIDER}
       title="Welcome to your payment gateway portal"
-      description="Manage your provider profile, integrations, and CompareX partnership from one place."
+      description="Manage your provider profile and CompareX partnership from one place."
       cards={[
         {
           href: "/payment-gateway-dashboard/profile",
-          title: "My Profile",
-          description: "View and update your payment provider profile.",
-        },
-        {
-          href: "/payment-gateway-dashboard/integrations",
-          title: "Integrations",
-          description: "Track integration status and technical readiness.",
+          title: "Complete Profile",
+          description: "Finish onboarding and publish your marketplace profile.",
         },
         {
           href: "/payment-gateway-dashboard/support",
           title: "Help & Support",
           description: "Get help with onboarding and partnership requests.",
+        },
+        {
+          href: "/payment-gateway-dashboard/settings",
+          title: "Settings",
+          description: "Manage account preferences for your payment gateway portal.",
         },
       ]}
     />

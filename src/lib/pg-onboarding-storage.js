@@ -1,12 +1,32 @@
 const STORAGE_KEY = "comparex.pg.onboarding.profile";
 
+function sanitizeFileMeta(value) {
+  if (!value) return null;
+  if (typeof value === "string") {
+    return { fileName: value };
+  }
+  if (typeof File !== "undefined" && value instanceof File) {
+    return { fileName: value.name };
+  }
+  if (typeof value === "object") {
+    return {
+      fileName: value.fileName || value.name || null,
+      url: value.url || null,
+      key: value.key || null,
+      mimeType: value.mimeType || null,
+      size: value.size ?? null,
+    };
+  }
+  return null;
+}
+
 function sanitizeForStorage(form) {
   if (!form || typeof form !== "object") return null;
 
   return {
     ...form,
-    companyLogo: form.companyLogo?.name || null,
-    onboardingChecklist: form.onboardingChecklist?.name || null,
+    companyLogo: sanitizeFileMeta(form.companyLogo),
+    onboardingChecklist: sanitizeFileMeta(form.onboardingChecklist),
     updatedAt: new Date().toISOString(),
   };
 }

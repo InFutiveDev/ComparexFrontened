@@ -541,65 +541,8 @@ export const initialOnboardingForm = {
 };
 
 export function validateStep(stepId, form) {
-  const st = form.serviceType;
-  const show = (key) => isFieldVisible(st, key);
-
-  switch (stepId) {
-    case "service-type":
-      return Boolean(form.serviceType);
-    case "company":
-      return Boolean(
-        form.legalEntityName.trim() &&
-          form.brandName.trim() &&
-          form.websiteUrl.trim() &&
-          form.headquartersCountry &&
-          form.headquartersCity.trim() &&
-          form.yearEstablished.trim() &&
-          form.pciDssStatus &&
-          form.companyOverview.trim()
-      );
-    case "pricing": {
-      if (show("upiMdr") && !form.upiMdr) return false;
-      if (show("creditCardMdr") && !form.creditCardMdr) return false;
-      if (show("debitCardMdr") && !form.debitCardMdr) return false;
-      if (show("hardwareCost") && !form.hardwareCost) return false;
-      if (show("forexMarkup") && !form.forexMarkup) return false;
-      if (show("settlementCurrency") && !form.settlementCurrency) return false;
-      if (show("settlementInfrastructure") && !form.settlementInfrastructure) return false;
-      if (show("multiCurrencyWallet") && !form.multiCurrencyWallet) return false;
-      if (show("perTransactionFee") && !form.perTransactionFee) return false;
-      return true;
-    }
-    case "operations": {
-      if (!form.onboardingTat) return false;
-      if (show("settlementCycle") && !form.settlementCycle) return false;
-      if (show("averageResponseTime") && !form.averageResponseTime) return false;
-      if (!form.restrictedCategories.length) return false;
-      if (!form.bestSuitedBusinessTypes.length) return false;
-      return true;
-    }
-    case "smart-tags":
-      return form.smartTags.length > 0 && form.smartTags.length <= MAX_SMART_TAGS;
-    case "sort-by":
-      return form.sortByCategories.length > 0;
-    case "features":
-      return form.features.length > 0;
-    case "technical":
-      return Boolean(form.apiDocumentationUrl.trim() && form.pluginAvailability.length > 0);
-    case "merchant-experience":
-      return true;
-    case "talk-to-expert":
-      if (!form.talkToExpertEnabled) return true;
-      return Boolean(
-        form.expertName.trim() &&
-          form.expertEmail.trim() &&
-          form.expertMobile.trim() &&
-          form.expertDescription.trim() &&
-          form.calendarSynced
-      );
-    case "recommendation":
-      return true;
-    default:
-      return false;
+  if (stepId === "smart-tags") {
+    return form.smartTags.length <= MAX_SMART_TAGS;
   }
+  return true;
 }

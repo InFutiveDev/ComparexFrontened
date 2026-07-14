@@ -64,6 +64,16 @@ export function mapResellerToTableRow(item) {
 }
 
 export function mapPaymentGatewayToTableRow(item) {
+  const verificationStatus = item.verificationStatus || "incomplete";
+  const statusLabel =
+    verificationStatus === "pending_review"
+      ? "Pending Review"
+      : verificationStatus === "approved"
+        ? "Approved"
+        : verificationStatus === "rejected"
+          ? "Rejected"
+          : "Incomplete";
+
   return {
     id: item.id,
     name: item.contactPerson,
@@ -72,12 +82,16 @@ export function mapPaymentGatewayToTableRow(item) {
     phone: item.phone,
     source: item.source || "Payment Form",
     priority: item.partnershipGoals?.[0] ? formatLabel(item.partnershipGoals[0]) : "—",
-    category: item.paymentCapabilities?.[0] ? formatLabel(item.paymentCapabilities[0]) : "Payment Provider",
+    category: item.paymentCapabilities?.[0]
+      ? formatLabel(item.paymentCapabilities[0])
+      : "Payment Provider",
     workType: "Payment Gateway",
     userId: item.userId ?? null,
     accountStatus: item.accountStatus ?? "inactive",
     createdAt: item.createdAt,
+    verificationStatus,
     ...defaultRowMeta,
+    status: statusLabel,
   };
 }
 
