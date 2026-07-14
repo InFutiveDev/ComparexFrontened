@@ -1,10 +1,5 @@
-import { PortalPage } from "@/components/portal/portal-page";
+import { PgProviderProfile } from "@/components/portal/pg-provider-profile";
 
 export default function PaymentGatewayProfilePage() {
-  return (
-    <PortalPage
-      title="My Profile"
-      description="Your payment gateway provider profile and partnership details."
-    />
-  );
+  return <PgProviderProfile />;
 }

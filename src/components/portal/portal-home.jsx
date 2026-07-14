@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth/auth-provider";
 import { formatRoleLabel } from "@/lib/account-roles";
+import { OnboardingForm } from "@/components/portal/onboarding-form";
 
 export function PortalHome({
   role,
@@ -11,10 +13,23 @@ export function PortalHome({
   cards = [],
 }) {
   const { user } = useAuth();
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
 
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-4 flex w-fit items-center justify-between gap-2 rounded-full bg-[#EEF2FC] px-5 py-1.5">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#2D4CC8]">
+            complete your profile
+          </p>
+          <button
+            type="button"
+            onClick={() => setOnboardingOpen(true)}
+            className="inline-flex cursor-pointer items-center rounded-full border border-[#2D4CC8]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#2D4CC8] transition hover:border-[#2D4CC8] hover:bg-[#2D4CC8] hover:text-white"
+          >
+            Complete Profile
+          </button>
+        </div>
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#2D4CC8]">
           {formatRoleLabel(role)} dashboard
         </p>
@@ -59,6 +74,8 @@ export function PortalHome({
           ))}
         </section>
       ) : null}
+
+      <OnboardingForm open={onboardingOpen} onClose={() => setOnboardingOpen(false)} />
     </div>
   );
 }
