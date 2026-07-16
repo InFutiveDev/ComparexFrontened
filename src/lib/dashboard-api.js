@@ -188,3 +188,31 @@ export function updateAdminPayoutSettings(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+/** Master Admin — MDR Management (FR-MA-07 / 08 / 09) */
+export function fetchAdminMdrSettings() {
+  return authFetch("/admin/mdr");
+}
+
+export function updateAdminGlobalMdr(payload) {
+  return authFetch("/admin/mdr/global", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateAdminMdrTiers(payload) {
+  return authFetch("/admin/mdr/tiers", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchAdminMdrAudit({ page = 1, limit = 50, scope } = {}) {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  if (scope) params.set("scope", scope);
+  return authFetch(`/admin/mdr/audit?${params.toString()}`);
+}

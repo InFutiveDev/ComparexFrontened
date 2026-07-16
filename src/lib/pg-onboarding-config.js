@@ -536,6 +536,7 @@ export const initialOnboardingForm = {
   expertEmail: "",
   expertMobile: "",
   expertDescription: "",
+  calendlyUrl: "",
   calendarSynced: false,
   availabilitySlots: "",
 };

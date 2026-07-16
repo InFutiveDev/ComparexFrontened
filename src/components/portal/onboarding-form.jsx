@@ -1596,6 +1596,19 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                         />
                       </div>
                       <div className="sm:col-span-2">
+                        <label className={labelClass}>Calendly booking URL</label>
+                        <input
+                          type="url"
+                          className={inputClass}
+                          value={form.calendlyUrl}
+                          onChange={(e) => updateField("calendlyUrl", e.target.value)}
+                          placeholder="https://calendly.com/your-team/30min"
+                        />
+                        <p className="mt-1 text-xs text-slate-500">
+                          Used by Sub Admins to route merchant leads to your expert schedule.
+                        </p>
+                      </div>
+                      <div className="sm:col-span-2">
                         <ToggleField
                           id="calendar-synced"
                           label="Calendar Sync with External Tool"
@@ -1609,7 +1622,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                           className={inputClass}
                           value={form.availabilitySlots}
                           onChange={(e) => updateField("availabilitySlots", e.target.value)}
-                          placeholder="e.g. Mon–Fri 10:00–18:00 IST"
+                          placeholder="e.g. Mon–Fri 10:00 AM, 11:30 AM, 2:00 PM, 4:30 PM"
                         />
                       </div>
                     </div>

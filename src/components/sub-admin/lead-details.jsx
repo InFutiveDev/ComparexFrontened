@@ -18,12 +18,12 @@ import {
   getInitials,
   InfoCard,
 } from "@/components/dashboard/shared/record-details";
+import { ExpertRoutingSection } from "@/components/sub-admin/expert-routing-section";
 import { LeadStatusBadge } from "@/components/sub-admin/leads-table";
 import { ApiError } from "@/lib/api";
 import {
   LEAD_STATUS_OPTIONS,
   assignSubAdminLeadToPg,
-  bookSubAdminTalkToExpert,
   fetchAssignablePaymentGateways,
   fetchSubAdminLeadById,
   updateSubAdminLeadStatus,
@@ -56,13 +56,6 @@ export function LeadDetails({ params }) {
   const [selectedPgId, setSelectedPgId] = useState("");
   const [assignNotes, setAssignNotes] = useState("");
   const [loadingPgs, setLoadingPgs] = useState(false);
-
-  const [expertForm, setExpertForm] = useState({
-    preferredDate: "",
-    preferredTime: "",
-    timezone: "Asia/Kolkata",
-    notes: "",
-  });
 
   const loadLead = useCallback(async () => {
     setIsLoading(true);
@@ -143,28 +136,6 @@ export function LeadDetails({ params }) {
       setActionMessage(data.message || "Lead assigned to payment gateway");
     } catch (err) {
       setActionError(err instanceof ApiError ? err.message : "Failed to assign lead");
-    } finally {
-      setIsUpdating(false);
-    }
-  }
-
-  async function handleTalkToExpert() {
-    setIsUpdating(true);
-    setActionError("");
-    setActionMessage("");
-    try {
-      const data = await bookSubAdminTalkToExpert(id, {
-        preferredDate: expertForm.preferredDate || undefined,
-        preferredTime: expertForm.preferredTime || undefined,
-        timezone: expertForm.timezone || undefined,
-        notes: expertForm.notes || undefined,
-        paymentGatewayId: selectedPgId || undefined,
-      });
-      setLead(data.lead);
-      setTimeline(data.timeline || []);
-      setActionMessage(data.message || "Talk to Expert booked");
-    } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : "Failed to book Talk to Expert");
     } finally {
       setIsUpdating(false);
     }
@@ -366,45 +337,30 @@ export function LeadDetails({ params }) {
         </div>
       </InfoCard>
 
-      <InfoCard title="Book Talk to Expert (FR-SA-04)" icon={HiCalendarDays}>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <input
-            type="date"
-            className={inputClass}
-            value={expertForm.preferredDate}
-            onChange={(e) =>
-              setExpertForm((prev) => ({ ...prev, preferredDate: e.target.value }))
-            }
+      <InfoCard title="Expert Routing via Calendly (FR-SA-07 / FR-SA-08)" icon={HiCalendarDays}>
+        {lead.leadStatus === "expert_booked" ? (
+          <p className="text-sm text-emerald-700">
+            This lead is already routed for a Talk to Expert call
+            {lead.assignedPgName ? (
+              <>
+                {" "}
+                with <strong>{lead.assignedPgName}</strong>
+              </>
+            ) : null}
+            .
+          </p>
+        ) : (
+          <ExpertRoutingSection
+            fixedLeadId={id}
+            fixedLead={lead}
+            onRouted={(data) => {
+              setLead(data.lead);
+              setTimeline(data.timeline || []);
+              setActionMessage(data.message || "Lead routed to PG expert via Calendly");
+              setActionError("");
+            }}
           />
-          <input
-            type="time"
-            className={inputClass}
-            value={expertForm.preferredTime}
-            onChange={(e) =>
-              setExpertForm((prev) => ({ ...prev, preferredTime: e.target.value }))
-            }
-          />
-          <input
-            className={inputClass}
-            placeholder="Timezone"
-            value={expertForm.timezone}
-            onChange={(e) => setExpertForm((prev) => ({ ...prev, timezone: e.target.value }))}
-          />
-          <input
-            className={inputClass}
-            placeholder="Notes"
-            value={expertForm.notes}
-            onChange={(e) => setExpertForm((prev) => ({ ...prev, notes: e.target.value }))}
-          />
-        </div>
-        <button
-          type="button"
-          disabled={isUpdating}
-          onClick={handleTalkToExpert}
-          className="mt-4 rounded-full border border-[#2D4CC8] bg-white px-5 py-2.5 text-sm font-semibold text-[#2D4CC8] disabled:opacity-50"
-        >
-          Book Talk to Expert
-        </button>
+        )}
       </InfoCard>
 
       <InfoCard title="Activity Timeline (FR-SA-03)" icon={HiClock}>

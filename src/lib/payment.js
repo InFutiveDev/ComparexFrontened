@@ -8,6 +8,14 @@ export async function submitPaymentProvider(payload) {
   });
 }
 
+/** Public list of PGs that nominated a Talk to Expert representative. */
+export function fetchTalkToExpertProviders({ search } = {}) {
+  const params = new URLSearchParams();
+  if (search?.trim()) params.set("search", search.trim());
+  const query = params.toString();
+  return apiFetch(`/payment/talk-to-expert${query ? `?${query}` : ""}`);
+}
+
 export async function updatePaymentProvider(id, payload) {
   return apiFetch(`/payment/${id}`, {
     method: "PATCH",

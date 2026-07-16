@@ -12,6 +12,12 @@ const cards = [
     description: "Assign qualified leads to payment gateways or book Talk to Expert.",
   },
   {
+    href: "/sub-admin-dashboard/expert-routing",
+    title: "Expert Routing via Calendly",
+    description:
+      "FR-SA-07 / FR-SA-08 · View available PG expert slots and route leads for scheduled calls.",
+  },
+  {
     href: "/sub-admin-dashboard/bulk-upload",
     title: "Bulk Upload",
     description: "Upload a CSV of leads and assign them to a specific payment gateway.",

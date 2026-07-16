@@ -479,6 +479,8 @@ export function PgProviderProfile() {
               <LabelValue label="Expert Email" value={profile.expertEmail} />
               <LabelValue label="Expert Mobile" value={profile.expertMobile} />
               <LabelValue label="Calendar Synced" value={profile.calendarSynced} />
+              <LabelValue label="Calendly URL" value={profile.calendlyUrl} />
+              <LabelValue label="Availability Slots" value={profile.availabilitySlots} />
               <div className="sm:col-span-2 lg:col-span-3">
                 <LabelValue label="Expert Description" value={profile.expertDescription} />
               </div>

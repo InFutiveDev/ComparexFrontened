@@ -1,12 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   HiArrowLeft,
   HiArrowRight,
-  HiCalendarDays,
   HiCheck,
   HiOutlineChevronDown,
   HiOutlineMagnifyingGlass,
@@ -15,15 +14,9 @@ import {
 import { ApiError } from "@/lib/api";
 import { submitExpertBooking } from "@/lib/expert";
 import { heroFormStepOneFields } from "@/lib/mock-data";
-import {
-  businessPriorityOptions,
-  getPgById,
-  morePgs,
-  prominentPgs,
-} from "./talk-to-expert-data";
+import { fetchTalkToExpertProviders } from "@/lib/payment";
+import { businessPriorityOptions } from "./talk-to-expert-data";
 import { CalendlyScheduleEmbed } from "./calendly-schedule-embed";
-
-const allPgs = [...prominentPgs, ...morePgs];
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#40C3CF] focus:ring-2 focus:ring-[#40C3CF]/20";
@@ -124,221 +117,122 @@ function SearchableSelect({
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [menuPosition, setMenuPosition] = useState(null);
-  const containerRef = useRef(null);
+  const [menuPos, setMenuPos] = useState(null);
+  const rootRef = useRef(null);
   const inputRef = useRef(null);
 
-  const selectableOptions = useMemo(
-    () => options.filter((option) => option.value),
-    [options]
-  );
+  const selected = options.find((opt) => opt.value === value);
 
-  const selected = selectableOptions.find((option) => option.value === value);
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return options;
+    return options.filter((opt) => opt.label.toLowerCase().includes(q));
+  }, [options, query]);
 
-  const filteredOptions = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return selectableOptions;
-
-    return selectableOptions.filter((option) =>
-      option.label.toLowerCase().includes(normalized)
-    );
-  }, [selectableOptions, query]);
-
-  function updateMenuPosition() {
-    const input = inputRef.current;
-    if (!input) return;
-
-    const rect = input.getBoundingClientRect();
-    const menuMaxHeight = 220;
-    const gap = 6;
-    const spaceBelow = window.innerHeight - rect.bottom - gap;
-    const spaceAbove = rect.top - gap;
-    const openUpward = spaceBelow < menuMaxHeight && spaceAbove > spaceBelow;
-
-    setMenuPosition({
+  const updateMenuPos = useCallback(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setMenuPos({
+      top: rect.bottom + 6,
       left: rect.left,
       width: rect.width,
-      maxHeight: Math.min(menuMaxHeight, openUpward ? spaceAbove : spaceBelow),
-      top: openUpward ? undefined : rect.bottom + gap,
-      bottom: openUpward ? window.innerHeight - rect.top + gap : undefined,
     });
-  }
-
-  function openDropdown() {
-    setOpen(true);
-    updateMenuPosition();
-  }
-
-  function closeDropdown() {
-    setOpen(false);
-    setQuery(selected?.label ?? "");
-  }
-
-  useEffect(() => {
-    if (!open) {
-      setQuery(selected?.label ?? "");
-    }
-  }, [selected?.label, open]);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
-
-    updateMenuPosition();
-
-    function handleClickOutside(event) {
-      if (
-        containerRef.current?.contains(event.target) ||
-        event.target.closest?.("[data-form-select-menu]")
-      ) {
-        return;
-      }
-      closeDropdown();
-    }
-
-    function handleReposition() {
-      updateMenuPosition();
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    window.addEventListener("resize", handleReposition);
-    window.addEventListener("scroll", handleReposition, true);
-
+    updateMenuPos();
+    const onScroll = () => updateMenuPos();
+    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("resize", onScroll);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      window.removeEventListener("resize", handleReposition);
-      window.removeEventListener("scroll", handleReposition, true);
+      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onScroll);
     };
-  }, [open, selected?.label]);
+  }, [open, updateMenuPos]);
 
-  function handleSelect(optionValue, optionLabel) {
-    onChange(optionValue);
-    setQuery(optionLabel);
-    onQueryChange?.(optionLabel);
-    setOpen(false);
-  }
-
-  function handleInputChange(event) {
-    setQuery(event.target.value);
-    onQueryChange?.(event.target.value);
-    if (!open) setOpen(true);
-    if (value) onChange("");
-  }
-
-  function handleClear() {
-    setQuery("");
-    onQueryChange?.("");
-    onChange("");
-    inputRef.current?.focus();
-    openDropdown();
-  }
-
-  const menu =
-    open && menuPosition && typeof document !== "undefined"
-      ? createPortal(
-          <ul
-            data-form-select-menu
-            role="listbox"
-            aria-labelledby={id}
-            style={{
-              position: "fixed",
-              left: menuPosition.left,
-              width: menuPosition.width,
-              maxHeight: menuPosition.maxHeight,
-              top: menuPosition.top,
-              bottom: menuPosition.bottom,
-              zIndex: 200,
-            }}
-            className="overflow-y-auto rounded-xl border border-[#2D4CC8]/25 bg-white py-1 shadow-2xl shadow-slate-900/15 [scrollbar-color:#cbd5e1_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-track]:bg-transparent"
-          >
-            {filteredOptions.length > 0 ? (
-              filteredOptions.map((option) => {
-                const isSelected = value === option.value;
-                return (
-                  <li key={option.value} role="option" aria-selected={isSelected}>
-                    <button
-                      type="button"
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => handleSelect(option.value, option.label)}
-                      className={`flex w-full cursor-pointer items-center justify-between gap-2 px-4 py-2.5 text-left text-sm transition ${
-                        isSelected
-                          ? "bg-[#EEF2FC] font-semibold text-[#2D4CC8]"
-                          : "text-slate-700 hover:bg-slate-50 hover:text-[#2D4CC8]"
-                      }`}
-                    >
-                      <span className="truncate">{option.label}</span>
-                      {isSelected ? <HiCheck className="size-4 shrink-0" aria-hidden /> : null}
-                    </button>
-                  </li>
-                );
-              })
-            ) : (
-              <li className="px-4 py-3 text-sm text-slate-500">No matches found</li>
-            )}
-          </ul>,
-          document.body
-        )
-      : null;
+  useEffect(() => {
+    function handlePointer(event) {
+      if (!rootRef.current?.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handlePointer);
+    return () => document.removeEventListener("mousedown", handlePointer);
+  }, []);
 
   return (
-    <div ref={containerRef} className="relative z-10">
-      <HiOutlineMagnifyingGlass
-        className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#2D4CC8]"
-        aria-hidden
-      />
-      <input
-        ref={inputRef}
-        id={id}
-        type="text"
-        value={query}
-        onChange={handleInputChange}
-        onFocus={openDropdown}
-        onClick={openDropdown}
-        placeholder={placeholder}
-        autoComplete="off"
-        role="combobox"
-        aria-expanded={open}
-        aria-controls={`${id}-listbox`}
-        aria-autocomplete="list"
-        className={`w-full border bg-white py-3 pl-10 pr-10 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:ring-2 focus:ring-[#2D4CC8]/20 ${
-          inputClassName || "rounded-xl border-slate-200 focus:border-[#2D4CC8]"
-        } ${open ? "border-[#2D4CC8] ring-2 ring-[#2D4CC8]/15" : ""}`}
-      />
-      {query ? (
-        <button
-          type="button"
-          onClick={handleClear}
-          className="absolute right-3 top-1/2 flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-          aria-label="Clear search"
-        >
-          <HiOutlineXMark className="size-4" />
-        </button>
-      ) : (
-        <HiOutlineChevronDown
-          className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-[#2D4CC8] transition-transform duration-200 ${
-            open ? "rotate-180" : ""
-          }`}
-          aria-hidden
+    <div ref={rootRef} className="relative">
+      <div className="relative">
+        <HiOutlineMagnifyingGlass className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <input
+          ref={inputRef}
+          id={id}
+          value={open ? query : selected?.label || query}
+          placeholder={placeholder}
+          onFocus={() => {
+            setOpen(true);
+            setQuery(selected?.label || "");
+            updateMenuPos();
+          }}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            onQueryChange?.(e.target.value);
+            setOpen(true);
+          }}
+          className={`${inputClass} pl-11 pr-10 ${inputClassName}`}
         />
-      )}
-      {menu}
+        <HiOutlineChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+      </div>
+      {open && menuPos && typeof document !== "undefined"
+        ? createPortal(
+            <ul
+              className="fixed z-[120] max-h-60 overflow-auto rounded-2xl border border-slate-200 bg-white py-2 shadow-xl"
+              style={{ top: menuPos.top, left: menuPos.left, width: menuPos.width }}
+            >
+              {filtered.length === 0 ? (
+                <li className="px-4 py-3 text-sm text-slate-500">No matches</li>
+              ) : (
+                filtered.map((opt) => (
+                  <li key={opt.value}>
+                    <button
+                      type="button"
+                      className="w-full px-4 py-2.5 text-left text-sm text-[#13203F] hover:bg-[#EEF2FC]"
+                      onClick={() => {
+                        onChange(opt.value);
+                        setQuery(opt.label);
+                        onQueryChange?.(opt.label);
+                        setOpen(false);
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
 
 function OptionButtons({ value, options, onChange }) {
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {options.map((option) => {
-        const selected = option.value === value;
+        const selected = value === option.value;
         return (
           <button
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`cursor-pointer rounded-xl border px-4 py-3 text-left text-sm font-medium transition ${
+            className={`rounded-2xl border px-4 py-3.5 text-left text-sm font-semibold transition ${
               selected
-                ? "border-[#2D4CC8] bg-[#EEF2FC] text-[#13203F] ring-2 ring-[#2D4CC8]/20"
-                : "border-slate-200 bg-white text-slate-600 hover:border-[#2D4CC8]/40"
+                ? "border-[#2D4CC8] bg-[#EEF2FC] text-[#2D4CC8] ring-2 ring-[#2D4CC8]/15"
+                : "border-slate-200 bg-white text-[#13203F] hover:border-[#2D4CC8]/30"
             }`}
           >
             {option.label}
@@ -350,6 +244,17 @@ function OptionButtons({ value, options, onChange }) {
 }
 
 function ProviderLogo({ name, logo, initials }) {
+  const isRemote = typeof logo === "string" && /^https?:\/\//i.test(logo);
+
+  if (logo && isRemote) {
+    return (
+      <div className="flex size-14 items-center justify-center rounded-xl border border-slate-100 bg-white p-2">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={logo} alt="" className="max-h-full max-w-full object-contain" />
+      </div>
+    );
+  }
+
   if (logo) {
     return (
       <div className="flex size-14 items-center justify-center rounded-xl border border-slate-100 bg-white p-2">
@@ -374,8 +279,40 @@ export function TalkToExpertModal({ open, onClose }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [calendlyBooked, setCalendlyBooked] = useState(false);
+  const [providers, setProviders] = useState([]);
+  const [providersLoading, setProvidersLoading] = useState(false);
+  const [providersError, setProvidersError] = useState("");
 
-  const selectedPg = getPgById(selectedTargetId);
+  const selectedPg = useMemo(
+    () => providers.find((pg) => pg.id === selectedTargetId) || null,
+    [providers, selectedTargetId],
+  );
+
+  const visibleProviders = useMemo(
+    () => providers.filter((pg) => matchesSearchText(pg.name, providerSearch)),
+    [providers, providerSearch],
+  );
+
+  const loadProviders = useCallback(async () => {
+    setProvidersLoading(true);
+    setProvidersError("");
+    try {
+      const data = await fetchTalkToExpertProviders();
+      setProviders(Array.isArray(data.paymentGateways) ? data.paymentGateways : []);
+    } catch (err) {
+      setProviders([]);
+      setProvidersError(
+        err instanceof ApiError ? err.message : "Failed to load payment gateway experts",
+      );
+    } finally {
+      setProvidersLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    loadProviders();
+  }, [open, loadProviders]);
 
   const calendlyPrefill = useMemo(
     () => ({
@@ -516,7 +453,9 @@ export function TalkToExpertModal({ open, onClose }) {
 
       {flow === "select" ? (
         <div className="space-y-5">
-          <p className="text-sm text-slate-600">Select a payment gateway to connect with their nominated representative.</p>
+          <p className="text-sm text-slate-600">
+            Select a payment gateway to connect with their nominated representative.
+          </p>
 
           <SearchableSelect
             id="pg-search"
@@ -525,33 +464,57 @@ export function TalkToExpertModal({ open, onClose }) {
             onQueryChange={setProviderSearch}
             placeholder="Search payment gateways..."
             inputClassName="rounded-full border-[#2D4CC8] focus:border-[#2D4CC8]"
-            options={allPgs.map((pg) => ({ value: pg.id, label: pg.name }))}
+            options={providers.map((pg) => ({ value: pg.id, label: pg.name }))}
           />
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {prominentPgs
-              .filter((pg) => matchesSearchText(pg.name, providerSearch))
-              .map((pg) => (
-              <button
-                key={pg.id}
-                type="button"
-                onClick={() => setSelectedTargetId(pg.id)}
-                className={`flex cursor-pointer flex-col items-center gap-3 rounded-2xl border bg-white p-4 transition ${
-                  selectedTargetId === pg.id
-                    ? "border-[#2D4CC8] bg-[#EEF2FC] ring-2 ring-[#2D4CC8]/20"
-                    : "border-slate-200 hover:border-[#2D4CC8]/30"
-                }`}
-              >
-                <ProviderLogo name={pg.name} logo={pg.logo} />
-                <span className="text-center text-sm font-semibold text-[#13203F]">{pg.name}</span>
-              </button>
-            ))}
-          </div>
-
-          {prominentPgs.filter((pg) => matchesSearchText(pg.name, providerSearch)).length === 0 ? (
+          {providersLoading ? (
             <p className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-500">
-              No popular gateways match your search.
+              Loading payment gateways…
             </p>
+          ) : null}
+
+          {providersError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {providersError}
+              <button
+                type="button"
+                onClick={loadProviders}
+                className="ml-2 font-semibold underline"
+              >
+                Retry
+              </button>
+            </div>
+          ) : null}
+
+          {!providersLoading && !providersError && visibleProviders.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-500">
+              {providers.length === 0
+                ? "No payment gateways have nominated an expert yet."
+                : "No payment gateways match your search."}
+            </p>
+          ) : null}
+
+          {!providersLoading && visibleProviders.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {visibleProviders.map((pg) => (
+                <button
+                  key={pg.id}
+                  type="button"
+                  onClick={() => setSelectedTargetId(pg.id)}
+                  className={`flex cursor-pointer flex-col items-center gap-3 rounded-2xl border bg-white p-4 transition ${
+                    selectedTargetId === pg.id
+                      ? "border-[#2D4CC8] bg-[#EEF2FC] ring-2 ring-[#2D4CC8]/20"
+                      : "border-slate-200 hover:border-[#2D4CC8]/30"
+                  }`}
+                >
+                  <ProviderLogo name={pg.name} logo={pg.logo} initials={pg.initials} />
+                  <span className="text-center text-sm font-semibold text-[#13203F]">{pg.name}</span>
+                  {pg.rep?.name ? (
+                    <span className="text-center text-[11px] text-slate-500">{pg.rep.name}</span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
           ) : null}
         </div>
       ) : null}
@@ -638,9 +601,11 @@ export function TalkToExpertModal({ open, onClose }) {
                 <ProviderLogo name={selectedPg.name} logo={selectedPg.logo} initials={selectedPg.initials} />
                 <div className="flex-1">
                   <p className="text-xs font-semibold uppercase tracking-wide text-[#2D4CC8]">Nominated PG Rep</p>
-                  <h3 className="text-lg font-bold text-[#13203F]">{selectedPg.rep.name}</h3>
-                  <p className="text-sm text-slate-600">{selectedPg.rep.title} · {selectedPg.name}</p>
-                  <p className="mt-2 text-sm text-slate-600">{selectedPg.rep.bio}</p>
+                  <h3 className="text-lg font-bold text-[#13203F]">{selectedPg.rep?.name}</h3>
+                  <p className="text-sm text-slate-600">
+                    {selectedPg.rep?.title} · {selectedPg.name}
+                  </p>
+                  <p className="mt-2 text-sm text-slate-600">{selectedPg.rep?.bio}</p>
                 </div>
               </div>
             </div>
@@ -657,6 +622,7 @@ export function TalkToExpertModal({ open, onClose }) {
               </div>
             ) : null}
             <CalendlyScheduleEmbed
+              url={selectedPg?.calendlyUrl || undefined}
               prefill={calendlyPrefill}
               onEventScheduled={confirmBookingFromCalendly}
             />
@@ -725,6 +691,7 @@ export function TalkToExpertModal({ open, onClose }) {
               type="button"
               disabled={
                 isSubmitting ||
+                providersLoading ||
                 (flow === "select" && !selectedTargetId) ||
                 (flow === "details" && !canContinueDetails())
               }
@@ -765,46 +732,5 @@ export default function TalkToExpertSection({ isOpen, onOpenChange }) {
   const open = isOpen ?? internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
 
-  return (
-    <>
-      {/* <section className="bg-[#f2f6fb] py-16 sm:py-20">
-        <div className="container mx-auto max-w-7xl px-4">
-          <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center shadow-xl shadow-[#13203F]/5 sm:p-12">
-            <h2 className="text-2xl font-bold text-[#13203F] sm:text-3xl">
-              Unbiased Expert Guidance for Your Payment Stack
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-slate-600">
-              Talk to PG representatives or independent industry experts. Compare onboarding,
-              pricing, and platform fit — then schedule a call in minutes.
-            </p>
-
-            <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-[#2D4CC8]/15 bg-[#EEF2FC]/50 p-5 text-left">
-                <p className="text-xs font-bold uppercase tracking-wide text-[#2D4CC8]">TPR</p>
-                <p className="mt-1 font-semibold text-[#13203F]">Talk to PG Representatives</p>
-                <p className="mt-2 text-sm text-slate-600">Direct conversations with nominated PG sales & success teams.</p>
-              </div>
-              <div className="rounded-2xl border border-[#2D4CC8]/15 bg-[#EEF2FC]/50 p-5 text-left">
-                <p className="text-xs font-bold uppercase tracking-wide text-[#2D4CC8]">TIR</p>
-                <p className="mt-1 font-semibold text-[#13203F]">Talk to Industry Expert</p>
-                <p className="mt-2 text-sm text-slate-600">Independent advisors who help you choose the right platform.</p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setOpen(true)}
-              className="mt-8 inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#2D4CC8]/25 transition hover:brightness-110"
-              style={{ color: "#fff" }}
-            >
-              <HiCalendarDays className="size-5" aria-hidden />
-              Talk to Expert
-            </button>
-          </div>
-        </div>
-      </section> */}
-
-      <TalkToExpertModal open={open} onClose={() => setOpen(false)} />
-    </>
-  );
+  return <TalkToExpertModal open={open} onClose={() => setOpen(false)} />;
 }

@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   HiArrowRightOnRectangle,
+  HiCalendarDays,
   HiClipboardDocumentList,
   HiCloudArrowUp,
   HiSquares2X2,
@@ -18,6 +19,7 @@ const navItems = [
   { href: "/sub-admin-dashboard", label: "Overview", icon: HiSquares2X2 },
   { href: "/sub-admin-dashboard/leads", label: "Lead Qualification", icon: HiClipboardDocumentList },
   { href: "/sub-admin-dashboard/assign", label: "Lead Assignment", icon: HiUserGroup },
+  { href: "/sub-admin-dashboard/expert-routing", label: "Expert Routing", icon: HiCalendarDays },
   { href: "/sub-admin-dashboard/bulk-upload", label: "Bulk Upload", icon: HiCloudArrowUp },
 ];
 

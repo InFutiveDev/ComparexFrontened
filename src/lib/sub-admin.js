@@ -93,6 +93,11 @@ export function fetchAssignablePaymentGateways({
   );
 }
 
+/** FR-SA-07 / FR-SA-08 — PG experts with Calendly + available slots */
+export function fetchRoutableExperts({ search } = {}) {
+  return authFetch(`/sub-admin/experts${toQuery({ search })}`);
+}
+
 export async function bulkUploadLeadsToPg({ paymentGatewayId, file }) {
   const token = getStoredToken();
   if (!token) {
