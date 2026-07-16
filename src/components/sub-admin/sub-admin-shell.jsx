@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   HiArrowRightOnRectangle,
+  HiBell,
   HiCalendarDays,
   HiClipboardDocumentList,
   HiCloudArrowUp,
@@ -15,11 +16,17 @@ import {
 import { useAuth } from "@/components/auth/auth-provider";
 import { formatRoleLabel } from "@/lib/account-roles";
 
+const notificationsEnabled =
+  process.env.NEXT_PUBLIC_NOTIFICATIONS_ENABLED === "true";
+
 const navItems = [
   { href: "/sub-admin-dashboard", label: "Overview", icon: HiSquares2X2 },
   { href: "/sub-admin-dashboard/leads", label: "Lead Qualification", icon: HiClipboardDocumentList },
   { href: "/sub-admin-dashboard/assign", label: "Lead Assignment", icon: HiUserGroup },
   { href: "/sub-admin-dashboard/expert-routing", label: "Expert Routing", icon: HiCalendarDays },
+  ...(notificationsEnabled
+    ? [{ href: "/sub-admin-dashboard/notifications", label: "Notifications", icon: HiBell }]
+    : []),
   { href: "/sub-admin-dashboard/bulk-upload", label: "Bulk Upload", icon: HiCloudArrowUp },
 ];
 

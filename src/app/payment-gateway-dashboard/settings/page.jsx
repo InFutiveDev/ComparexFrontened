@@ -1,10 +1,5 @@
-import { PortalPage } from "@/components/portal/portal-page";
+import { PgProfileConfiguration } from "@/components/portal/pg-profile-configuration";
 
 export default function PaymentGatewaySettingsPage() {
-  return (
-    <PortalPage
-      title="Settings"
-      description="Manage your payment gateway portal preferences and account settings."
-    />
-  );
+  return <PgProfileConfiguration />;
 }

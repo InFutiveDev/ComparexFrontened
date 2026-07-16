@@ -1,4 +1,4 @@
-import { apiFetch, apiFormFetch, ApiError } from "@/lib/api";
+import { API_BASE_URL, apiFetch, apiFormFetch, ApiError } from "@/lib/api";
 import { getStoredToken } from "@/lib/auth";
 
 export async function submitPaymentProvider(payload) {
@@ -47,6 +47,94 @@ export function updateMyPaymentProfile(payload) {
     method: "PATCH",
     body: JSON.stringify(payload),
   });
+}
+
+/** FR-PG-01 — update PG identity, logo, description, and contacts. */
+export function updateMyPgProfile(payload) {
+  return updateMyPaymentProfile({
+    section: "profile",
+    ...payload,
+  });
+}
+
+/** FR-PG-02 — update PG MDR, TAT, settlement, and supported features. */
+export function updateMyPgConfiguration(onboarding) {
+  return updateMyPaymentProfile({
+    section: "config",
+    onboarding,
+  });
+}
+
+/** FR-PG-03 — leads assigned by Sub Admin or registered via PG affiliate link. */
+export function fetchMyPgLeads({
+  page = 1,
+  limit = 25,
+  status,
+  source,
+  search,
+} = {}) {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  if (status) params.set("status", status);
+  if (source) params.set("source", source);
+  if (search?.trim()) params.set("search", search.trim());
+  return authFetch(`/pg/leads?${params.toString()}`);
+}
+
+export function fetchMyPgLeadById(id) {
+  return authFetch(`/pg/leads/${id}`);
+}
+
+/** FR-PG-04 — remarks are required by the API. */
+export function updateMyPgLeadStatus(id, { status, remarks }) {
+  return authFetch(`/pg/leads/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status, remarks }),
+  });
+}
+
+/** FR-PG-03 — download current filtered lead set as CSV or Excel .xls. */
+export async function downloadMyPgLeads({
+  format = "csv",
+  status,
+  source,
+  search,
+} = {}) {
+  const token = getStoredToken();
+  if (!token) throw new ApiError("Authentication required", 401);
+
+  const params = new URLSearchParams({ format });
+  if (status) params.set("status", status);
+  if (source) params.set("source", source);
+  if (search?.trim()) params.set("search", search.trim());
+
+  const response = await fetch(`${API_BASE_URL}/pg/leads/export?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    let data = null;
+    try {
+      data = await response.json();
+    } catch {
+      // Non-JSON export error response.
+    }
+    throw new ApiError(data?.message || "Failed to export leads", response.status);
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get("content-disposition") || "";
+  const fileName =
+    disposition.match(/filename="([^"]+)"/)?.[1] || `pg-leads.${format}`;
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
 }
 
 export async function uploadPgOnboardingFile(file, folder = "pg-onboarding") {

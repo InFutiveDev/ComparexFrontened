@@ -140,6 +140,12 @@ export function HeroAdviceForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSavingStep, setIsSavingStep] = useState(false);
   const [error, setError] = useState("");
+  const [affiliatePgId, setAffiliatePgId] = useState("");
+
+  useEffect(() => {
+    const pgId = new URLSearchParams(window.location.search).get("pg");
+    setAffiliatePgId(pgId || "");
+  }, []);
 
   function updateField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -185,6 +191,7 @@ export function HeroAdviceForm() {
           businessName: form.businessName.trim(),
           email: form.email.trim(),
           phone: form.phone.trim(),
+          pgId: affiliatePgId || undefined,
         };
 
         if (recordId) {
