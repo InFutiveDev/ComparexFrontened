@@ -97,7 +97,9 @@ export function ExpertRoutingSection({ fixedLeadId = null, fixedLead = null, onR
   }, [experts, expertQuery]);
 
   const selectedExpert = useMemo(
-    () => experts.find((item) => item.id === selectedExpertId) || null,
+    () =>
+      experts.find((item) => (item.routingId || item.id) === selectedExpertId) ||
+      null,
     [experts, selectedExpertId],
   );
 
@@ -166,7 +168,9 @@ export function ExpertRoutingSection({ fixedLeadId = null, fixedLead = null, onR
 
   useEffect(() => {
     if (!selectedExpertId) return;
-    const stillVisible = filteredExperts.some((expert) => expert.id === selectedExpertId);
+    const stillVisible = filteredExperts.some(
+      (expert) => (expert.routingId || expert.id) === selectedExpertId,
+    );
     if (!stillVisible) {
       setSelectedExpertId("");
       setSelectedSlotId("");
@@ -184,7 +188,8 @@ export function ExpertRoutingSection({ fixedLeadId = null, fixedLead = null, onR
 
     try {
       const data = await bookSubAdminTalkToExpert(selectedLeadId, {
-        paymentGatewayId: selectedExpertId,
+        paymentGatewayId: selectedExpert?.paymentGatewayId || selectedExpert?.id,
+        expertId: selectedExpert?.expertId || undefined,
         paymentGatewayName: selectedExpert?.name,
         representativeName: selectedExpert?.rep?.name,
         representativeTitle: selectedExpert?.rep?.title,
@@ -331,7 +336,10 @@ export function ExpertRoutingSection({ fixedLeadId = null, fixedLead = null, onR
               <select
                 className={inputClass}
                 value={
-                  filteredExperts.some((expert) => expert.id === selectedExpertId)
+                  filteredExperts.some(
+                    (expert) =>
+                      (expert.routingId || expert.id) === selectedExpertId,
+                  )
                     ? selectedExpertId
                     : ""
                 }
@@ -346,7 +354,10 @@ export function ExpertRoutingSection({ fixedLeadId = null, fixedLead = null, onR
                     : "Choose expert…"}
                 </option>
                 {filteredExperts.map((expert) => (
-                  <option key={expert.id} value={expert.id}>
+                  <option
+                    key={expert.routingId || expert.id}
+                    value={expert.routingId || expert.id}
+                  >
                     {expert.name} · {expert.rep?.name || "Expert"}
                     {expert.calendlyUrl ? " · Calendly ready" : ""}
                   </option>

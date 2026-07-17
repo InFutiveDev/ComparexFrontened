@@ -65,6 +65,18 @@ export function updateMyPgConfiguration(onboarding) {
   });
 }
 
+/** FR-PG-06 / FR-PG-07 — internal advisors, availability, and Calendly. */
+export function fetchMyPgExperts() {
+  return authFetch("/payment/me/experts");
+}
+
+export function updateMyPgExperts(experts) {
+  return authFetch("/payment/me/experts", {
+    method: "PUT",
+    body: JSON.stringify({ experts }),
+  });
+}
+
 /** FR-PG-03 — leads assigned by Sub Admin or registered via PG affiliate link. */
 export function fetchMyPgLeads({
   page = 1,

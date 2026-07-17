@@ -4,7 +4,11 @@ const notificationsEnabled =
 export const MERCHANT_PORTAL_NAV = [
   { href: "/merchant-dashboard", label: "Overview", icon: "squares" },
   { href: "/merchant-dashboard/profile", label: "My Profile", icon: "user" },
-  { href: "/merchant-dashboard/recommendations", label: "Recommendations", icon: "document" },
+  {
+    href: "/merchant-dashboard/recommendations",
+    label: "Compare Payment Gateways",
+    icon: "document",
+  },
   ...(notificationsEnabled
     ? [{ href: "/merchant-dashboard/notifications", label: "Notifications", icon: "document" }]
     : []),
@@ -23,6 +27,11 @@ export const RESELLER_PORTAL_NAV = [
 export const PAYMENT_GATEWAY_PORTAL_NAV = [
   { href: "/payment-gateway-dashboard", label: "Overview", icon: "squares" },
   { href: "/payment-gateway-dashboard/leads", label: "Leads", icon: "document" },
+  {
+    href: "/payment-gateway-dashboard/experts",
+    label: "Expert Routing",
+    icon: "users",
+  },
   { href: "/payment-gateway-dashboard/profile", label: "Onboarding Profile", icon: "user" },
   { href: "/payment-gateway-dashboard/support", label: "Help & Support", icon: "lifebuoy" },
   {

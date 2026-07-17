@@ -15,8 +15,8 @@ export default function MerchantDashboardPage() {
         },
         {
           href: "/merchant-dashboard/recommendations",
-          title: "Recommendations",
-          description: "See payment gateway suggestions tailored for your business.",
+          title: "Compare Payment Gateways",
+          description: "Compare active PGs by MDR, TAT, categories, features, and ratings.",
         },
         {
           href: "/merchant-dashboard/support",

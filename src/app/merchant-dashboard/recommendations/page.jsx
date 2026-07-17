@@ -1,10 +1,5 @@
-import { PortalPage } from "@/components/portal/portal-page";
+import { MerchantPgComparisonTable } from "@/components/portal/merchant-pg-comparison-table";
 
 export default function MerchantRecommendationsPage() {
-  return (
-    <PortalPage
-      title="Recommendations"
-      description="Payment gateway recommendations based on your business profile."
-    />
-  );
+  return <MerchantPgComparisonTable />;
 }
