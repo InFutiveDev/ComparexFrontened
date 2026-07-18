@@ -81,6 +81,7 @@ export function MerchantDetails({ id }) {
         <InfoCard title="Contact Information" icon={HiUserCircle}>
           <div className="grid gap-4 sm:grid-cols-2">
             <DetailField label="Business Name">{data.businessName}</DetailField>
+            <DetailField label="Contact Person">{data.contactName || "—"}</DetailField>
             <DetailField label="Phone Number">
               <a href={`tel:${data.phone}`} className="text-[#2D4CC8] hover:underline">
                 {data.phone}
@@ -97,6 +98,15 @@ export function MerchantDetails({ id }) {
         <InfoCard title="Business Details" icon={HiTag}>
           <div className="grid gap-4 sm:grid-cols-2">
             <DetailField label="Industry">{formatDetailLabel(data.industry)}</DetailField>
+            <DetailField label="Estimated Monthly Volume">
+              {data.estimatedMonthlyVolume
+                ? new Intl.NumberFormat("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0,
+                  }).format(data.estimatedMonthlyVolume)
+                : "—"}
+            </DetailField>
             <DetailField label="Priority">{formatDetailLabel(data.priority)}</DetailField>
             <DetailField label="Source">{formatDetailLabel(data.source)}</DetailField>
             <DetailField label="Login Access">

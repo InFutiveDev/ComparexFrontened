@@ -273,6 +273,7 @@ function ProviderLogo({ name, logo, initials }) {
 export function TalkToExpertModal({ open, onClose }) {
   const [flow, setFlow] = useState("select");
   const [selectedTargetId, setSelectedTargetId] = useState("");
+  const [selectedExpertId, setSelectedExpertId] = useState("");
   const [visitorStep, setVisitorStep] = useState(1);
   const [visitor, setVisitor] = useState(initialVisitor);
   const [providerSearch, setProviderSearch] = useState("");
@@ -287,6 +288,38 @@ export function TalkToExpertModal({ open, onClose }) {
     () => providers.find((pg) => pg.id === selectedTargetId) || null,
     [providers, selectedTargetId],
   );
+  const availableExperts = useMemo(() => {
+    if (!selectedPg) return [];
+    if (Array.isArray(selectedPg.experts) && selectedPg.experts.length > 0) {
+      return selectedPg.experts.filter((expert) => expert.status !== "inactive");
+    }
+    return selectedPg.rep?.name
+      ? [
+          {
+            id: selectedPg.expertId || "primary",
+            name: selectedPg.rep.name,
+            designation: selectedPg.rep.title,
+            description: selectedPg.rep.bio,
+            calendlyUrl: selectedPg.calendlyUrl,
+            isPrimary: true,
+          },
+        ]
+      : [];
+  }, [selectedPg]);
+  const selectedExpert = useMemo(
+    () =>
+      availableExperts.find((expert) => expert.id === selectedExpertId) ||
+      availableExperts.find((expert) => expert.isPrimary) ||
+      availableExperts[0] ||
+      null,
+    [availableExperts, selectedExpertId],
+  );
+
+  useEffect(() => {
+    const defaultExpert =
+      availableExperts.find((expert) => expert.isPrimary) || availableExperts[0];
+    setSelectedExpertId(defaultExpert?.id || "");
+  }, [selectedTargetId, availableExperts]);
 
   const visibleProviders = useMemo(
     () => providers.filter((pg) => matchesSearchText(pg.name, providerSearch)),
@@ -321,15 +354,25 @@ export function TalkToExpertModal({ open, onClose }) {
       customAnswers: {
         a1: visitor.company.trim(),
         a2: visitor.phone.trim(),
-        a3: selectedPg?.name || "",
+        a3: selectedExpert
+          ? `${selectedPg?.name || ""} · ${selectedExpert.name}`
+          : selectedPg?.name || "",
       },
     }),
-    [visitor.fullName, visitor.email, visitor.company, visitor.phone, selectedPg?.name],
+    [
+      visitor.fullName,
+      visitor.email,
+      visitor.company,
+      visitor.phone,
+      selectedPg?.name,
+      selectedExpert,
+    ],
   );
 
   function resetModal() {
     setFlow("select");
     setSelectedTargetId("");
+    setSelectedExpertId("");
     setVisitorStep(1);
     setVisitor(initialVisitor);
     setProviderSearch("");
@@ -400,8 +443,10 @@ export function TalkToExpertModal({ open, onClose }) {
         priority: visitor.priority,
         paymentGatewayId: selectedPg.id,
         paymentGatewayName: selectedPg.name,
-        representativeName: selectedPg.rep?.name || null,
-        representativeTitle: selectedPg.rep?.title || null,
+        expertId: selectedExpert?.id || selectedPg.expertId || null,
+        representativeName: selectedExpert?.name || selectedPg.rep?.name || null,
+        representativeTitle:
+          selectedExpert?.designation || selectedPg.rep?.title || null,
         slotId: slot.slotId,
         slotDateLabel: slot.slotDateLabel,
         slotTime: slot.slotTime,
@@ -516,6 +561,36 @@ export function TalkToExpertModal({ open, onClose }) {
               ))}
             </div>
           ) : null}
+
+          {selectedPg && availableExperts.length > 0 ? (
+            <div className="rounded-2xl border border-[#2D4CC8]/20 bg-[#EEF2FC] p-4">
+              <label
+                htmlFor="available-expert"
+                className="text-sm font-semibold text-[#13203F]"
+              >
+                Select available expert
+              </label>
+              <select
+                id="available-expert"
+                value={selectedExpert?.id || ""}
+                onChange={(event) => setSelectedExpertId(event.target.value)}
+                className={`${inputClass} mt-2 bg-white`}
+              >
+                {availableExperts.map((expert) => (
+                  <option key={expert.id} value={expert.id}>
+                    {expert.name}
+                    {expert.designation ? ` · ${expert.designation}` : ""}
+                    {expert.calendlyUrl ? " · Calendly available" : ""}
+                  </option>
+                ))}
+              </select>
+              {selectedExpert?.availabilitySlots ? (
+                <p className="mt-2 text-xs text-slate-600">
+                  Published availability: {selectedExpert.availabilitySlots}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -601,11 +676,16 @@ export function TalkToExpertModal({ open, onClose }) {
                 <ProviderLogo name={selectedPg.name} logo={selectedPg.logo} initials={selectedPg.initials} />
                 <div className="flex-1">
                   <p className="text-xs font-semibold uppercase tracking-wide text-[#2D4CC8]">Nominated PG Rep</p>
-                  <h3 className="text-lg font-bold text-[#13203F]">{selectedPg.rep?.name}</h3>
+                  <h3 className="text-lg font-bold text-[#13203F]">
+                    {selectedExpert?.name || selectedPg.rep?.name}
+                  </h3>
                   <p className="text-sm text-slate-600">
-                    {selectedPg.rep?.title} · {selectedPg.name}
+                    {selectedExpert?.designation || selectedPg.rep?.title} ·{" "}
+                    {selectedPg.name}
                   </p>
-                  <p className="mt-2 text-sm text-slate-600">{selectedPg.rep?.bio}</p>
+                  <p className="mt-2 text-sm text-slate-600">
+                    {selectedExpert?.description || selectedPg.rep?.bio}
+                  </p>
                 </div>
               </div>
             </div>
@@ -622,7 +702,11 @@ export function TalkToExpertModal({ open, onClose }) {
               </div>
             ) : null}
             <CalendlyScheduleEmbed
-              url={selectedPg?.calendlyUrl || undefined}
+              url={
+                selectedExpert?.calendlyUrl ||
+                selectedPg?.calendlyUrl ||
+                undefined
+              }
               prefill={calendlyPrefill}
               onEventScheduled={confirmBookingFromCalendly}
             />
@@ -692,7 +776,7 @@ export function TalkToExpertModal({ open, onClose }) {
               disabled={
                 isSubmitting ||
                 providersLoading ||
-                (flow === "select" && !selectedTargetId) ||
+                (flow === "select" && (!selectedTargetId || !selectedExpert)) ||
                 (flow === "details" && !canContinueDetails())
               }
               onClick={() => {

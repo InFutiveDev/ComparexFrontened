@@ -3,6 +3,17 @@ const notificationsEnabled =
 
 export const MERCHANT_PORTAL_NAV = [
   { href: "/merchant-dashboard", label: "Overview", icon: "squares" },
+  { href: "/merchant-dashboard/submit-lead", label: "Submit Lead", icon: "document" },
+  {
+    href: "/merchant-dashboard/talk-to-expert",
+    label: "Talk to Expert",
+    icon: "chat",
+  },
+  {
+    href: "/merchant-dashboard/reviews",
+    label: "Ratings & Reviews",
+    icon: "document",
+  },
   { href: "/merchant-dashboard/profile", label: "My Profile", icon: "user" },
   {
     href: "/merchant-dashboard/recommendations",

@@ -23,6 +23,13 @@ async function authFetch(path, options = {}) {
   });
 }
 
+export function submitMerchantReview(payload) {
+  return authFetch("/review/merchant", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 export function fetchReviews({ page = 1, limit = 50 } = {}) {
   const params = new URLSearchParams({
     page: String(page),

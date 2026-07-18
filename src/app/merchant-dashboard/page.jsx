@@ -9,6 +9,21 @@ export default function MerchantDashboardPage() {
       description="Track your CompareX application, review payment recommendations, and get support — all in one place."
       cards={[
         {
+          href: "/merchant-dashboard/submit-lead",
+          title: "Submit Lead",
+          description: "Share your business category and estimated monthly payment volume.",
+        },
+        {
+          href: "/merchant-dashboard/talk-to-expert",
+          title: "Talk to Expert",
+          description: "Select an available advisor and schedule a consultation in Calendly.",
+        },
+        {
+          href: "/merchant-dashboard/reviews",
+          title: "Ratings & Reviews",
+          description: "Rate payment gateways and your overall CompareX platform experience.",
+        },
+        {
           href: "/merchant-dashboard/profile",
           title: "My Profile",
           description: "View and manage your merchant account details.",

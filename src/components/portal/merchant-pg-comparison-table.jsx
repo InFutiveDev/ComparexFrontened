@@ -334,14 +334,28 @@ export function MerchantPgComparisonTable() {
                     </td>
                     <td className="px-4 py-4">
                       {row.rating?.count > 0 ? (
-                        <div className="flex items-center gap-1 text-amber-500">
-                          <HiStar className="size-4" />
-                          <span className="font-bold text-[#13203F]">
-                            {row.rating.average.toFixed(1)}
-                          </span>
-                          <span className="text-xs text-slate-500">
-                            ({row.rating.count})
-                          </span>
+                        <div>
+                          <div className="flex items-center gap-1 text-amber-500">
+                            <HiStar className="size-4" />
+                            <span className="font-bold text-[#13203F]">
+                              {row.rating.average.toFixed(1)}
+                            </span>
+                            <span className="text-xs text-slate-500">
+                              ({row.rating.count})
+                            </span>
+                          </div>
+                          {row.rating.reviews?.[0]?.reviewText ? (
+                            <p
+                              className="mt-2 max-w-52 text-xs italic leading-relaxed text-slate-600"
+                              title={row.rating.reviews[0].reviewText}
+                            >
+                              &ldquo;
+                              {row.rating.reviews[0].reviewText.length > 90
+                                ? `${row.rating.reviews[0].reviewText.slice(0, 90)}…`
+                                : row.rating.reviews[0].reviewText}
+                              &rdquo;
+                            </p>
+                          ) : null}
                         </div>
                       ) : (
                         <span className="text-xs font-medium text-slate-500">No ratings yet</span>

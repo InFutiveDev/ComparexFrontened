@@ -150,6 +150,9 @@ export function ReviewsRatingsDetails({ params }) {
         <InfoCard title="Ratings" icon={HiStar}>
           <div className="grid gap-4 sm:grid-cols-2">
             <DetailField label="Overall">{data.rating}/5</DetailField>
+            <DetailField label="Platform Experience">
+              {data.platformRating ? `${data.platformRating}/5` : "—"}
+            </DetailField>
             <DetailField label="NPS">{data.recommendNps ?? "—"}/10</DetailField>
             <DetailField label="Onboarding">{ratings.onboardingRating || "—"}</DetailField>
             <DetailField label="Support">{ratings.supportRating || "—"}</DetailField>
