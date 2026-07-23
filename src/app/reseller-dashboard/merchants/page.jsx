@@ -1,10 +1,5 @@
-import { PortalPage } from "@/components/portal/portal-page";
+import { ResellerReferralSection } from "@/components/portal/reseller-referral-section";
 
 export default function ResellerMerchantsPage() {
-  return (
-    <PortalPage
-      title="Merchants"
-      description="Merchants associated with your reseller partnership."
-    />
-  );
+  return <ResellerReferralSection />;
 }

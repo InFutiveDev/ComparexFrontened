@@ -12,12 +12,14 @@ import {
 } from "@/lib/reseller";
 import {
   BANK_ACCOUNT_TYPE_OPTIONS,
+  formatKycStatusLabel,
   formatVerificationLabel,
   MERCHANT_NETWORK_OPTIONS,
   MONTHLY_REFERRAL_OPTIONS,
   PARTNERSHIP_MODEL_OPTIONS,
   YEARS_EXPERIENCE_OPTIONS,
 } from "@/lib/reseller-profile-options";
+import { StatusBadge, kycStatusTone } from "@/lib/reseller-finance-ui";
 
 const STEPS = [
   { id: "business", label: "Business details" },
@@ -89,7 +91,9 @@ function PartnershipToggle({ value, onChange }) {
   );
 }
 
-function ProfileCompletionBanner({ percent, verificationStatus, checks }) {
+function ProfileCompletionBanner({ percent, verificationStatus, kycStatus, profile, checks }) {
+  const displayKycStatus = kycStatus || profile?.kycStatus || "incomplete";
+
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -98,9 +102,28 @@ function ProfileCompletionBanner({ percent, verificationStatus, checks }) {
             Profile completion
           </p>
           <h2 className="mt-1 text-2xl font-bold text-[#13203F]">{percent}% completed</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Status: {formatVerificationLabel(verificationStatus)}
-          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <p className="text-sm text-slate-600">
+              Account: {formatVerificationLabel(verificationStatus)}
+            </p>
+            <StatusBadge
+              label={`KYC: ${formatKycStatusLabel(displayKycStatus)}`}
+              tone={kycStatusTone(displayKycStatus)}
+            />
+          </div>
+          {profile?.panCard ? (
+            <p className="mt-2 text-xs text-slate-500">
+              FR-RS-09 · PAN/Aadhaar submitted via{" "}
+              {profile.kycVerificationProvider === "document_upload"
+                ? "document upload"
+                : profile.kycVerificationProvider || "document upload"}
+              {profile.kycSubmittedAt
+                ? ` · ${new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(
+                    new Date(profile.kycSubmittedAt),
+                  )}`
+                : ""}
+            </p>
+          ) : null}
         </div>
         <div className="h-3 w-full max-w-xs overflow-hidden rounded-full bg-slate-100">
           <div
@@ -296,6 +319,8 @@ export function ResellerProfileCompletion() {
         <ProfileCompletionBanner
           percent={profile.profileCompletionPercent ?? 0}
           verificationStatus={profile.verificationStatus}
+          kycStatus={profile.kycStatus}
+          profile={profile}
           checks={profile.profileCompletion?.checks}
         />
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
@@ -323,6 +348,8 @@ export function ResellerProfileCompletion() {
       <ProfileCompletionBanner
         percent={profile.profileCompletionPercent ?? 0}
         verificationStatus={profile.verificationStatus}
+        kycStatus={profile.kycStatus}
+        profile={profile}
         checks={profile.profileCompletion?.checks}
       />
 
@@ -667,6 +694,8 @@ export function ResellerProfileCompletionSummary({ profile }) {
     <ProfileCompletionBanner
       percent={profile.profileCompletionPercent ?? 0}
       verificationStatus={profile.verificationStatus}
+      kycStatus={profile.kycStatus}
+      profile={profile}
       checks={profile.profileCompletion?.checks}
     />
   );

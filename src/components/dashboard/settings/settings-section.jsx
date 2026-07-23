@@ -417,8 +417,12 @@ export function SettingsSection() {
           <div>
             <h3 className="text-lg font-bold text-[#13203F]">User access rights</h3>
             <p className="mt-1 text-sm text-slate-600">
-              Define and modify permissions for every platform role. Master Admin always retains full
-              access.
+              Define permissions for each platform role. Master Admin always retains full access.
+              Create individual users from{" "}
+              <a href="/dashboard/users" className="font-semibold text-[#2D4CC8] hover:underline">
+                Users & Access
+              </a>
+              .
             </p>
           </div>
 

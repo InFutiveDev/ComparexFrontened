@@ -172,6 +172,16 @@ export async function uploadPgOnboardingFile(file, folder = "pg-onboarding") {
 export function serializeOnboardingForApi(form = {}) {
   const payload = { ...form };
 
+  delete payload.merchantSuccessStoriesUrl;
+  delete payload.caseStudiesUrl;
+
+  payload.merchantSuccessStoriesUrls = Array.isArray(payload.merchantSuccessStoriesUrls)
+    ? payload.merchantSuccessStoriesUrls.map((item) => String(item).trim()).filter(Boolean)
+    : [];
+  payload.caseStudiesUrls = Array.isArray(payload.caseStudiesUrls)
+    ? payload.caseStudiesUrls.map((item) => String(item).trim()).filter(Boolean)
+    : [];
+
   for (const key of ["companyLogo", "onboardingChecklist"]) {
     const value = payload[key];
     if (!value) {

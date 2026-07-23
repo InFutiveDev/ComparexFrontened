@@ -8,6 +8,13 @@ export async function submitReview(payload) {
   });
 }
 
+export async function submitWebsiteReview(payload) {
+  return apiFetch("/review/website", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 async function authFetch(path, options = {}) {
   const token = getStoredToken();
   if (!token) {

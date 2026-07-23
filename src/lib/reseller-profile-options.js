@@ -34,9 +34,24 @@ export const BANK_ACCOUNT_TYPE_OPTIONS = [
 export function formatVerificationLabel(status) {
   switch (status) {
     case "pending_review":
-      return "Pending admin review";
+    case "pending":
+      return "Pending";
     case "approved":
-      return "Approved";
+    case "verified":
+      return "Verified";
+    case "rejected":
+      return "Rejected";
+    default:
+      return "Incomplete";
+  }
+}
+
+export function formatKycStatusLabel(status) {
+  switch (status) {
+    case "pending":
+      return "Pending";
+    case "verified":
+      return "Verified";
     case "rejected":
       return "Rejected";
     default:

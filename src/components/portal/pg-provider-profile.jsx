@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { HiPencilSquare } from "react-icons/hi2";
 import { OnboardingForm } from "@/components/portal/onboarding-form";
+import { PgRatingSummary } from "@/components/shared/pg-rating-summary";
 import { ApiError } from "@/lib/api";
 import { fetchMyPaymentProfile } from "@/lib/payment";
 import {
@@ -208,6 +209,12 @@ export function PgProviderProfile() {
             />
           </div>
         </div>
+      ) : null}
+
+      {gateway ? (
+        <Section title="Merchant ratings">
+          <PgRatingSummary rating={gateway.rating} showReviews />
+        </Section>
       ) : null}
 
       {loadError ? (

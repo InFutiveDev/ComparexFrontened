@@ -19,6 +19,7 @@ import {
   InfoCard,
   useDashboardDetail,
 } from "@/components/dashboard/shared/record-details";
+import { PgRatingSummary } from "@/components/shared/pg-rating-summary";
 import {
   fetchPaymentGatewayById,
   updatePaymentOnboardingDocuments,
@@ -177,6 +178,19 @@ export function PaymentGatewayDetails({ id }) {
           <p className="mt-1 text-lg font-bold text-[#13203F]">{data.designation || "—"}</p>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-medium text-slate-500">Average Rating</p>
+          <p className="mt-1 text-lg font-bold text-[#13203F]">
+            {data.rating?.count > 0 ? `${Number(data.rating.average).toFixed(1)} / 5` : "—"}
+          </p>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-medium text-slate-500">Total Reviews</p>
+          <p className="mt-1 text-lg font-bold text-[#13203F]">{data.rating?.count ?? 0}</p>
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <p className="text-xs font-medium text-slate-500">Onboarding %</p>
           <p className="mt-1 text-lg font-bold text-[#13203F]">
             {data.profileCompletionPercent ?? data.profileCompletion?.percent ?? 0}%
@@ -187,6 +201,8 @@ export function PaymentGatewayDetails({ id }) {
           <p className="mt-1 text-lg font-bold text-[#13203F]">{formatDetailDate(data.createdAt)}</p>
         </div>
       </div>
+
+      <PgRatingSummary rating={data.rating} showReviews hideStats />
 
       <div className="grid gap-5 lg:grid-cols-2">
         <InfoCard title="Organisation" icon={HiUserCircle}>

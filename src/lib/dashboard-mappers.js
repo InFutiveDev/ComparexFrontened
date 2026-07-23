@@ -90,6 +90,8 @@ export function mapPaymentGatewayToTableRow(item) {
     accountStatus: item.accountStatus ?? "inactive",
     createdAt: item.createdAt,
     verificationStatus,
+    ratingAverage: item.rating?.count > 0 ? Number(item.rating.average).toFixed(1) : "—",
+    ratingCount: item.rating?.count ?? 0,
     ...defaultRowMeta,
     status: statusLabel,
   };
@@ -197,20 +199,23 @@ export function mapExpertBookingListResponse(response) {
 }
 
 export function mapReviewToTableRow(item) {
+  const isWebsite = item.reviewType === "comparex_website";
   return {
     id: item.id,
     name: item.name,
-    company: item.businessName,
+    company: isWebsite ? "CompareX Website" : item.businessName,
     email: item.email,
-    phone: item.productName || "—",
+    phone: isWebsite ? "Website feedback" : item.productName || "—",
     source: item.source || "Write a Review",
     priority: `${item.rating || 0}/5`,
-    category: item.productName || formatLabel(item.productCategory),
+    category: isWebsite ? "CompareX Website" : item.productName || formatLabel(item.productCategory),
     workType: "Reviews & Ratings",
+    reviewType: item.reviewType || "pg_review",
     submittedAt: item.createdAt,
     createdAt: item.createdAt,
     title: item.title,
     reviewText: item.reviewText,
+    suggestionNotes: item.suggestionNotes || item.reviewText,
     ...defaultRowMeta,
     status:
       item.status === "published"

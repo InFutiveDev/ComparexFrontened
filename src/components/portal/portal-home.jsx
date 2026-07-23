@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth/auth-provider";
+import { PgRatingSummary } from "@/components/shared/pg-rating-summary";
 import { OnboardingForm } from "@/components/portal/onboarding-form";
 import { USER_ROLES, formatRoleLabel } from "@/lib/account-roles";
 import { fetchMyPaymentProfile } from "@/lib/payment";
@@ -103,6 +104,15 @@ export function PortalHome({
             </p>
           </div>
         </div>
+
+        {isPaymentGateway ? (
+          <div className="mt-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Merchant ratings
+            </p>
+            <PgRatingSummary rating={pgProfile?.rating} compact />
+          </div>
+        ) : null}
       </section>
 
       {cards.length > 0 ? (

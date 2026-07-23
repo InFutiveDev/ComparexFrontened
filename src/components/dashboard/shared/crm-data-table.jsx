@@ -210,7 +210,7 @@ function CrmFilterModal({ open, labels, draftFilters, options, lockWorkTypeFilte
   );
 }
 
-function RowActionsMenu({ row, labels, isOpen, onToggle, onClose, detailsHref }) {
+function RowActionsMenu({ row, labels, isOpen, onToggle, onClose, detailsHref, onDeleteRow }) {
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
   const [menuStyle, setMenuStyle] = useState(null);
@@ -373,7 +373,12 @@ function RowActionsMenu({ row, labels, isOpen, onToggle, onClose, detailsHref })
             key={item.label}
             type="button"
             role="menuitem"
-            onClick={onClose}
+            onClick={() => {
+              if (item.label === labels.delete && onDeleteRow) {
+                onDeleteRow(row);
+              }
+              onClose();
+            }}
             className={`flex w-full cursor-pointer items-center gap-2 px-3 py-2.5 text-left text-sm transition ${item.className}`}
           >
             <Icon className={`size-4 ${item.iconClassName}`} aria-hidden />
@@ -419,6 +424,8 @@ export function CrmDataTable({
   showAccountStatus = false,
   accountStatusResource,
   onAccountStatusUpdated,
+  hideClientId = false,
+  onDeleteRow,
 }) {
   const labels = { ...defaultLabels, ...labelsProp };
   const { merchantSearch, setMerchantSearch, leadSearch, setLeadSearch } = useDashboard();
@@ -689,7 +696,9 @@ export function CrmDataTable({
                   <tr key={row.id} className="border-b border-slate-100 transition last:border-b-0 hover:bg-[#EEF2FC]/35">
                     <td className="px-4 py-3.5 sm:px-5">
                       <p className="font-semibold text-[#13203F]">{row.name}</p>
-                      <p className="mt-0.5 text-xs text-slate-500">ID: {row.id}</p>
+                      {!hideClientId ? (
+                        <p className="mt-0.5 text-xs text-slate-500">ID: {row.id}</p>
+                      ) : null}
                     </td>
                     <td className="px-3 py-3.5">
                       <a
@@ -749,6 +758,7 @@ export function CrmDataTable({
                         }
                         onClose={() => setOpenActionMenuId(null)}
                         detailsHref={getRowDetailsHref(row)}
+                        onDeleteRow={onDeleteRow}
                       />
                     </td>
                   </tr>

@@ -31,7 +31,9 @@ export const RESELLER_PORTAL_NAV = [
   { href: "/reseller-dashboard", label: "Overview", icon: "squares" },
   { href: "/reseller-dashboard/profile", label: "Complete Profile", icon: "user" },
   { href: "/reseller-dashboard/merchants", label: "Merchants", icon: "users" },
-  { href: "/reseller-dashboard/commissions", label: "Commissions", icon: "chart" },
+  { href: "/reseller-dashboard/gmv", label: "GMV", icon: "chart" },
+  { href: "/reseller-dashboard/commissions", label: "Commissions", icon: "document" },
+  { href: "/reseller-dashboard/invoices", label: "Invoices", icon: "card" },
   { href: "/reseller-dashboard/settings", label: "Settings", icon: "cog" },
 ];
 

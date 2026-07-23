@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   HiArrowLeft,
   HiArrowRight,
@@ -15,13 +15,32 @@ import { FaGoogle, FaLinkedin } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { HiUser } from "react-icons/hi2";
 import { ApiError } from "@/lib/api";
-import { submitReview } from "@/lib/review";
+import { fetchPgComparison } from "@/lib/pg-compare";
+import { mapPgToReviewProduct } from "@/lib/review-providers";
+import { submitReview, submitWebsiteReview } from "@/lib/review";
+
+const COMPAREX_WEBSITE_ID = "comparex-website";
+
+const comparexWebsiteProduct = {
+  id: COMPAREX_WEBSITE_ID,
+  name: "CompareX Website",
+  company: "CompareX",
+  logo: "/images/logo-icon.svg",
+  category: "platform",
+};
 
 const steps = [
   { id: 1, label: "Select Provider" },
   { id: 2, label: "Leave a Review" },
   { id: 3, label: "Consent & Submit" },
   { id: 4, label: "Share on LinkedIn" },
+  { id: 5, label: "Thank You" },
+];
+
+const websiteSteps = [
+  { id: 1, label: "Choose Type" },
+  { id: 2, label: "Rate CompareX" },
+  { id: 3, label: "Submit Feedback" },
   { id: 5, label: "Thank You" },
 ];
 
@@ -34,135 +53,6 @@ const categoryPills = [
   { value: "subscription", label: "Subscription Billing" },
   { value: "kyc-fraud", label: "KYC & Fraud" },
   { value: "infrastructure", label: "Payment Infrastructure" },
-];
-
-const popularProducts = [
-  {
-    id: "razorpay",
-    name: "Razorpay",
-    company: "Razorpay Software Pvt. Ltd.",
-    logo: "/images/brand-logos/Razorpay_logo.svg",
-    category: "online-pg",
-  },
-  {
-    id: "cashfree",
-    name: "Cashfree",
-    company: "Cashfree Payments",
-    logo: "/images/brand-logos/cashfree.png",
-    category: "online-pg",
-  },
-  {
-    id: "phonepe",
-    name: "PhonePe PG",
-    company: "PhonePe Pvt. Ltd.",
-    logo: "/images/brand-logos/phonepe.png",
-    category: "pos-qr",
-  },
-  {
-    id: "payu",
-    name: "PayU",
-    company: "PayU Payments Pvt. Ltd.",
-    logo: "/images/brand-logos/Payu.png",
-    category: "online-pg",
-  },
-  {
-    id: "paytm",
-    name: "Paytm PG",
-    company: "Paytm Payments Bank",
-    logo: "/images/brand-logos/paytm.png",
-    category: "pos-qr",
-  },
-  {
-    id: "ccavenue",
-    name: "CCAvenue",
-    company: "Infibeam Avenues Ltd.",
-    logo: "/images/brand-logos/ccavenue.png",
-    category: "online-pg",
-  },
-  {
-    id: "easebuzz",
-    name: "Easebuzz",
-    company: "Easebuzz Pvt. Ltd.",
-    logo: "/images/brand-logos/easebuzz.png",
-    category: "online-pg",
-  },
-  {
-    id: "stripe",
-    name: "Stripe",
-    company: "Stripe Inc.",
-    logo: "/images/brand-logos/stripe.png",
-    category: "crossborder",
-  },
-  {
-    id: "amazon-pay",
-    name: "Amazon Pay",
-    company: "Amazon Pay India",
-    logo: "/images/brand-logos/amazon.jpg",
-    category: "pos-qr",
-  },
-  {
-    id: "instamojo",
-    name: "Instamojo",
-    company: "Instamojo Technologies Pvt. Ltd.",
-    initials: "IM",
-    category: "online-pg",
-  },
-  {
-    id: "billdesk",
-    name: "BillDesk",
-    company: "IndiaIdeas.com Ltd.",
-    initials: "BD",
-    category: "infrastructure",
-  },
-  {
-    id: "comparex",
-    name: "CompareX",
-    company: "CompareX",
-    logo: "/images/logo-icon.svg",
-    category: "infrastructure",
-  },
-  {
-    id: "razorpayx",
-    name: "RazorpayX",
-    company: "Razorpay Software Pvt. Ltd.",
-    initials: "RX",
-    category: "payouts",
-  },
-  {
-    id: "cashfree-payouts",
-    name: "Cashfree Payouts",
-    company: "Cashfree Payments",
-    initials: "CP",
-    category: "payouts",
-  },
-  {
-    id: "chargebee",
-    name: "Chargebee",
-    company: "Chargebee Inc.",
-    initials: "CB",
-    category: "subscription",
-  },
-  {
-    id: "zoho-subscriptions",
-    name: "Zoho Subscriptions",
-    company: "Zoho Corporation",
-    initials: "ZS",
-    category: "subscription",
-  },
-  {
-    id: "signzy",
-    name: "Signzy",
-    company: "Signzy Technologies",
-    initials: "SZ",
-    category: "kyc-fraud",
-  },
-  {
-    id: "hyperverge",
-    name: "Hyperverge",
-    company: "Hyperverge Technologies",
-    initials: "HV",
-    category: "kyc-fraud",
-  },
 ];
 
 const jobTitleOptions = [
@@ -263,8 +153,6 @@ const coreRatingFields = [
   { key: "settlementRating", label: "Settlement Experience" },
 ];
 
-const products = popularProducts;
-
 function normalizeSearchQuery(searchQuery = "") {
   return searchQuery.trim().toLowerCase();
 }
@@ -302,7 +190,10 @@ function filterProducts(items, categoryFilter, searchQuery = "") {
 }
 
 const initialForm = {
+  reviewMode: "pg",
   productId: "",
+  websiteSuggestion: "",
+  websiteConsent: false,
   identityMethod: "",
   identityConnected: false,
   name: "",
@@ -480,18 +371,32 @@ function ProductLogo({ product, size = "md" }) {
   const imageSize = size === "md" ? 60 : 36;
 
   if (product.logo) {
+    const isRemoteLogo = /^https?:\/\//.test(product.logo);
+
     return (
       <div
         className={`${boxClass} pointer-events-none flex shrink-0 items-center justify-center`}
       >
-        <Image
-          src={product.logo}
-          alt=""
-          width={imageSize}
-          height={imageSize}
-          draggable={false}
-          className="pointer-events-none max-h-full max-w-full object-contain"
-        />
+        {isRemoteLogo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={product.logo}
+            alt=""
+            draggable={false}
+            className="pointer-events-none max-h-full max-w-full object-contain"
+            width={imageSize}
+            height={imageSize}
+          />
+        ) : (
+          <Image
+            src={product.logo}
+            alt=""
+            width={imageSize}
+            height={imageSize}
+            draggable={false}
+            className="pointer-events-none max-h-full max-w-full object-contain"
+          />
+        )}
       </div>
     );
   }
@@ -700,28 +605,84 @@ function ProviderSmartSearch({
 
 function Step1SelectProvider({
   selectedId,
+  reviewMode,
   onSelect,
+  onSelectWebsite,
   onContinue,
   categoryFilter,
   onCategoryChange,
   searchQuery,
   onSearchChange,
   filteredProducts,
+  allProducts,
+  isLoading,
+  loadError,
+  onRetry,
 }) {
   function handleProviderSelect(productId) {
     onSearchChange("");
     onSelect(productId);
   }
 
+  const selectedProduct =
+    reviewMode === "website"
+      ? comparexWebsiteProduct
+      : allProducts.find((item) => item.id === selectedId);
+  const isWebsiteSelected = reviewMode === "website";
+
   return (
     <div className="relative space-y-6 overflow-visible">
       <StepHeader
         title="Help Businesses Make Smarter Platform Decisions"
-        subtitle="Share your genuine experience with the provider and help other businesses make informed decisions."
+        subtitle="Review a payment gateway or share feedback about your experience on the CompareX website."
       />
 
+      <div className="rounded-2xl border border-[#2D4CC8]/20 bg-gradient-to-r from-[#EEF2FC] to-white p-4 sm:p-5">
+        <p className="text-sm font-semibold text-[#13203F]">Other option</p>
+        <p className="mt-1 text-sm text-slate-600">
+          Used CompareX to compare providers? Rate the website and share suggestions.
+        </p>
+        <button
+          type="button"
+          onClick={onSelectWebsite}
+          className={`mt-4 inline-flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition sm:w-auto ${
+            isWebsiteSelected
+              ? "border-[#2D4CC8] bg-white ring-2 ring-[#2D4CC8]/20"
+              : "border-slate-200 bg-white hover:border-[#2D4CC8]/40"
+          }`}
+        >
+          <span className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-lg bg-[#EEF2FC]">
+              <Image src="/images/logo-icon.svg" alt="" width={24} height={24} />
+            </span>
+            <span>
+              <span className="block text-sm font-bold text-[#13203F]">Rate CompareX Website</span>
+              <span className="block text-xs text-slate-500">Rating, suggestions & your name</span>
+            </span>
+          </span>
+          {isWebsiteSelected ? (
+            <span className="rounded-full bg-[#25a36f] px-2.5 py-1 text-xs font-semibold text-white">
+              Selected
+            </span>
+          ) : (
+            <HiArrowRight className="size-4 text-[#2D4CC8]" aria-hidden />
+          )}
+        </button>
+      </div>
+
+      {!isWebsiteSelected ? (
+        <>
+      {loadError ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {loadError}{" "}
+          <button type="button" onClick={onRetry} className="font-semibold underline">
+            Retry
+          </button>
+        </div>
+      ) : null}
+
       <ProviderSmartSearch
-        products={popularProducts}
+        products={allProducts}
         categoryFilter={categoryFilter}
         selectedId={selectedId}
         query={searchQuery}
@@ -734,7 +695,9 @@ function Step1SelectProvider({
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm font-medium text-slate-600">Filter by category</p>
             <p className="text-xs text-slate-500 sm:text-sm">
-              Showing {filteredProducts.length} provider{filteredProducts.length === 1 ? "" : "s"}
+              {isLoading
+                ? "Loading payment gateways…"
+                : `Showing ${filteredProducts.length} provider${filteredProducts.length === 1 ? "" : "s"}`}
             </p>
           </div>
           <CategoryPillFilter value={categoryFilter} onChange={onCategoryChange} />
@@ -742,13 +705,13 @@ function Step1SelectProvider({
 
         <div>
         <p className="mb-3 text-sm font-medium text-slate-600">
-          Here are some popular platforms businesses are reviewing right now.
+          Active payment gateways onboarded on CompareX.
         </p>
         {selectedId ? (
           <div className="mb-3 flex flex-col gap-3 rounded-xl border border-[#25a36f]/30 bg-[#25a36f]/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-slate-700">
               <span className="font-semibold text-[#25a36f]">Selected — </span>
-              {popularProducts.find((item) => item.id === selectedId)?.name ?? "Provider"}
+              {selectedProduct?.name ?? "Provider"}
             </p>
             <button
               type="button"
@@ -761,12 +724,18 @@ function Step1SelectProvider({
             </button>
           </div>
         ) : null}
-        <ProductGrid
-          items={filteredProducts}
-          selectedId={selectedId}
-          onSelect={handleProviderSelect}
-          emptyMessage="No providers match your search or category."
-        />
+        {isLoading ? (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
+            Loading payment gateways…
+          </div>
+        ) : (
+          <ProductGrid
+            items={filteredProducts}
+            selectedId={selectedId}
+            onSelect={handleProviderSelect}
+            emptyMessage="No active payment gateways match your search or category."
+          />
+        )}
         </div>
       </div>
 
@@ -780,6 +749,152 @@ function Step1SelectProvider({
           <HiArrowRight className="size-3.5" aria-hidden />
         </Link>
       </p>
+        </>
+      ) : null}
+
+      {isWebsiteSelected ? (
+        <div className="flex flex-col gap-3 rounded-xl border border-[#25a36f]/30 bg-[#25a36f]/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-slate-700">
+            <span className="font-semibold text-[#25a36f]">Selected — </span>
+            CompareX Website feedback
+          </p>
+          <button
+            type="button"
+            onClick={onContinue}
+            className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-full bg-[#2D4CC8] px-4 py-2 text-xs font-semibold text-white sm:text-sm"
+            style={{ color: "#fff" }}
+          >
+            Continue
+            <HiArrowRight className="size-3.5" aria-hidden />
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function Step2WebsiteFeedback({ form, updateField, showValidation }) {
+  const missingItems = [];
+
+  if (showValidation) {
+    if (!form.name.trim()) missingItems.push("Enter your name");
+    if (!form.email.trim()) missingItems.push("Enter your email");
+    if (form.rating < 1) missingItems.push("Add a rating for CompareX website");
+    if (!form.websiteSuggestion.trim()) missingItems.push("Add your suggestion notes");
+  }
+
+  return (
+    <div className="space-y-6">
+      <StepHeader
+        title="Rate CompareX Website"
+        subtitle="Tell us how the CompareX platform helped you and what we can improve."
+      />
+
+      <div className="flex items-center gap-3 rounded-xl border border-[#2D4CC8]/15 bg-white px-4 py-3">
+        <Image src="/images/logo-icon.svg" alt="" width={36} height={36} />
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Feedback for</p>
+          <p className="text-sm font-bold text-[#13203F]">CompareX Website</p>
+        </div>
+      </div>
+
+      <SectionBlock title="Your feedback">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="website-reviewer-name" className={labelClass}>
+              Your Name *
+            </label>
+            <input
+              id="website-reviewer-name"
+              value={form.name}
+              onChange={(e) => updateField("name", e.target.value)}
+              className={inputClass}
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="website-reviewer-email" className={labelClass}>
+              Email *
+            </label>
+            <input
+              id="website-reviewer-email"
+              type="email"
+              value={form.email}
+              onChange={(e) => updateField("email", e.target.value)}
+              className={inputClass}
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className={labelClass}>Website Rating *</label>
+          <StarRating value={form.rating} onChange={(value) => updateField("rating", value)} />
+        </div>
+
+        <div>
+          <label htmlFor="website-suggestion" className={labelClass}>
+            Suggestion Notes *
+          </label>
+          <textarea
+            id="website-suggestion"
+            value={form.websiteSuggestion}
+            onChange={(e) => updateField("websiteSuggestion", e.target.value)}
+            rows={5}
+            placeholder="What did you like about CompareX? What features or improvements would help you?"
+            className={`${inputClass} min-h-[120px] resize-y`}
+            required
+          />
+        </div>
+      </SectionBlock>
+
+      <FormValidationHint items={missingItems} />
+    </div>
+  );
+}
+
+function Step3WebsiteSubmit({ form, updateField, showValidation }) {
+  return (
+    <div className="space-y-6">
+      <StepHeader
+        title="Submit Website Feedback"
+        subtitle="Your feedback is sent to CompareX admin for review. It will not appear on payment gateway pages."
+      />
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+        <h3 className="text-base font-bold text-[#13203F]">Summary</h3>
+        <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-slate-600">
+          <span>Name</span>
+          <span className="text-right font-medium text-[#13203F]">{form.name || "—"}</span>
+          <span>Email</span>
+          <span className="text-right font-medium text-[#13203F]">{form.email || "—"}</span>
+          <span>Rating</span>
+          <span className="text-right font-medium text-[#13203F]">
+            {form.rating > 0 ? `${form.rating}/5` : "—"}
+          </span>
+        </div>
+        {form.websiteSuggestion ? (
+          <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">
+            {form.websiteSuggestion}
+          </p>
+        ) : null}
+      </div>
+
+      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-3">
+        <input
+          type="checkbox"
+          checked={form.websiteConsent}
+          onChange={(e) => updateField("websiteConsent", e.target.checked)}
+          className="mt-0.5 size-4 shrink-0 rounded border-slate-300 text-[#2D4CC8] focus:ring-[#2D4CC8]/30"
+        />
+        <span className="text-sm leading-relaxed text-slate-700">
+          I confirm this feedback is based on my genuine experience with CompareX
+        </span>
+      </label>
+
+      {showValidation && !form.websiteConsent ? (
+        <FormValidationHint items={["Please confirm your feedback is genuine"]} />
+      ) : null}
     </div>
   );
 }
@@ -1121,7 +1236,7 @@ function Step2LeaveReview({
     ? conditionalRatingFields[selectedProduct.category] ?? []
     : [];
 
-  const missingItems = showValidation ? getStep2MissingItems(form, conditionalFields) : [];
+  const missingItems = showValidation ? getStep2MissingItems(form) : [];
 
   return (
     <div className="space-y-6">
@@ -1337,12 +1452,14 @@ function Step2LeaveReview({
           </div>
 
           <div className="space-y-3 border-t border-slate-100 pt-4">
+            <p className="text-xs text-slate-500">Detailed ratings below are optional.</p>
             {coreRatingFields.map((field) => (
               <RatingRow
                 key={field.key}
                 label={field.label}
                 value={form[field.key]}
                 onChange={(value) => updateField(field.key, value)}
+                optional
               />
             ))}
             <RatingRow
@@ -1355,13 +1472,17 @@ function Step2LeaveReview({
 
           {conditionalFields.length > 0 ? (
             <div className="space-y-3 border-t border-slate-100 pt-4">
-              <p className="text-sm font-semibold text-[#13203F]">Category-specific experience</p>
+              <p className="text-sm font-semibold text-[#13203F]">
+                Category-specific experience{" "}
+                <span className="font-normal text-slate-400">(Optional)</span>
+              </p>
               {conditionalFields.map((field) => (
                 <RatingRow
                   key={field.key}
                   label={field.label}
                   value={form[field.key]}
                   onChange={(value) => updateField(field.key, value)}
+                  optional
                 />
               ))}
             </div>
@@ -1641,10 +1762,13 @@ function Step5ThankYou({ selectedProduct, form, onReset }) {
   );
 }
 
-function StepIndicator({ currentStep }) {
+function StepIndicator({ currentStep, flowSteps = steps }) {
+  const gridClass =
+    flowSteps.length <= 4 ? "mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4" : "mb-6 grid grid-cols-2 gap-2 sm:grid-cols-5";
+
   return (
-    <ol className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-5">
-      {steps.map((item) => {
+    <ol className={gridClass}>
+      {flowSteps.map((item) => {
         const done = currentStep > item.id;
         const active = currentStep === item.id;
         return (
@@ -1696,21 +1820,11 @@ function getLinkedInShareUrl(form, productName) {
   return `https://www.linkedin.com/shareArticle?${params.toString()}`;
 }
 
-function hasRequiredRatings(form, conditionalFields) {
-  if (form.rating < 1 || form.recommendNps === null) return false;
-
-  for (const field of coreRatingFields) {
-    if (form[field.key] < 1) return false;
-  }
-
-  for (const field of conditionalFields) {
-    if (form[field.key] < 1) return false;
-  }
-
-  return true;
+function hasRequiredRatings(form) {
+  return form.rating >= 1 && form.recommendNps !== null;
 }
 
-function getStep2MissingItems(form, conditionalFields) {
+function getStep2MissingItems(form) {
   const items = [];
 
   if (!form.identityMethod) items.push("Select a login or identity method");
@@ -1724,9 +1838,6 @@ function getStep2MissingItems(form, conditionalFields) {
   if (!form.usageDuration) items.push("Select how long you've used this provider");
   if (form.rating < 1) items.push("Add an overall rating");
   if (form.recommendNps === null) items.push("Rate how likely you are to recommend this provider");
-  if (!hasRequiredRatings(form, conditionalFields)) {
-    items.push("Complete all required experience ratings");
-  }
   if (!form.title.trim()) items.push("Add a review title");
   if (!form.reviewText.trim()) items.push("Write your review");
 
@@ -1736,6 +1847,9 @@ function getStep2MissingItems(form, conditionalFields) {
 export default function ReviewsSection() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
+  const [products, setProducts] = useState([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [productsError, setProductsError] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showValidation, setShowValidation] = useState(false);
@@ -1743,25 +1857,61 @@ export default function ReviewsSection() {
   const [submitError, setSubmitError] = useState("");
   const formCardRef = useRef(null);
 
-  const selectedProduct = products.find((item) => item.id === form.productId);
+  const loadProducts = useCallback(async () => {
+    setIsLoadingProducts(true);
+    setProductsError("");
+    try {
+      const data = await fetchPgComparison({ sort: "name_asc" });
+      setProducts((data.paymentGateways || []).map(mapPgToReviewProduct));
+    } catch (err) {
+      setProducts([]);
+      setProductsError(
+        err instanceof ApiError ? err.message : "Failed to load payment gateways",
+      );
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
+
+  const isWebsiteFlow = form.reviewMode === "website";
+  const flowSteps = isWebsiteFlow ? websiteSteps : steps;
+
+  const selectedProduct =
+    isWebsiteFlow && form.productId === COMPAREX_WEBSITE_ID
+      ? comparexWebsiteProduct
+      : products.find((item) => item.id === form.productId);
 
   const filteredStep1Products = useMemo(
-    () => filterProducts(popularProducts, categoryFilter, searchQuery),
-    [categoryFilter, searchQuery]
+    () => filterProducts(products, categoryFilter, searchQuery),
+    [products, categoryFilter, searchQuery]
   );
 
-  const conditionalFields = selectedProduct
-    ? conditionalRatingFields[selectedProduct.category] ?? []
-    : [];
+  const conditionalFields =
+    selectedProduct && !isWebsiteFlow
+      ? conditionalRatingFields[selectedProduct.category] ?? []
+      : [];
 
   function updateField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  function handleSelectWebsite() {
+    setForm((prev) => ({
+      ...prev,
+      reviewMode: "website",
+      productId: COMPAREX_WEBSITE_ID,
+    }));
+    setShowValidation(false);
+  }
+
   function handleProductSelect(productId) {
     if (!productId) return;
 
-    setForm((prev) => ({ ...prev, productId }));
+    setForm((prev) => ({ ...prev, productId, reviewMode: "pg" }));
     setShowValidation(false);
   }
 
@@ -1777,11 +1927,12 @@ export default function ReviewsSection() {
   function handleCategoryChange(nextCategory) {
     setCategoryFilter(nextCategory);
 
-    if (!form.productId) return;
+    if (!form.productId || isWebsiteFlow) return;
 
-    const visibleProducts = filterProducts(popularProducts, nextCategory, searchQuery);
+    const visibleProducts = filterProducts(products, nextCategory, searchQuery);
     if (!visibleProducts.some((item) => item.id === form.productId)) {
       updateField("productId", "");
+      updateField("reviewMode", "pg");
     }
   }
 
@@ -1836,6 +1987,15 @@ export default function ReviewsSection() {
   function canGoNext() {
     if (step === 1) return Boolean(form.productId);
 
+    if (step === 2 && isWebsiteFlow) {
+      return Boolean(
+        form.name.trim() &&
+          form.email.trim() &&
+          form.rating >= 1 &&
+          form.websiteSuggestion.trim(),
+      );
+    }
+
     if (step === 2) {
       const jobTitleValid =
         form.jobTitle && (form.jobTitle !== "Others" || form.jobTitleOther.trim());
@@ -1850,10 +2010,14 @@ export default function ReviewsSection() {
           jobTitleValid &&
           form.monthlyVolume &&
           form.usageDuration &&
-          hasRequiredRatings(form, conditionalFields) &&
+          hasRequiredRatings(form) &&
           form.title.trim() &&
           form.reviewText.trim()
       );
+    }
+
+    if (step === 3 && isWebsiteFlow) {
+      return form.websiteConsent;
     }
 
     if (step === 3) {
@@ -1861,6 +2025,27 @@ export default function ReviewsSection() {
     }
 
     return false;
+  }
+
+  async function submitWebsiteReviewToApi() {
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      await submitWebsiteReview({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        rating: form.rating,
+        suggestionNotes: form.websiteSuggestion.trim(),
+        consentGenuine: form.websiteConsent,
+      });
+      return true;
+    } catch (err) {
+      setSubmitError(err instanceof ApiError ? err.message : "Failed to submit feedback");
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   async function submitReviewToApi() {
@@ -1875,6 +2060,7 @@ export default function ReviewsSection() {
     try {
       await submitReview({
         productId: selectedProduct.id,
+        paymentProviderId: selectedProduct.paymentProviderId || selectedProduct.id,
         productName: selectedProduct.name,
         productCompany: selectedProduct.company,
         productCategory: selectedProduct.category,
@@ -1945,6 +2131,13 @@ export default function ReviewsSection() {
     }
     setShowValidation(false);
 
+    if (step === 3 && isWebsiteFlow) {
+      const saved = await submitWebsiteReviewToApi();
+      if (!saved) return;
+      setStep(5);
+      return;
+    }
+
     if (step === 3) {
       const saved = await submitReviewToApi();
       if (!saved) return;
@@ -1980,8 +2173,11 @@ export default function ReviewsSection() {
     setStep(1);
   }
 
-  const activeStep = steps.find((item) => item.id === step) ?? steps[0];
-  const progressWidth = `${(step / steps.length) * 100}%`;
+  const activeStep = flowSteps.find((item) => item.id === step) ?? flowSteps[0];
+  const activeStepIndex = Math.max(0, flowSteps.findIndex((item) => item.id === step));
+  const progressWidth = `${((activeStepIndex + 1) / flowSteps.length) * 100}%`;
+  const showStepFooter = isWebsiteFlow ? step > 0 && step < 5 && step !== 4 : step > 0 && step < 4;
+  const submitLabel = isWebsiteFlow ? "Submit Feedback" : "Submit Review";
 
   return (
     <section className="bg-[#f2f6fb] py-16 sm:py-20">
@@ -2001,11 +2197,11 @@ export default function ReviewsSection() {
         >
           {step < 5 ? (
             <>
-              <StepIndicator currentStep={step} />
+              <StepIndicator currentStep={step} flowSteps={flowSteps} />
 
               <div className="mb-4 flex items-center justify-between gap-4 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
                 <span>
-                  Step {step} of {steps.length}
+                  Step {activeStepIndex + 1} of {flowSteps.length}
                 </span>
                 <span className="text-[#13203F]">{activeStep.label}</span>
               </div>
@@ -2023,21 +2219,37 @@ export default function ReviewsSection() {
               <>
                 <Step1SelectProvider
                   selectedId={form.productId}
+                  reviewMode={form.reviewMode}
                   onSelect={handleProductSelect}
+                  onSelectWebsite={handleSelectWebsite}
                   onContinue={handleContinueToReview}
                   categoryFilter={categoryFilter}
                   onCategoryChange={handleCategoryChange}
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                   filteredProducts={filteredStep1Products}
+                  allProducts={products}
+                  isLoading={isLoadingProducts}
+                  loadError={productsError}
+                  onRetry={loadProducts}
                 />
                 {!form.productId && showValidation ? (
-                  <FormValidationHint items={["Select a provider to review"]} />
+                  <FormValidationHint
+                    items={["Select a payment gateway or choose Rate CompareX Website"]}
+                  />
                 ) : null}
               </>
             )}
 
-            {step === 2 && (
+            {step === 2 && isWebsiteFlow ? (
+              <Step2WebsiteFeedback
+                form={form}
+                updateField={updateField}
+                showValidation={showValidation}
+              />
+            ) : null}
+
+            {step === 2 && !isWebsiteFlow ? (
               <Step2LeaveReview
                 form={form}
                 selectedProduct={selectedProduct}
@@ -2046,25 +2258,33 @@ export default function ReviewsSection() {
                 onIdentityDisconnect={handleIdentityDisconnect}
                 showValidation={showValidation}
               />
-            )}
+            ) : null}
 
-            {step === 3 && (
+            {step === 3 && isWebsiteFlow ? (
+              <Step3WebsiteSubmit
+                form={form}
+                updateField={updateField}
+                showValidation={showValidation}
+              />
+            ) : null}
+
+            {step === 3 && !isWebsiteFlow ? (
               <Step3Consent
                 form={form}
                 selectedProduct={selectedProduct}
                 updateField={updateField}
                 showValidation={showValidation}
               />
-            )}
+            ) : null}
 
-            {step === 4 && (
+            {step === 4 && !isWebsiteFlow ? (
               <Step4ShareLinkedIn
                 form={form}
                 selectedProduct={selectedProduct}
                 onShare={handleShareLinkedIn}
                 onSkip={handleSkipShare}
               />
-            )}
+            ) : null}
 
             {step === 5 && (
               <Step5ThankYou
@@ -2075,7 +2295,7 @@ export default function ReviewsSection() {
             )}
           </div>
 
-          {step > 0 && step < 4 ? (
+          {showStepFooter ? (
             <div className="mt-6 space-y-3 border-t border-slate-200/70 pt-5">
               {submitError ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -2107,7 +2327,7 @@ export default function ReviewsSection() {
                 {step === 3
                   ? isSubmitting
                     ? "Submitting..."
-                    : "Submit Review"
+                    : submitLabel
                   : "Next"}
                 <HiArrowRight className="size-4" aria-hidden />
               </button>

@@ -20,6 +20,7 @@ import {
   HiStar,
   HiUserGroup,
   HiUserPlus,
+  HiUsers,
 } from "react-icons/hi2";
 import { useAuth } from "@/components/auth/auth-provider";
 import { formatRoleLabel } from "@/lib/account-roles";
@@ -36,6 +37,7 @@ const navItems = [
   { href: "/dashboard/talk-to-expert", label: "Talk to Expert", icon: HiCalendarDays },
   { href: "/dashboard/reviews-ratings", label: "Reviews & Ratings", icon: HiStar },
   { href: "/dashboard/reports", label: "Reports", icon: HiChartBarSquare },
+  { href: "/dashboard/users", label: "Users & Access", icon: HiUsers },
   { href: "/dashboard/settings", label: "System Settings", icon: HiCog6Tooth },
   { href: "/dashboard/help-support", label: "Help & Support", icon: HiLifebuoy },
 ];

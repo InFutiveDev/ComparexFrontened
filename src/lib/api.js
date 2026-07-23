@@ -1,4 +1,4 @@
-const DEFAULT_API_URL = "http://100.54.237.0/api";
+const DEFAULT_API_URL = "http://localhost:3001/api";
 
 export const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL
@@ -17,13 +17,21 @@ export async function apiFetch(path, options = {}) {
     ? path
     : `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
+  let response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+  } catch {
+    throw new ApiError(
+      `Cannot reach API at ${API_BASE_URL}. Make sure the API server is running.`,
+      0
+    );
+  }
 
   let data = null;
   const contentType = response.headers.get("content-type") || "";
@@ -33,7 +41,12 @@ export async function apiFetch(path, options = {}) {
   }
 
   if (!response.ok) {
-    throw new ApiError(data?.message || `API error: ${response.status}`, response.status);
+    const message =
+      data?.message ||
+      (response.status === 404
+        ? "API route not found. Restart or redeploy the API server with the latest code."
+        : `API error: ${response.status}`);
+    throw new ApiError(message, response.status);
   }
 
   return data;
@@ -48,6 +61,11 @@ export async function apiFormFetch(path, formData, options = {}) {
     method: "POST",
     body: formData,
     ...options,
+  }).catch(() => {
+    throw new ApiError(
+      `Cannot reach API at ${API_BASE_URL}. Make sure the API server is running.`,
+      0,
+    );
   });
 
   let data = null;
@@ -58,7 +76,12 @@ export async function apiFormFetch(path, formData, options = {}) {
   }
 
   if (!response.ok) {
-    throw new ApiError(data?.message || `API error: ${response.status}`, response.status);
+    const message =
+      data?.message ||
+      (response.status === 404
+        ? "API route not found. Restart or redeploy the API server with the latest code."
+        : `API error: ${response.status}`);
+    throw new ApiError(message, response.status);
   }
 
   return data;

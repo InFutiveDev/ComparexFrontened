@@ -88,6 +88,12 @@ export function updateReviewStatus(id, status) {
   });
 }
 
+export function deleteReview(id) {
+  return authFetch(`/review/${id}`, {
+    method: "DELETE",
+  });
+}
+
 export function updateMerchantAccountStatus(id, status) {
   return authFetch(`/merchant/${id}/account-status`, {
     method: "PATCH",
@@ -215,4 +221,34 @@ export function fetchAdminMdrAudit({ page = 1, limit = 50, scope } = {}) {
   });
   if (scope) params.set("scope", scope);
   return authFetch(`/admin/mdr/audit?${params.toString()}`);
+}
+
+/** Master Admin — Users & role assignment */
+function usersQuery({ page = 1, limit = 10, role, status, search } = {}) {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  if (role) params.set("role", role);
+  if (status) params.set("status", status);
+  if (search) params.set("search", search);
+  return params.toString();
+}
+
+export function fetchAdminUsers(filters = {}) {
+  return authFetch(`/admin/users?${usersQuery(filters)}`);
+}
+
+export function createAdminUser(payload) {
+  return authFetch("/admin/users", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateAdminUser(id, payload) {
+  return authFetch(`/admin/users/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
 }

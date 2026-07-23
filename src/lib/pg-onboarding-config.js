@@ -123,8 +123,8 @@ export const SECTION_VISIBILITY = {
 export const FIELD_VISIBILITY = {
   // Pricing
   upiMdr: ["full-stack-pg", "upi-only-pg", "pos", "one-click", "orchestration"],
-  creditCardMdr: ["full-stack-pg", "orchestration"],
-  debitCardMdr: ["full-stack-pg", "orchestration"],
+  creditCardMdr: ["full-stack-pg", "pos", "orchestration"],
+  debitCardMdr: ["full-stack-pg", "pos", "orchestration"],
   internationalMdr: ["full-stack-pg", "cross-border"],
   walletCharges: ["full-stack-pg", "orchestration"],
   netBankingCharges: ["full-stack-pg", "orchestration"],
@@ -163,6 +163,41 @@ export const FIELD_VISIBILITY = {
   bestSuitedBusinessTypes: "all",
 };
 
+/** Pricing fields that stay optional for specific service types on step 3. */
+export const PRICING_OPTIONAL_FIELDS = {
+  "full-stack-pg": ["emiBnplCharges", "refundFee", "chargebackFee"],
+};
+
+/** Pricing fields required before leaving step 3, by service type. */
+export const PRICING_REQUIRED_FIELDS = {
+  "full-stack-pg": ["upiMdr", "creditCardMdr", "debitCardMdr"],
+  "upi-only-pg": ["upiMdr"],
+  pos: ["upiMdr", "hardwareCost"],
+  "cross-border": [
+    "forexMarkup",
+    "settlementCurrency",
+    "settlementInfrastructure",
+    "multiCurrencyWallet",
+  ],
+  "one-click": ["upiMdr"],
+  "risk-frm": ["perTransactionFee"],
+  orchestration: ["upiMdr", "creditCardMdr", "debitCardMdr"],
+};
+
+export function isPricingFieldOptional(serviceType, fieldKey) {
+  return (PRICING_OPTIONAL_FIELDS[serviceType] || []).includes(fieldKey);
+}
+
+export function isPricingFieldRequired(serviceType, fieldKey) {
+  if (!serviceType || !isFieldVisible(serviceType, fieldKey)) return false;
+  if (isPricingFieldOptional(serviceType, fieldKey)) return false;
+  return (PRICING_REQUIRED_FIELDS[serviceType] || []).includes(fieldKey);
+}
+
+export function hasPricingValue(value) {
+  return Boolean(typeof value === "string" ? value.trim() : value);
+}
+
 export function isFieldVisible(serviceType, fieldKey) {
   if (!serviceType) return false;
   const rule = FIELD_VISIBILITY[fieldKey];
@@ -195,6 +230,21 @@ export const COUNTRY_OPTIONS = [
   "Germany",
   "Others",
 ];
+
+export const INDIA_COUNTRY_OPTIONS = ["India"];
+
+export function getCountriesSupportedOptions(serviceType) {
+  return serviceType === "cross-border" ? COUNTRY_OPTIONS : INDIA_COUNTRY_OPTIONS;
+}
+
+export function normalizeCountriesSupported(serviceType, countriesSupported = []) {
+  if (serviceType === "cross-border") {
+    return Array.isArray(countriesSupported)
+      ? countriesSupported.map((item) => String(item).trim()).filter(Boolean)
+      : [];
+  }
+  return ["India"];
+}
 
 export const SETTLEMENT_CURRENCY_OPTIONS = [
   "USD",
@@ -398,7 +448,7 @@ export function getFeaturesForServiceType(serviceType) {
   return [...new Set(list)];
 }
 
-export const SDK_OPTIONS = ["Python", "PHP", "Node.js", "Java", ".NET", "Ruby"];
+export const SDK_OPTIONS = ["Python", "PHP", "Node.js", "Java", ".NET", "Ruby", "Other"];
 
 export const PLUGIN_OPTIONS = [
   "Shopify",
@@ -406,9 +456,10 @@ export const PLUGIN_OPTIONS = [
   "Magento",
   "BigCommerce",
   "PrestaShop",
+  "Other",
 ];
 
-export const MOBILE_SDK_OPTIONS = ["iOS", "Android", "React Native", "Flutter"];
+export const MOBILE_SDK_OPTIONS = ["iOS", "Android", "React Native", "Flutter", "Other"];
 
 export const BUSINESS_TYPE_OPTIONS = [
   "Ecommerce / D2C",
@@ -527,8 +578,8 @@ export const initialOnboardingForm = {
   webhookSupport: false,
   mobileSdkSupport: [],
   // Merchant experience
-  merchantSuccessStoriesUrl: "",
-  caseStudiesUrl: "",
+  merchantSuccessStoriesUrls: [],
+  caseStudiesUrls: [],
   // Talk to expert
   talkToExpertEnabled: true,
   expertName: "",
@@ -541,7 +592,46 @@ export const initialOnboardingForm = {
   availabilitySlots: "",
 };
 
+export function normalizeUrlList(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+  if (typeof value === "string" && value.trim()) {
+    return [value.trim()];
+  }
+  return [];
+}
+
+/** Migrate legacy single-URL onboarding fields when loading saved data. */
+export function normalizeOnboardingForm(data = {}) {
+  const next = { ...initialOnboardingForm, ...data };
+
+  next.merchantSuccessStoriesUrls = normalizeUrlList(
+    data.merchantSuccessStoriesUrls ?? data.merchantSuccessStoriesUrl
+  );
+  next.caseStudiesUrls = normalizeUrlList(data.caseStudiesUrls ?? data.caseStudiesUrl);
+
+  if (next.serviceType) {
+    next.countriesSupported = normalizeCountriesSupported(
+      next.serviceType,
+      next.countriesSupported
+    );
+  }
+
+  return next;
+}
+
 export function validateStep(stepId, form) {
+  if (stepId === "company" && form.serviceType === "full-stack-pg") {
+    return Boolean(form.websiteUrl?.trim());
+  }
+  if (stepId === "pricing") {
+    const requiredFields = PRICING_REQUIRED_FIELDS[form.serviceType] || [];
+    return requiredFields.every((fieldKey) => {
+      if (isPricingFieldOptional(form.serviceType, fieldKey)) return true;
+      return hasPricingValue(form[fieldKey]);
+    });
+  }
   if (stepId === "smart-tags") {
     return form.smartTags.length <= MAX_SMART_TAGS;
   }

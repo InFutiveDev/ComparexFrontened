@@ -15,6 +15,7 @@ import { ApiError } from "@/lib/api";
 import { submitExpertBooking } from "@/lib/expert";
 import { heroFormStepOneFields } from "@/lib/mock-data";
 import { fetchTalkToExpertProviders } from "@/lib/payment";
+import { expertHasAvailability } from "@/lib/pg-expert-schedule";
 import { businessPriorityOptions } from "./talk-to-expert-data";
 import { CalendlyScheduleEmbed } from "./calendly-schedule-embed";
 
@@ -291,17 +292,20 @@ export function TalkToExpertModal({ open, onClose }) {
   const availableExperts = useMemo(() => {
     if (!selectedPg) return [];
     if (Array.isArray(selectedPg.experts) && selectedPg.experts.length > 0) {
-      return selectedPg.experts.filter((expert) => expert.status !== "inactive");
+      return selectedPg.experts.filter(
+        (expert) => expert.status !== "inactive" && expertHasAvailability(expert),
+      );
     }
-    return selectedPg.rep?.name
+    return selectedPg.rep?.name && expertHasAvailability(selectedPg)
       ? [
           {
-            id: selectedPg.expertId || "primary",
+            id: selectedPg.expertId || "legacy",
             name: selectedPg.rep.name,
             designation: selectedPg.rep.title,
             description: selectedPg.rep.bio,
             calendlyUrl: selectedPg.calendlyUrl,
-            isPrimary: true,
+            availabilitySlots: selectedPg.availabilitySlots,
+            weeklyAvailability: selectedPg.weeklyAvailability,
           },
         ]
       : [];
@@ -309,16 +313,13 @@ export function TalkToExpertModal({ open, onClose }) {
   const selectedExpert = useMemo(
     () =>
       availableExperts.find((expert) => expert.id === selectedExpertId) ||
-      availableExperts.find((expert) => expert.isPrimary) ||
       availableExperts[0] ||
       null,
     [availableExperts, selectedExpertId],
   );
 
   useEffect(() => {
-    const defaultExpert =
-      availableExperts.find((expert) => expert.isPrimary) || availableExperts[0];
-    setSelectedExpertId(defaultExpert?.id || "");
+    setSelectedExpertId(availableExperts[0]?.id || "");
   }, [selectedTargetId, availableExperts]);
 
   const visibleProviders = useMemo(
@@ -568,7 +569,7 @@ export function TalkToExpertModal({ open, onClose }) {
                 htmlFor="available-expert"
                 className="text-sm font-semibold text-[#13203F]"
               >
-                Select available expert
+                Select expert (by availability)
               </label>
               <select
                 id="available-expert"

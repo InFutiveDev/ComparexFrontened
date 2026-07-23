@@ -7,7 +7,6 @@ import {
   HiArrowRight,
   HiCheck,
   HiChevronDown,
-  HiMapPin,
   HiOutlineXMark,
 } from "react-icons/hi2";
 import { savePgOnboardingProfile } from "@/lib/pg-onboarding-storage";
@@ -41,8 +40,13 @@ import {
   YES_NO_OPTIONS,
   getFeaturesForServiceType,
   getVisibleSteps,
+  getCountriesSupportedOptions,
   initialOnboardingForm,
   isFieldVisible,
+  isPricingFieldOptional,
+  isPricingFieldRequired,
+  normalizeCountriesSupported,
+  normalizeOnboardingForm,
   validateStep,
 } from "@/lib/pg-onboarding-config";
 
@@ -50,6 +54,21 @@ const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20";
 
 const labelClass = "mb-1.5 block text-left text-sm font-semibold text-[#13203F]";
+
+function PricingFieldLabel({ fieldKey, serviceType, children }) {
+  const optional = isPricingFieldOptional(serviceType, fieldKey);
+  const required = isPricingFieldRequired(serviceType, fieldKey);
+
+  return (
+    <label className={labelClass}>
+      {children}
+      {required ? <span className="text-red-500"> *</span> : null}
+      {optional ? (
+        <span className="ml-1 text-xs font-normal text-slate-500">(optional)</span>
+      ) : null}
+    </label>
+  );
+}
 
 function normalizeOptions(options) {
   return options.map((option) =>
@@ -273,6 +292,231 @@ function MultiSelectChips({ options, value, onChange, max }) {
   );
 }
 
+function MultiSelectChipsWithCustom({
+  options,
+  value,
+  onChange,
+  max,
+  placeholder = "Add custom value",
+}) {
+  const [customInput, setCustomInput] = useState("");
+  const optionValues = options.map((option) =>
+    typeof option === "string" ? option : option.value
+  );
+  const customSelected = value.filter((item) => !optionValues.includes(item));
+
+  function toggle(item) {
+    const selected = value.includes(item);
+    if (selected) {
+      onChange(value.filter((v) => v !== item));
+      return;
+    }
+    if (max && value.length >= max) return;
+    onChange([...value, item]);
+  }
+
+  function addCustom() {
+    const item = customInput.trim();
+    if (!item || value.includes(item)) return;
+    if (max && value.length >= max) return;
+    onChange([...value, item]);
+    setCustomInput("");
+  }
+
+  return (
+    <div className="space-y-3">
+      <MultiSelectChips options={options} value={value} onChange={onChange} max={max} />
+      {customSelected.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {customSelected.map((item) => (
+            <span
+              key={item}
+              className="inline-flex items-center gap-2 rounded-full border border-[#2D4CC8]/20 bg-[#EEF2FC] px-3 py-1.5 text-xs font-semibold text-[#2D4CC8]"
+            >
+              {item}
+              <button
+                type="button"
+                onClick={() => toggle(item)}
+                className="cursor-pointer text-[#2D4CC8]/70 transition hover:text-[#13203F]"
+                aria-label={`Remove ${item}`}
+              >
+                <HiOutlineXMark className="size-3.5" />
+              </button>
+            </span>
+          ))}
+        </div>
+      ) : null}
+      <div className="flex gap-2">
+        <input
+          className={`${inputClass} flex-1`}
+          value={customInput}
+          onChange={(e) => setCustomInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addCustom();
+            }
+          }}
+          placeholder={placeholder}
+        />
+        <button
+          type="button"
+          onClick={addCustom}
+          disabled={!customInput.trim()}
+          className="shrink-0 rounded-xl border border-[#2D4CC8]/30 bg-white px-4 py-3 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#EEF2FC] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MultiSelectWithOtherInput({ options, value, onChange, label, placeholder }) {
+  const [otherInput, setOtherInput] = useState("");
+  const optionValues = options.map((option) =>
+    typeof option === "string" ? option : option.value
+  );
+  const customSelected = value.filter((item) => !optionValues.includes(item));
+
+  function addOther() {
+    const item = otherInput.trim();
+    if (!item || value.includes(item)) return;
+    onChange([...value, item]);
+    setOtherInput("");
+  }
+
+  function removeCustom(item) {
+    onChange(value.filter((v) => v !== item));
+  }
+
+  return (
+    <div className="space-y-3">
+      <MultiSelectChips options={options} value={value} onChange={onChange} />
+      {customSelected.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {customSelected.map((item) => (
+            <span
+              key={item}
+              className="inline-flex items-center gap-2 rounded-full border border-[#2D4CC8]/20 bg-[#EEF2FC] px-3 py-1.5 text-xs font-semibold text-[#2D4CC8]"
+            >
+              {item}
+              <button
+                type="button"
+                onClick={() => removeCustom(item)}
+                className="cursor-pointer text-[#2D4CC8]/70 transition hover:text-[#13203F]"
+                aria-label={`Remove ${item}`}
+              >
+                <HiOutlineXMark className="size-3.5" />
+              </button>
+            </span>
+          ))}
+        </div>
+      ) : null}
+      <div>
+        <label className="mb-1.5 block text-left text-xs font-medium text-slate-500">
+          Other {label} (not in list)
+        </label>
+        <div className="flex gap-2">
+          <input
+            className={`${inputClass} flex-1`}
+            value={otherInput}
+            onChange={(e) => setOtherInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addOther();
+              }
+            }}
+            placeholder={placeholder || `Add other ${label.toLowerCase()}`}
+          />
+          <button
+            type="button"
+            onClick={addOther}
+            disabled={!otherInput.trim()}
+            className="shrink-0 rounded-xl border border-[#2D4CC8]/30 bg-white px-4 py-3 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#EEF2FC] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UrlListField({ label, value, onChange, placeholder = "https://" }) {
+  const [draft, setDraft] = useState("");
+
+  function addUrl() {
+    const url = draft.trim();
+    if (!url || value.includes(url)) return;
+    onChange([...value, url]);
+    setDraft("");
+  }
+
+  function removeUrl(url) {
+    onChange(value.filter((item) => item !== url));
+  }
+
+  return (
+    <div>
+      <label className={labelClass}>{label}</label>
+      <div className="flex gap-2">
+        <input
+          type="url"
+          className={`${inputClass} flex-1`}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addUrl();
+            }
+          }}
+          placeholder={placeholder}
+        />
+        <button
+          type="button"
+          onClick={addUrl}
+          disabled={!draft.trim()}
+          className="shrink-0 rounded-xl border border-[#2D4CC8]/30 bg-white px-4 py-3 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#EEF2FC] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Add
+        </button>
+      </div>
+      {value.length > 0 ? (
+        <div className="mt-3 space-y-2">
+          {value.map((url) => (
+            <div
+              key={url}
+              className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5"
+            >
+              <a
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="min-w-0 truncate text-sm font-medium text-[#2D4CC8] hover:underline"
+              >
+                {url}
+              </a>
+              <button
+                type="button"
+                onClick={() => removeUrl(url)}
+                className="shrink-0 cursor-pointer text-slate-400 transition hover:text-red-600"
+                aria-label={`Remove ${url}`}
+              >
+                <HiOutlineXMark className="size-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-2 text-xs text-slate-500">No URLs added yet.</p>
+      )}
+    </div>
+  );
+}
+
 function Field({ show, children }) {
   if (!show) return null;
   return children;
@@ -392,10 +636,12 @@ function FileUploadField({
 
 function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi = true }) {
   const [stepIndex, setStepIndex] = useState(0);
-  const [form, setForm] = useState(() => ({
-    ...initialOnboardingForm,
-    ...(initialData || {}),
-  }));
+  const [form, setForm] = useState(() =>
+    normalizeOnboardingForm({
+      ...initialOnboardingForm,
+      ...(initialData || {}),
+    })
+  );
   const [submitted, setSubmitted] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const [featureQuery, setFeatureQuery] = useState("");
@@ -441,12 +687,14 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
     }
 
     setStepIndex(0);
-    setForm({
-      ...initialOnboardingForm,
-      ...(initialData || {}),
-      companyLogo: getFileMeta(initialData?.companyLogo),
-      onboardingChecklist: getFileMeta(initialData?.onboardingChecklist),
-    });
+    setForm(
+      normalizeOnboardingForm({
+        ...initialOnboardingForm,
+        ...(initialData || {}),
+        companyLogo: getFileMeta(initialData?.companyLogo),
+        onboardingChecklist: getFileMeta(initialData?.onboardingChecklist),
+      })
+    );
     setSubmitted(false);
     setDraftSaved(false);
     setFeatureQuery("");
@@ -482,6 +730,34 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
       if (prev.smartTags.length >= MAX_SMART_TAGS) return prev;
       return { ...prev, smartTags: [...prev.smartTags, tagValue] };
     });
+  }
+
+  function addSuggestedTag() {
+    const tag = form.suggestNewTag.trim();
+    if (!tag) return;
+    setForm((prev) => {
+      if (prev.smartTags.includes(tag) || prev.smartTags.length >= MAX_SMART_TAGS) {
+        return prev;
+      }
+      return { ...prev, smartTags: [...prev.smartTags, tag], suggestNewTag: "" };
+    });
+  }
+
+  function addSuggestedFeature() {
+    const feature = form.suggestNewFeature.trim();
+    if (!feature) return;
+    setForm((prev) => {
+      if (prev.features.includes(feature)) return prev;
+      return { ...prev, features: [...prev.features, feature], suggestNewFeature: "" };
+    });
+  }
+
+  function selectServiceType(serviceType) {
+    setForm((prev) => ({
+      ...prev,
+      serviceType,
+      countriesSupported: normalizeCountriesSupported(serviceType, prev.countriesSupported),
+    }));
   }
 
   function addFeature(feature) {
@@ -545,7 +821,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
 
     const gateway = response?.paymentGateway;
     const nextOnboarding = gateway?.onboarding || {};
-    const saved = {
+    const saved = normalizeOnboardingForm({
       ...form,
       ...nextOnboarding,
       companyLogo: getFileMeta(nextOnboarding.companyLogo ?? form.companyLogo),
@@ -555,7 +831,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
       verificationStatus: gateway?.verificationStatus,
       profileCompletion: gateway?.profileCompletion,
       updatedAt: new Date().toISOString(),
-    };
+    });
 
     savePgOnboardingProfile(saved);
     onSaved?.(saved, gateway);
@@ -597,8 +873,14 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
 
   const selectedService =
     SERVICE_TYPES.find((option) => option.value === form.serviceType)?.label || "—";
-  const selectedSmartTags = SMART_TAG_OPTIONS.filter((tag) =>
-    form.smartTags.includes(tag.value)
+  const selectedSmartTags = form.smartTags.map((tagValue) => {
+    const predefined = SMART_TAG_OPTIONS.find((tag) => tag.value === tagValue);
+    return predefined || { value: tagValue, label: tagValue, emoji: "🏷️" };
+  });
+
+  const countriesSupportedOptions = useMemo(
+    () => getCountriesSupportedOptions(form.serviceType),
+    [form.serviceType]
   );
 
   if (!open) return null;
@@ -681,7 +963,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                         <button
                           key={option.value}
                           type="button"
-                          onClick={() => updateField("serviceType", option.value)}
+                          onClick={() => selectServiceType(option.value)}
                           className={`flex min-h-[120px] cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border bg-white px-3 py-5 text-center transition ${
                             selected
                               ? "border-[#2D4CC8] shadow-sm ring-2 ring-[#2D4CC8]/20"
@@ -747,13 +1029,19 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Website URL</label>
+                      <label className={labelClass}>
+                        Website URL
+                        {form.serviceType === "full-stack-pg" ? (
+                          <span className="text-red-500"> *</span>
+                        ) : null}
+                      </label>
                       <input
                         type="url"
                         className={inputClass}
                         value={form.websiteUrl}
                         onChange={(e) => updateField("websiteUrl", e.target.value)}
                         placeholder="https://"
+                        required={form.serviceType === "full-stack-pg"}
                       />
                     </div>
                     <div>
@@ -804,11 +1092,24 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                     </div>
                     <div className="sm:col-span-2">
                       <label className={labelClass}>Countries Supported</label>
-                      <MultiSelectChips
-                        options={COUNTRY_OPTIONS}
-                        value={form.countriesSupported}
-                        onChange={(v) => updateField("countriesSupported", v)}
-                      />
+                      {form.serviceType === "cross-border" ? (
+                        <MultiSelectChips
+                          options={countriesSupportedOptions}
+                          value={form.countriesSupported}
+                          onChange={(v) => updateField("countriesSupported", v)}
+                        />
+                      ) : (
+                        <>
+                          <MultiSelectChips
+                            options={countriesSupportedOptions}
+                            value={form.countriesSupported}
+                            onChange={() => updateField("countriesSupported", ["India"])}
+                          />
+                          <p className="mt-1.5 text-xs text-slate-500">
+                            India is the supported country for this category.
+                          </p>
+                        </>
+                      )}
                     </div>
                     <div>
                       <label className={labelClass}>RBI / PAPG Status</label>
@@ -856,7 +1157,9 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Field show={show("upiMdr")}>
                       <div>
-                        <label className={labelClass}>UPI MDR (%)</label>
+                        <PricingFieldLabel fieldKey="upiMdr" serviceType={form.serviceType}>
+                          UPI MDR (%)
+                        </PricingFieldLabel>
                         <input
                           className={inputClass}
                           value={form.upiMdr}
@@ -867,7 +1170,12 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                     </Field>
                     <Field show={show("creditCardMdr")}>
                       <div>
-                        <label className={labelClass}>Credit Card MDR (%)</label>
+                        <PricingFieldLabel
+                          fieldKey="creditCardMdr"
+                          serviceType={form.serviceType}
+                        >
+                          Credit Card MDR (%)
+                        </PricingFieldLabel>
                         <input
                           className={inputClass}
                           value={form.creditCardMdr}
@@ -878,7 +1186,9 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                     </Field>
                     <Field show={show("debitCardMdr")}>
                       <div>
-                        <label className={labelClass}>Debit Card MDR (%)</label>
+                        <PricingFieldLabel fieldKey="debitCardMdr" serviceType={form.serviceType}>
+                          Debit Card MDR (%)
+                        </PricingFieldLabel>
                         <input
                           className={inputClass}
                           value={form.debitCardMdr}
@@ -920,7 +1230,12 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                     </Field>
                     <Field show={show("emiBnplCharges")}>
                       <div>
-                        <label className={labelClass}>EMI & BNPL Charges (%)</label>
+                        <PricingFieldLabel
+                          fieldKey="emiBnplCharges"
+                          serviceType={form.serviceType}
+                        >
+                          EMI & BNPL Charges (%)
+                        </PricingFieldLabel>
                         <input
                           className={inputClass}
                           value={form.emiBnplCharges}
@@ -930,7 +1245,9 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                     </Field>
                     <Field show={show("refundFee")}>
                       <div>
-                        <label className={labelClass}>Refund Fee (₹)</label>
+                        <PricingFieldLabel fieldKey="refundFee" serviceType={form.serviceType}>
+                          Refund Fee (₹)
+                        </PricingFieldLabel>
                         <input
                           className={inputClass}
                           value={form.refundFee}
@@ -940,7 +1257,12 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                     </Field>
                     <Field show={show("chargebackFee")}>
                       <div>
-                        <label className={labelClass}>Dispute & Chargeback (₹)</label>
+                        <PricingFieldLabel
+                          fieldKey="chargebackFee"
+                          serviceType={form.serviceType}
+                        >
+                          Dispute & Chargeback (₹)
+                        </PricingFieldLabel>
                         <input
                           className={inputClass}
                           value={form.chargebackFee}
@@ -1225,18 +1547,20 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                     </div>
                     <div className="sm:col-span-2">
                       <label className={labelClass}>Restricted Categories</label>
-                      <MultiSelectChips
+                      <MultiSelectChipsWithCustom
                         options={RESTRICTED_CATEGORY_OPTIONS}
                         value={form.restrictedCategories}
                         onChange={(v) => updateField("restrictedCategories", v)}
+                        placeholder="Add category not listed above"
                       />
                     </div>
                     <div className="sm:col-span-2">
                       <label className={labelClass}>Best Suited Business Types</label>
-                      <MultiSelectChips
+                      <MultiSelectChipsWithCustom
                         options={BUSINESS_TYPE_OPTIONS}
                         value={form.bestSuitedBusinessTypes}
                         onChange={(v) => updateField("bestSuitedBusinessTypes", v)}
+                        placeholder="Add business type not listed above"
                       />
                     </div>
                   </div>
@@ -1284,9 +1608,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                     </div>
                     {form.smartTags.length > 0 ? (
                       <div className="mt-3 flex flex-wrap gap-2">
-                        {SMART_TAG_OPTIONS.filter((tag) =>
-                          form.smartTags.includes(tag.value)
-                        ).map((tag) => (
+                        {selectedSmartTags.map((tag) => (
                           <span
                             key={tag.value}
                             className="inline-flex items-center gap-2 rounded-full border border-[#2D4CC8]/25 bg-[#EEF2FC] px-3 py-1.5 text-sm font-medium text-[#13203F]"
@@ -1313,12 +1635,31 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
 
                   <div>
                     <label className={labelClass}>Suggest New Tags</label>
-                    <input
-                      className={inputClass}
-                      value={form.suggestNewTag}
-                      onChange={(e) => updateField("suggestNewTag", e.target.value)}
-                      placeholder="Suggest a tag for review"
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        className={`${inputClass} flex-1`}
+                        value={form.suggestNewTag}
+                        onChange={(e) => updateField("suggestNewTag", e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addSuggestedTag();
+                          }
+                        }}
+                        placeholder="Suggest a tag for review"
+                      />
+                      <button
+                        type="button"
+                        onClick={addSuggestedTag}
+                        disabled={!form.suggestNewTag.trim() || form.smartTags.length >= MAX_SMART_TAGS}
+                        className="shrink-0 rounded-xl border border-[#2D4CC8]/30 bg-white px-4 py-3 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#EEF2FC] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    <p className="mt-1.5 text-xs text-slate-500">
+                      Suggested tags are added to Selected Tags immediately.
+                    </p>
                   </div>
                 </div>
               ) : null}
@@ -1406,12 +1747,31 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                   </div>
                   <div>
                     <label className={labelClass}>Suggest New Feature</label>
-                    <input
-                      className={inputClass}
-                      value={form.suggestNewFeature}
-                      onChange={(e) => updateField("suggestNewFeature", e.target.value)}
-                      placeholder="Suggest a feature for internal review"
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        className={`${inputClass} flex-1`}
+                        value={form.suggestNewFeature}
+                        onChange={(e) => updateField("suggestNewFeature", e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addSuggestedFeature();
+                          }
+                        }}
+                        placeholder="Suggest a feature for internal review"
+                      />
+                      <button
+                        type="button"
+                        onClick={addSuggestedFeature}
+                        disabled={!form.suggestNewFeature.trim()}
+                        className="shrink-0 rounded-xl border border-[#2D4CC8]/30 bg-white px-4 py-3 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#EEF2FC] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    <p className="mt-1.5 text-xs text-slate-500">
+                      Suggested features are added to Search &amp; Add Features immediately.
+                    </p>
                   </div>
                 </div>
               ) : null}
@@ -1439,26 +1799,32 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                     </div>
                     <div className="sm:col-span-2">
                       <label className={labelClass}>SDK Availability</label>
-                      <MultiSelectChips
+                      <MultiSelectWithOtherInput
                         options={SDK_OPTIONS}
                         value={form.sdkAvailability}
                         onChange={(v) => updateField("sdkAvailability", v)}
+                        label="SDK"
+                        placeholder="e.g. Go, Kotlin"
                       />
                     </div>
                     <div className="sm:col-span-2">
                       <label className={labelClass}>Plugin Availability</label>
-                      <MultiSelectChips
+                      <MultiSelectWithOtherInput
                         options={PLUGIN_OPTIONS}
                         value={form.pluginAvailability}
                         onChange={(v) => updateField("pluginAvailability", v)}
+                        label="Plugin"
+                        placeholder="e.g. OpenCart, Wix"
                       />
                     </div>
                     <div className="sm:col-span-2">
                       <label className={labelClass}>Mobile SDK Support</label>
-                      <MultiSelectChips
+                      <MultiSelectWithOtherInput
                         options={MOBILE_SDK_OPTIONS}
                         value={form.mobileSdkSupport}
                         onChange={(v) => updateField("mobileSdkSupport", v)}
+                        label="Mobile SDK"
+                        placeholder="e.g. Xamarin, Ionic"
                       />
                     </div>
                     <div className="space-y-3 sm:col-span-2">
@@ -1486,44 +1852,21 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                       Merchant Experience
                     </h3>
                     <p className="mt-2 text-sm text-slate-500 sm:text-base">
-                      Ratings are system-calculated. You can submit success assets.
+                      Share merchant success stories and case studies to help merchants evaluate your
+                      offering.
                     </p>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-                      <p className="text-xs text-slate-500">Merchant Rating</p>
-                      <p className="mt-1 text-sm font-semibold text-[#13203F]">Auto-calculated</p>
-                    </div>
-                    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-                      <p className="text-xs text-slate-500">Total Reviews</p>
-                      <p className="mt-1 text-sm font-semibold text-[#13203F]">Auto-calculated</p>
-                    </div>
-                    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-                      <p className="text-xs text-slate-500">CompareX Match Score</p>
-                      <p className="mt-1 text-sm font-semibold text-[#13203F]">Auto-calculated</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className={labelClass}>Merchant Success Stories (URL)</label>
-                      <input
-                        type="url"
-                        className={inputClass}
-                        value={form.merchantSuccessStoriesUrl}
-                        onChange={(e) => updateField("merchantSuccessStoriesUrl", e.target.value)}
-                        placeholder="https://"
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Case Studies (URL)</label>
-                      <input
-                        type="url"
-                        className={inputClass}
-                        value={form.caseStudiesUrl}
-                        onChange={(e) => updateField("caseStudiesUrl", e.target.value)}
-                        placeholder="https://"
-                      />
-                    </div>
+                  <div className="grid grid-cols-1 gap-6">
+                    <UrlListField
+                      label="Merchant Success Stories (URL)"
+                      value={form.merchantSuccessStoriesUrls}
+                      onChange={(v) => updateField("merchantSuccessStoriesUrls", v)}
+                    />
+                    <UrlListField
+                      label="Case Studies (URL)"
+                      value={form.caseStudiesUrls}
+                      onChange={(v) => updateField("caseStudiesUrls", v)}
+                    />
                   </div>
                 </div>
               ) : null}
@@ -1686,20 +2029,6 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                       </div>
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-4">
-                    <div className="flex items-start gap-3">
-                      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-500">
-                        <HiMapPin className="size-4" aria-hidden />
-                      </span>
-                      <div>
-                        <p className="text-sm font-bold text-[#13203F]">CompareX Recommendation</p>
-                        <p className="mt-1 text-sm leading-relaxed text-slate-600">
-                          Operators with transparent pricing, faster onboarding, and merchant-friendly
-                          support generally receive higher visibility and better merchant conversion.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
                   {draftSaved ? (
                     <p className="text-sm font-medium text-[#25a36f]">
                       Draft saved. You can continue whenever you&apos;re ready.
@@ -1719,22 +2048,32 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                   <>
                     <button
                       type="button"
-                      disabled={isSaving || Boolean(uploadingField)}
-                      onClick={handleSaveDraft}
-                      className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-slate-200 px-5 py-3 text-sm font-bold text-[#13203F] transition hover:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+                      onClick={() => setStepIndex((s) => s - 1)}
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-[#2D4CC8]/40"
                     >
-                      {isSaving ? "Saving..." : "Save Draft"}
+                      <HiArrowLeft className="size-4" aria-hidden />
+                      Back
                     </button>
-                    <button
-                      type="button"
-                      disabled={isSaving || Boolean(uploadingField)}
-                      onClick={handleSubmit}
-                      className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#13203F] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#1c2d52] disabled:cursor-not-allowed disabled:opacity-50"
-                      style={{ color: "#fff" }}
-                    >
-                      {isSaving ? "Submitting..." : "Submit for Review"}
-                      <HiArrowRight className="size-4" aria-hidden />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        disabled={isSaving || Boolean(uploadingField)}
+                        onClick={handleSaveDraft}
+                        className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-slate-200 px-5 py-3 text-sm font-bold text-[#13203F] transition hover:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isSaving ? "Saving..." : "Save Draft"}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSaving || Boolean(uploadingField)}
+                        onClick={handleSubmit}
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#13203F] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#1c2d52] disabled:cursor-not-allowed disabled:opacity-50"
+                        style={{ color: "#fff" }}
+                      >
+                        {isSaving ? "Submitting..." : "Submit for Review"}
+                        <HiArrowRight className="size-4" aria-hidden />
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <>

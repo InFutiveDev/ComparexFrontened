@@ -10,6 +10,10 @@ import { ApiError } from "@/lib/api";
 import { submitMerchantLead, updateMerchantLead } from "@/lib/merchant";
 import { extractFormRecordId } from "@/lib/form-record-id";
 import {
+  captureAffiliateParamsFromUrl,
+  getAffiliateParams,
+} from "@/lib/affiliate-tracking";
+import {
   sanitizePhoneInput,
   validateContactFields,
 } from "@/lib/validation";
@@ -140,11 +144,9 @@ export function HeroAdviceForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSavingStep, setIsSavingStep] = useState(false);
   const [error, setError] = useState("");
-  const [affiliatePgId, setAffiliatePgId] = useState("");
 
   useEffect(() => {
-    const pgId = new URLSearchParams(window.location.search).get("pg");
-    setAffiliatePgId(pgId || "");
+    captureAffiliateParamsFromUrl();
   }, []);
 
   function updateField(key, value) {
@@ -186,12 +188,14 @@ export function HeroAdviceForm() {
 
     try {
       if (step === 1) {
+        const { pgId, resellerId } = getAffiliateParams();
         const stepOnePayload = {
           step: 1,
           businessName: form.businessName.trim(),
           email: form.email.trim(),
           phone: form.phone.trim(),
-          pgId: affiliatePgId || undefined,
+          pgId: pgId || undefined,
+          resellerId: resellerId || undefined,
         };
 
         if (recordId) {
