@@ -16,6 +16,7 @@ import {
   uploadPgOnboardingFile,
 } from "@/lib/payment";
 import { ApiError } from "@/lib/api";
+import { sanitizePhoneInput } from "@/lib/validation";
 import {
   APPROVAL_COMPLEXITY_OPTIONS,
   BUSINESS_TYPE_OPTIONS,
@@ -1919,12 +1920,12 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                         <input
                           className={inputClass}
                           inputMode="numeric"
-                          maxLength={10}
+                          maxLength={11}
                           value={form.expertMobile}
                           onChange={(e) =>
-                            updateField("expertMobile", e.target.value.replace(/\D/g, "").slice(0, 10))
+                            updateField("expertMobile", sanitizePhoneInput(e.target.value))
                           }
-                          placeholder="10-digit"
+                          placeholder="10–11 digits"
                         />
                       </div>
                       <div className="sm:col-span-2">

@@ -2,12 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   HiArrowLeft,
   HiCheck,
   HiChevronDown,
-  HiChatBubbleLeftRight,
   HiHeart,
   HiOutlineClipboardDocument,
   HiOutlineCurrencyRupee,
@@ -18,12 +17,20 @@ import {
 import { useTalkToExpert } from "@/components/website/talk-to-expert/talk-to-expert-provider";
 import {
   firmModePricing,
-  getOtherPgFirms,
   getPgBySlug,
   paymentModes,
   pgFirms,
 } from "@/lib/pg-catalog";
+import {
+  buildWebsitePricingMap,
+  mapPgToWebsiteCompareRow,
+} from "@/lib/pg-website-compare";
+import { ApiError } from "@/lib/api";
+import { extractFormRecordId } from "@/lib/form-record-id";
+import { submitMerchantLead, updateMerchantLead } from "@/lib/merchant";
+import { fetchPgComparison } from "@/lib/pg-compare";
 import { pgNameToSlug } from "@/lib/pg-slug";
+import { sanitizePhoneInput, validateContactFields } from "@/lib/validation";
 
 const pgFaqs = [
   {
@@ -411,16 +418,13 @@ const PG_TABS = [
   { id: "pricing", label: "Pricing" },
   { id: "user-reviews", label: "User Reviews" },
   { id: "offers", label: "Offers" },
-  { id: "discussions", label: "Discussions" },
 ];
 
 const businessTypeOptions = [
-  "Ecommerce / D2C",
-  "SaaS / Subscription",
-  "Marketplace",
-  "Retail / Offline",
-  "Enterprise",
-  "Other",
+  { value: "ecommerce-d2c", label: "Ecommerce / D2C" },
+  { value: "saas-subscription-platforms", label: "SaaS / Subscription" },
+  { value: "b2b-manufacturing", label: "Enterprise / B2B" },
+  { value: "other-businesses", label: "Retail / Marketplace / Other" },
 ];
 
 function buildKeyFeatures(firm) {
@@ -468,51 +472,6 @@ function getPgOffers(firm) {
       title: `${firm.settlement} Settlement Advantage`,
       description: `Evaluate how ${firm.name}'s ${firm.settlement.toLowerCase()} settlement cycle fits your cash-flow needs before you switch.`,
       badge: "Cash Flow",
-    },
-  ];
-}
-
-function getPgDiscussions(firm) {
-  return [
-    {
-      id: 1,
-      author: "D2C Founder",
-      date: "2 days ago",
-      title: `How fast is ${firm.name} onboarding for ecommerce brands?`,
-      excerpt:
-        "We need to go live within a week. Has anyone completed documentation and integration recently?",
-      replies: 9,
-      likes: 14,
-    },
-    {
-      id: 2,
-      author: "SaaS Ops Lead",
-      date: "5 days ago",
-      title: `Is ${firm.settlement} settlement reliable at higher volumes?`,
-      excerpt:
-        "Our monthly GMV is growing quickly and we want to understand real settlement experience with this PG.",
-      replies: 6,
-      likes: 11,
-    },
-    {
-      id: 3,
-      author: "Retail Merchant",
-      date: "1 week ago",
-      title: `Best use case for ${firm.name} vs other PGs?`,
-      excerpt:
-        "Comparing success rates and support quality. Would love to hear from merchants in a similar category.",
-      replies: 12,
-      likes: 18,
-    },
-    {
-      id: 4,
-      author: "Marketplace Seller",
-      date: "2 weeks ago",
-      title: `Does ${firm.name} support easy refund workflows?`,
-      excerpt:
-        "Refund speed and dashboard visibility are important for us. Any practical feedback from current users?",
-      replies: 4,
-      likes: 7,
     },
   ];
 }
@@ -581,36 +540,6 @@ function OfferCard({ offer }) {
   );
 }
 
-function DiscussionCard({ discussion }) {
-  return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-colors hover:border-[#2D4CC8]/25">
-      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-        <span className="font-semibold text-[#13203F]">{discussion.author}</span>
-        <span aria-hidden>•</span>
-        <span>{discussion.date}</span>
-      </div>
-      <h3 className="mt-3 text-base font-bold text-[#13203F] sm:text-lg">{discussion.title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-slate-600">{discussion.excerpt}</p>
-      <div className="mt-4 flex flex-wrap items-center gap-4 text-sm font-medium text-slate-500">
-        <span className="inline-flex items-center gap-1.5">
-          <HiChatBubbleLeftRight className="size-4 text-[#2D4CC8]" aria-hidden />
-          {discussion.replies} replies
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <HiHeart className="size-4 text-[#2D4CC8]" aria-hidden />
-          {discussion.likes} likes
-        </span>
-        <button
-          type="button"
-          className="cursor-pointer text-[#2D4CC8] transition-colors hover:text-[#2542b6]"
-        >
-          Join discussion
-        </button>
-      </div>
-    </article>
-  );
-}
-
 function PgTabNav({ activeTab, onChange }) {
   return (
     <div className="sticky top-20 z-30 border-b border-slate-200 bg-white shadow-sm">
@@ -638,23 +567,70 @@ function PgTabNav({ activeTab, onChange }) {
   );
 }
 
-function PgQuoteSidebar({ firm, onSubmit }) {
+function PgQuoteSidebar({ firm }) {
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
-    businessType: businessTypeOptions[0],
+    businessType: businessTypeOptions[0].value,
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   function handleChange(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    setSubmitted(true);
-    onSubmit();
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    const contactError = validateContactFields({
+      email: form.email,
+      phone: form.phone,
+    });
+
+    if (contactError) {
+      setSubmitError(contactError);
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!form.name.trim()) {
+      setSubmitError("Name is required");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const data = await submitMerchantLead({
+        businessName: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        pgId: firm.id || undefined,
+      });
+      const leadId = extractFormRecordId(data);
+
+      if (!leadId) {
+        throw new ApiError("Failed to save your request. Please try again.");
+      }
+
+      await updateMerchantLead(leadId, {
+        step: 2,
+        industry: form.businessType,
+        pgId: firm.id || undefined,
+      });
+
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(
+        err instanceof ApiError ? err.message : "Failed to submit callback request",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const inputClass =
@@ -679,6 +655,11 @@ function PgQuoteSidebar({ firm, onSubmit }) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 px-5 py-5">
+            {submitError ? (
+              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {submitError}
+              </div>
+            ) : null}
             <div>
               <label htmlFor="quote-name" className="mb-1.5 block text-sm font-medium text-slate-600">
                 Name
@@ -713,10 +694,12 @@ function PgQuoteSidebar({ firm, onSubmit }) {
               <input
                 id="quote-phone"
                 type="tel"
+                inputMode="numeric"
+                maxLength={11}
                 value={form.phone}
-                onChange={(e) => handleChange("phone", e.target.value)}
+                onChange={(e) => handleChange("phone", sanitizePhoneInput(e.target.value))}
                 className={inputClass}
-                placeholder="10-digit (WhatsApp preferred)"
+                placeholder="10–11 digits (WhatsApp preferred)"
                 required
               />
             </div>
@@ -731,18 +714,19 @@ function PgQuoteSidebar({ firm, onSubmit }) {
                 className={inputClass}
               >
                 {businessTypeOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
             </div>
             <button
               type="submit"
-              className="flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] text-sm font-bold text-white shadow-md shadow-[#2D4CC8]/25 transition-opacity hover:opacity-90"
+              disabled={isSubmitting}
+              className="flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] text-sm font-bold text-white shadow-md shadow-[#2D4CC8]/25 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               style={{ color: "#fff" }}
             >
-              Request A Call Back
+              {isSubmitting ? "Submitting…" : "Request A Call Back"}
             </button>
           </form>
         )}
@@ -760,7 +744,6 @@ function PgDetailsMainContent({
   onPricingTab,
 }) {
   const [showAllFeatures, setShowAllFeatures] = useState(false);
-  const [discussionQuestion, setDiscussionQuestion] = useState("");
   const keyFeatures = buildKeyFeatures(firm);
   const visibleFeatures = showAllFeatures ? keyFeatures : keyFeatures.slice(0, 8);
 
@@ -988,51 +971,6 @@ function PgDetailsMainContent({
     );
   }
 
-  if (activeTab === "discussions") {
-    const discussions = getPgDiscussions(firm);
-
-    return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold text-[#13203F]">Merchant Discussions</h2>
-          <p className="mt-2 text-sm text-slate-600">
-            Questions, experiences, and onboarding insights shared by merchants evaluating{" "}
-            {firm.name}.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-[#f8fafc] p-5">
-          <label htmlFor="discussion-question" className="text-sm font-semibold text-[#13203F]">
-            Ask the community
-          </label>
-          <textarea
-            id="discussion-question"
-            value={discussionQuestion}
-            onChange={(event) => setDiscussionQuestion(event.target.value)}
-            rows={3}
-            placeholder={`What would you like to know about ${firm.name}?`}
-            className="mt-3 w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/15"
-          />
-          <button
-            type="button"
-            disabled={!discussionQuestion.trim()}
-            onClick={() => setDiscussionQuestion("")}
-            className="mt-3 inline-flex cursor-pointer items-center justify-center rounded-lg bg-[#2D4CC8] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#2542b6] disabled:cursor-not-allowed disabled:bg-slate-300"
-            style={{ color: "#fff" }}
-          >
-            Post Question
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          {discussions.map((discussion) => (
-            <DiscussionCard key={discussion.id} discussion={discussion} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   if (activeTab === "user-reviews") {
     return (
       <div className="space-y-8">
@@ -1105,18 +1043,90 @@ function FaqItem({ question, answer, isOpen, onToggle }) {
 
 export default function PgDetails({ slug }) {
   const { openTalkToExpert } = useTalkToExpert();
-  const firm = getPgBySlug(slug);
+  const catalogFirm = getPgBySlug(slug);
+  const [apiFirm, setApiFirm] = useState(null);
+  const [isLoadingApi, setIsLoadingApi] = useState(!catalogFirm);
   const [activeTab, setActiveTab] = useState("product-information");
   const [openFaq, setOpenFaq] = useState(0);
 
-  if (!firm) return null;
+  useEffect(() => {
+    if (catalogFirm) return undefined;
 
-  const pricingMap = firmModePricing[firm.name] ?? {};
-  const otherFirms = getOtherPgFirms(slug);
+    let cancelled = false;
+    setIsLoadingApi(true);
+
+    fetchPgComparison()
+      .then((data) => {
+        if (cancelled) return;
+        const match = (data.paymentGateways || []).find((pg) => pg.slug === slug);
+        if (!match) {
+          setApiFirm(null);
+          return;
+        }
+
+        const mapped = mapPgToWebsiteCompareRow(match);
+        setApiFirm({
+          ...mapped,
+          overview:
+            mapped._raw?.companyName || mapped.name
+              ? `${mapped.name} is an active payment gateway on CompareX. Compare MDR, settlement, onboarding timelines, and merchant ratings before you sign up.`
+              : "Payment gateway profile on CompareX.",
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setApiFirm(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingApi(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, catalogFirm]);
+
+  const firm = catalogFirm || apiFirm;
+  const firmId = firm?.id ?? apiFirm?.id ?? null;
+  const firmSlug = firm?.slug ?? slug ?? (firm ? pgNameToSlug(firm.name) : null);
+  const resolvedFirm = firm
+    ? {
+        ...firm,
+        id: firmId,
+        slug: firmSlug,
+      }
+    : null;
+
+  if (isLoadingApi) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center bg-[#f8fafc] px-4 text-sm text-slate-500">
+        Loading payment gateway details…
+      </div>
+    );
+  }
+
+  if (!resolvedFirm) {
+    return (
+      <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 bg-[#f8fafc] px-4 text-center">
+        <p className="text-lg font-semibold text-[#13203F]">Payment gateway not found</p>
+        <p className="max-w-md text-sm text-slate-600">
+          This provider is not available on CompareX yet, or the link may be outdated.
+        </p>
+        <Link
+          href="/compare-pg"
+          className="rounded-full bg-[#2D4CC8] px-5 py-2 text-sm font-semibold text-white"
+        >
+          Back to Compare PG
+        </Link>
+      </div>
+    );
+  }
+
+  const pricingMap =
+    firmModePricing[resolvedFirm.name] ?? buildWebsitePricingMap(resolvedFirm);
 
   return (
     <div className="bg-[#f8fafc]">
-      <PgDetailsHero firm={firm} openTalkToExpert={openTalkToExpert} />
+      <PgDetailsHero firm={resolvedFirm} openTalkToExpert={openTalkToExpert} />
 
       <PgTabNav activeTab={activeTab} onChange={setActiveTab} />
 
@@ -1124,7 +1134,7 @@ export default function PgDetails({ slug }) {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
           <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
             <PgDetailsMainContent
-              firm={firm}
+              firm={resolvedFirm}
               activeTab={activeTab}
               pricingMap={pricingMap}
               openFaq={openFaq}
@@ -1133,7 +1143,7 @@ export default function PgDetails({ slug }) {
             />
           </div>
 
-          <PgQuoteSidebar firm={firm} onSubmit={openTalkToExpert} />
+          <PgQuoteSidebar firm={resolvedFirm} />
         </div>
       </section>
     </div>

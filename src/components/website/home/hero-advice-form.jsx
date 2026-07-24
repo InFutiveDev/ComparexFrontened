@@ -384,7 +384,7 @@ export function HeroAdviceForm() {
                     value={form.phone}
                     onChange={(e) => updateField("phone", sanitizePhoneInput(e.target.value))}
                     className={inputClass}
-                    placeholder="10-digit (WhatsApp preferred)"
+                    placeholder="10–11 digits (WhatsApp preferred)"
                     required
                   />
                 </div>

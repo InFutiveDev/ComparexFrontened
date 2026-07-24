@@ -6,6 +6,26 @@ const defaultRowMeta = {
   assigneeColor: "#94a3b8",
 };
 
+const LEAD_STATUS_LABELS = {
+  new: "New",
+  in_review: "In Review",
+  qualified: "Qualified",
+  rejected: "Rejected",
+  assigned: "Assigned",
+  expert_booked: "Talk to Expert Booked",
+};
+
+function getInitials(value) {
+  const parts = String(value || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (parts.length === 0) return "—";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+}
+
 function formatLabel(value) {
   if (!value) return "—";
   return String(value)
@@ -15,7 +35,11 @@ function formatLabel(value) {
 }
 
 export function mapMerchantToTableRow(item) {
+  const leadStatus = item.leadStatus || "new";
+  const assignee = item.assignedPgName || "Unassigned";
+
   return {
+    ...defaultRowMeta,
     id: item.id,
     name: item.businessName,
     company: item.businessName,
@@ -28,7 +52,13 @@ export function mapMerchantToTableRow(item) {
     userId: item.userId ?? null,
     accountStatus: item.accountStatus ?? "inactive",
     createdAt: item.createdAt,
-    ...defaultRowMeta,
+    leadStatus,
+    pgLeadStatus: item.pgLeadStatus ?? null,
+    assignedPgName: item.assignedPgName ?? null,
+    status: LEAD_STATUS_LABELS[leadStatus] || formatLabel(leadStatus),
+    assignee,
+    assigneeInitials: assignee === "Unassigned" ? "—" : getInitials(assignee),
+    assigneeColor: assignee === "Unassigned" ? "#94a3b8" : "#2D4CC8",
   };
 }
 
@@ -75,6 +105,7 @@ export function mapPaymentGatewayToTableRow(item) {
           : "Incomplete";
 
   return {
+    ...defaultRowMeta,
     id: item.id,
     name: item.contactPerson,
     company: item.companyName,
@@ -90,9 +121,9 @@ export function mapPaymentGatewayToTableRow(item) {
     accountStatus: item.accountStatus ?? "inactive",
     createdAt: item.createdAt,
     verificationStatus,
+    profileCompletionPercent: item.profileCompletionPercent ?? 0,
     ratingAverage: item.rating?.count > 0 ? Number(item.rating.average).toFixed(1) : "—",
     ratingCount: item.rating?.count ?? 0,
-    ...defaultRowMeta,
     status: statusLabel,
   };
 }

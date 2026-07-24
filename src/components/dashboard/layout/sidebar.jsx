@@ -39,7 +39,7 @@ const navItems = [
   { href: "/dashboard/reports", label: "Reports", icon: HiChartBarSquare },
   { href: "/dashboard/users", label: "Users & Access", icon: HiUsers },
   { href: "/dashboard/settings", label: "System Settings", icon: HiCog6Tooth },
-  { href: "/dashboard/help-support", label: "Help & Support", icon: HiLifebuoy },
+  { href: "/dashboard/merchant-support", label: "Help & Support", icon: HiLifebuoy },
 ];
 
 function isActive(pathname, href) {

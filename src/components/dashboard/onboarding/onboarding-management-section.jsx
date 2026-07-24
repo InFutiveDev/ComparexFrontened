@@ -9,6 +9,7 @@ import {
 } from "@/lib/dashboard-api";
 import { uploadPgOnboardingFile } from "@/lib/payment";
 import { uploadResellerKycFile } from "@/lib/reseller";
+import { sanitizePhoneInput, validateMobilePhone } from "@/lib/validation";
 import {
   BANK_ACCOUNT_TYPE_OPTIONS,
   PARTNERSHIP_MODEL_OPTIONS,
@@ -126,6 +127,14 @@ export function OnboardingManagementSection() {
     setError("");
     setMessage("");
     setCreatedId("");
+
+    const phoneError = validateMobilePhone(pgForm.phone);
+    if (phoneError) {
+      setError(phoneError);
+      setIsSaving(false);
+      return;
+    }
+
     try {
       const data = await createAdminPaymentGateway(pgForm);
       setMessage(data.message || "Payment gateway onboarded");
@@ -144,6 +153,14 @@ export function OnboardingManagementSection() {
     setError("");
     setMessage("");
     setCreatedId("");
+
+    const phoneError = validateMobilePhone(resellerForm.phone);
+    if (phoneError) {
+      setError(phoneError);
+      setIsSaving(false);
+      return;
+    }
+
     try {
       const data = await createAdminReseller(resellerForm);
       setMessage(data.message || "Reseller onboarded");
@@ -278,9 +295,13 @@ export function OnboardingManagementSection() {
               <label className={labelClass}>Phone *</label>
               <input
                 required
+                inputMode="numeric"
+                maxLength={11}
                 className={inputClass}
                 value={pgForm.phone}
-                onChange={(e) => setPgForm((prev) => ({ ...prev, phone: e.target.value }))}
+                onChange={(e) =>
+                  setPgForm((prev) => ({ ...prev, phone: sanitizePhoneInput(e.target.value) }))
+                }
               />
             </div>
             <div>
@@ -392,9 +413,16 @@ export function OnboardingManagementSection() {
               <label className={labelClass}>Phone *</label>
               <input
                 required
+                inputMode="numeric"
+                maxLength={11}
                 className={inputClass}
                 value={resellerForm.phone}
-                onChange={(e) => setResellerForm((prev) => ({ ...prev, phone: e.target.value }))}
+                onChange={(e) =>
+                  setResellerForm((prev) => ({
+                    ...prev,
+                    phone: sanitizePhoneInput(e.target.value),
+                  }))
+                }
               />
             </div>
             <div>

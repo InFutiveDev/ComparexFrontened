@@ -16,6 +16,7 @@ import { submitExpertBooking } from "@/lib/expert";
 import { heroFormStepOneFields } from "@/lib/mock-data";
 import { fetchTalkToExpertProviders } from "@/lib/payment";
 import { expertHasAvailability } from "@/lib/pg-expert-schedule";
+import { isValidMobilePhone, sanitizePhoneInput } from "@/lib/validation";
 import { businessPriorityOptions } from "./talk-to-expert-data";
 import { CalendlyScheduleEmbed } from "./calendly-schedule-embed";
 
@@ -101,10 +102,6 @@ function matchesSearchText(text, query) {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return true;
   return text.toLowerCase().includes(normalized);
-}
-
-function sanitizePhoneDigits(value) {
-  return value.replace(/\D/g, "").slice(0, 10);
 }
 
 function SearchableSelect({
@@ -483,7 +480,7 @@ export function TalkToExpertModal({ open, onClose }) {
     if (visitorStep === 1) {
       return Boolean(
         visitor.fullName.trim() &&
-          /^\d{10}$/.test(visitor.phone) &&
+          isValidMobilePhone(visitor.phone) &&
           visitor.email.trim() &&
           visitor.company.trim(),
       );
@@ -623,11 +620,10 @@ export function TalkToExpertModal({ open, onClose }) {
                     type="tel"
                     inputMode="numeric"
                     autoComplete="tel"
-                    maxLength={10}
-                    pattern="[0-9]{10}"
-                    placeholder="10-digit (WhatsApp preferred)"
+                    maxLength={11}
+                    placeholder="10–11 digits (WhatsApp preferred)"
                     value={visitor.phone}
-                    onChange={(e) => updateVisitor("phone", sanitizePhoneDigits(e.target.value))}
+                    onChange={(e) => updateVisitor("phone", sanitizePhoneInput(e.target.value))}
                     className={inputClass}
                   />
                 </div>

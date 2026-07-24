@@ -11,6 +11,7 @@ import {
   HiPhone,
 } from "react-icons/hi2";
 import { FaWhatsapp } from "react-icons/fa";
+import { sanitizePhoneInput, validateMobilePhone } from "@/lib/validation";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#13203F] outline-none transition placeholder:text-slate-400 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20";
@@ -71,9 +72,23 @@ const subjectOptions = [
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(event) {
     event.preventDefault();
+    setError("");
+
+    const form = event.currentTarget;
+    const phone = String(new FormData(form).get("phone") || "").trim();
+
+    if (phone) {
+      const phoneError = validateMobilePhone(phone);
+      if (phoneError) {
+        setError(phoneError);
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     await new Promise((resolve) => window.setTimeout(resolve, 800));
     setIsSubmitting(false);
@@ -209,6 +224,11 @@ export default function ContactForm() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="mt-8 space-y-5 text-left">
+                    {error ? (
+                      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {error}
+                      </div>
+                    ) : null}
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                       <div>
                         <label htmlFor="name" className={labelClass}>
@@ -232,8 +252,13 @@ export default function ContactForm() {
                           type="tel"
                           id="phone"
                           name="phone"
-                          placeholder="10-digit (WhatsApp preferred)"
+                          inputMode="numeric"
+                          maxLength={11}
+                          placeholder="10–11 digits (WhatsApp preferred)"
                           className={inputClass}
+                          onChange={(event) => {
+                            event.target.value = sanitizePhoneInput(event.target.value);
+                          }}
                         />
                       </div>
 

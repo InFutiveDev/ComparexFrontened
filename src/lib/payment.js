@@ -16,6 +16,23 @@ export function fetchTalkToExpertProviders({ search } = {}) {
   return apiFetch(`/payment/talk-to-expert${query ? `?${query}` : ""}`);
 }
 
+export function fetchPgDiscussions({ paymentProviderId, slug, page = 1, limit = 20 } = {}) {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  if (paymentProviderId) params.set("paymentProviderId", paymentProviderId);
+  if (slug) params.set("slug", slug);
+  return apiFetch(`/payment/discussions?${params.toString()}`);
+}
+
+export function submitPgDiscussion(payload) {
+  return apiFetch("/payment/discussions", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 export async function updatePaymentProvider(id, payload) {
   return apiFetch(`/payment/${id}`, {
     method: "PATCH",

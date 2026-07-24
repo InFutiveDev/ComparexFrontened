@@ -18,6 +18,7 @@ import {
   serializeWeeklyAvailability,
 } from "@/lib/pg-expert-schedule";
 import { fetchMyPgExperts, updateMyPgExperts } from "@/lib/payment";
+import { sanitizePhoneInput } from "@/lib/validation";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-[#13203F] outline-none focus:border-[#40C3CF] focus:ring-2 focus:ring-[#40C3CF]/20";
@@ -421,9 +422,14 @@ export function PgExpertManagement() {
                   <label className="text-sm font-medium text-slate-600">
                     Mobile *
                     <input
+                      inputMode="numeric"
+                      maxLength={11}
                       className={`${inputClass} mt-1`}
                       value={expert.mobile}
-                      onChange={(e) => updateExpert(expert.id, "mobile", e.target.value)}
+                      onChange={(e) =>
+                        updateExpert(expert.id, "mobile", sanitizePhoneInput(e.target.value))
+                      }
+                      placeholder="10–11 digits"
                     />
                   </label>
                   <label className="text-sm font-medium text-slate-600 sm:col-span-2">

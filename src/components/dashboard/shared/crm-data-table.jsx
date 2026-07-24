@@ -63,7 +63,20 @@ function matchesRowFilters(row, filters, lockWorkTypeFilter) {
 
 const statusStyles = {
   New: "bg-[#25a36f]/12 text-[#25a36f]",
+  "In Review": "bg-amber-100 text-amber-700",
   Qualified: "bg-[#40C3CF]/15 text-[#0f766e]",
+  Rejected: "bg-red-100 text-red-700",
+  Assigned: "bg-[#2D4CC8]/10 text-[#2D4CC8]",
+  "Talk to Expert Booked": "bg-indigo-100 text-indigo-700",
+  "Pending Review": "bg-amber-100 text-amber-700",
+  Approved: "bg-emerald-100 text-emerald-700",
+  Incomplete: "bg-slate-100 text-slate-600",
+  Published: "bg-emerald-100 text-emerald-700",
+  Pending: "bg-amber-100 text-amber-700",
+  Hidden: "bg-slate-100 text-slate-600",
+  Contacted: "bg-[#40C3CF]/15 text-[#0f766e]",
+  Completed: "bg-[#2D4CC8]/10 text-[#2D4CC8]",
+  Cancelled: "bg-red-100 text-red-700",
   Proposal: "bg-amber-100 text-amber-700",
   Won: "bg-[#2D4CC8]/10 text-[#2D4CC8]",
 };

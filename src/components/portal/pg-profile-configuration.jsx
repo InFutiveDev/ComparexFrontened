@@ -14,6 +14,7 @@ import {
   SETTLEMENT_CYCLE_OPTIONS,
   getFeaturesForServiceType,
 } from "@/lib/pg-onboarding-config";
+import { sanitizePhoneInput, validateMobilePhone } from "@/lib/validation";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-[#13203F] outline-none focus:border-[#40C3CF] focus:ring-2 focus:ring-[#40C3CF]/20";
@@ -155,6 +156,14 @@ export function PgProfileConfiguration() {
     setIsSaving(true);
     setError("");
     setMessage("");
+
+    const phoneError = validateMobilePhone(profile.phone);
+    if (phoneError) {
+      setError(phoneError);
+      setIsSaving(false);
+      return;
+    }
+
     try {
       const data = await updateMyPgProfile({
         companyName: profile.companyName,
@@ -387,11 +396,11 @@ export function PgProfileConfiguration() {
                 <input
                   required
                   inputMode="numeric"
-                  maxLength={10}
+                  maxLength={11}
                   className={inputClass}
                   value={profile.phone}
                   onChange={(e) =>
-                    updateProfile("phone", e.target.value.replace(/\D/g, "").slice(0, 10))
+                    updateProfile("phone", sanitizePhoneInput(e.target.value))
                   }
                 />
               </div>

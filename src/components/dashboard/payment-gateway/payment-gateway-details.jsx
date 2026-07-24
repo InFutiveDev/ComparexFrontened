@@ -61,6 +61,32 @@ function FileLink({ file }) {
   return file.fileName;
 }
 
+function formatListValue(value) {
+  if (Array.isArray(value)) {
+    return value.length > 0 ? value.join(", ") : "—";
+  }
+  if (value === null || value === undefined || value === "") return "—";
+  return String(value);
+}
+
+function getPgExperts(onboarding = {}) {
+  if (Array.isArray(onboarding.experts) && onboarding.experts.length > 0) {
+    return onboarding.experts;
+  }
+
+  if (!onboarding.expertName) return [];
+
+  return [
+    {
+      name: onboarding.expertName,
+      designation: onboarding.expertDesignation,
+      email: onboarding.expertEmail,
+      mobile: onboarding.expertMobile,
+      calendlyUrl: onboarding.calendlyUrl,
+    },
+  ];
+}
+
 export function PaymentGatewayDetails({ id }) {
   const { data, isLoading, error, reload } = useDashboardDetail(
     id,
@@ -121,6 +147,8 @@ export function PaymentGatewayDetails({ id }) {
 
   const onboarding = data.onboarding || {};
   const verificationStatus = data.verificationStatus || "incomplete";
+  const experts = getPgExperts(onboarding);
+  const performance = data.performance || {};
 
   return (
     <div className="space-y-5">
@@ -285,14 +313,14 @@ export function PaymentGatewayDetails({ id }) {
 
         <InfoCard title="Online Presence" icon={HiGlobeAlt}>
           <DetailField label="Company Website">
-            {data.website ? (
+            {data.website || onboarding.websiteUrl ? (
               <a
-                href={data.website}
+                href={data.website || onboarding.websiteUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="text-[#2D4CC8] hover:underline"
               >
-                {data.website}
+                {data.website || onboarding.websiteUrl}
               </a>
             ) : (
               "Not provided"
@@ -305,6 +333,130 @@ export function PaymentGatewayDetails({ id }) {
             <DetailField label="Created At">{formatDetailDate(data.createdAt)}</DetailField>
           </div>
         </InfoCard>
+
+        <InfoCard title="Onboarding Profile" icon={HiDocumentText}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <DetailField label="Service Type">{formatDetailLabel(onboarding.serviceType)}</DetailField>
+            <DetailField label="Company Overview">{onboarding.companyOverview || "—"}</DetailField>
+            <DetailField label="Headquarters">
+              {[onboarding.headquartersCity, onboarding.headquartersCountry]
+                .filter(Boolean)
+                .join(", ") || "—"}
+            </DetailField>
+            <DetailField label="Year Established">{onboarding.yearEstablished || "—"}</DetailField>
+            <DetailField label="Merchant Base">{onboarding.merchantBaseCount || "—"}</DetailField>
+            <DetailField label="Countries Supported">
+              {formatListValue(onboarding.countriesSupported)}
+            </DetailField>
+            <DetailField label="RBI PAPG Status">{formatDetailLabel(onboarding.rbiPapgStatus)}</DetailField>
+            <DetailField label="PCI DSS Status">{formatDetailLabel(onboarding.pciDssStatus)}</DetailField>
+            <DetailField label="Best Suited Business Types">
+              {formatListValue(onboarding.bestSuitedBusinessTypes)}
+            </DetailField>
+            <DetailField label="Restricted Categories">
+              {formatListValue(onboarding.restrictedCategories)}
+            </DetailField>
+            <DetailField label="Smart Tags">{formatListValue(onboarding.smartTags)}</DetailField>
+            <DetailField label="Onboarding Submitted">
+              {formatDetailDate(data.onboardingSubmittedAt)}
+            </DetailField>
+          </div>
+        </InfoCard>
+
+        <InfoCard title="MDR & Commercials" icon={HiTag}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <DetailField label="UPI MDR">{onboarding.upiMdr || "—"}</DetailField>
+            <DetailField label="Credit Card MDR">{onboarding.creditCardMdr || "—"}</DetailField>
+            <DetailField label="Debit Card MDR">{onboarding.debitCardMdr || "—"}</DetailField>
+            <DetailField label="International MDR">{onboarding.internationalMdr || "—"}</DetailField>
+            <DetailField label="Wallet Charges">{onboarding.walletCharges || "—"}</DetailField>
+            <DetailField label="Net Banking Charges">{onboarding.netBankingCharges || "—"}</DetailField>
+            <DetailField label="EMI / BNPL Charges">{onboarding.emiBnplCharges || "—"}</DetailField>
+            <DetailField label="Setup Fees">{onboarding.setupFees || "—"}</DetailField>
+            <DetailField label="AMC / Platform Fees">{onboarding.amcPlatformFees || "—"}</DetailField>
+            <DetailField label="Instant Settlement Charges">
+              {onboarding.instantSettlementCharges || "—"}
+            </DetailField>
+          </div>
+        </InfoCard>
+
+        <InfoCard title="Settlement & Support" icon={HiGlobeAlt}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <DetailField label="Onboarding TAT">{onboarding.onboardingTat || "—"}</DetailField>
+            <DetailField label="Settlement Cycle">{onboarding.settlementCycle || "—"}</DetailField>
+            <DetailField label="Refund SLA">{onboarding.refundSla || "—"}</DetailField>
+            <DetailField label="Approval Complexity">
+              {formatDetailLabel(onboarding.approvalComplexity)}
+            </DetailField>
+            <DetailField label="Dedicated Account Manager">
+              {onboarding.dedicatedAccountManager ? "Yes" : "No"}
+            </DetailField>
+            <DetailField label="Merchant Support">
+              {onboarding.merchantSupportAvailability || "—"}
+            </DetailField>
+            <DetailField label="Average Response Time">
+              {onboarding.averageResponseTime || "—"}
+            </DetailField>
+            <DetailField label="Features">{formatListValue(onboarding.features)}</DetailField>
+          </div>
+        </InfoCard>
+
+        <InfoCard title="Performance Metrics" icon={HiUserCircle}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <DetailField label="Success Rate">
+              {performance.successRate ? `${performance.successRate}%` : "—"}
+            </DetailField>
+            <DetailField label="Settlement Score">
+              {performance.settlementScore ? `${performance.settlementScore}/10` : "—"}
+            </DetailField>
+            <DetailField label="Avg Settlement Hours">
+              {performance.avgSettlementHours ?? "—"}
+            </DetailField>
+            <DetailField label="Total Merchants">{performance.totalMerchants ?? "—"}</DetailField>
+            <DetailField label="Partnership Goals">
+              {formatListValue(data.partnershipGoals)}
+            </DetailField>
+            <DetailField label="Location">{data.location || "—"}</DetailField>
+          </div>
+        </InfoCard>
+
+        {experts.length > 0 ? (
+          <InfoCard title="Talk to Expert Advisors" icon={HiUserCircle}>
+            <div className="space-y-4">
+              {experts.map((expert, index) => (
+                <div
+                  key={expert.id || `${expert.email || expert.name}-${index}`}
+                  className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <DetailField label="Name">{expert.name || "—"}</DetailField>
+                    <DetailField label="Designation">{expert.designation || "—"}</DetailField>
+                    <DetailField label="Email">{expert.email || "—"}</DetailField>
+                    <DetailField label="Mobile">{expert.mobile || "—"}</DetailField>
+                    <DetailField label="Calendly URL">
+                      {expert.calendlyUrl ? (
+                        <a
+                          href={expert.calendlyUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[#2D4CC8] hover:underline"
+                        >
+                          View schedule
+                        </a>
+                      ) : (
+                        "—"
+                      )}
+                    </DetailField>
+                    <DetailField label="Status">{formatDetailLabel(expert.status || "active")}</DetailField>
+                  </div>
+                  {expert.description ? (
+                    <p className="mt-3 text-sm leading-relaxed text-slate-600">{expert.description}</p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </InfoCard>
+        ) : null}
       </div>
     </div>
   );

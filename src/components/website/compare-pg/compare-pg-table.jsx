@@ -2,316 +2,30 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   HiOutlineChevronDown,
   HiOutlineChevronUpDown,
   HiOutlineMagnifyingGlass,
 } from "react-icons/hi2";
 import { useTalkToExpert } from "@/components/website/talk-to-expert/talk-to-expert-provider";
-import { pgNameToSlug } from "@/lib/pg-slug";
+import { ApiError } from "@/lib/api";
+import { fetchPgComparison } from "@/lib/pg-compare";
+import {
+  getWebsitePricingForMode,
+  mapPgCompareListToWebsiteRows,
+  WEBSITE_PAYMENT_MODE_LABELS,
+} from "@/lib/pg-website-compare";
 
-const firms = [
-    {
-        name: "Razorpay",
-        logo: "RP",
-        bestForTags: ["🚀 Startup Friendly", "💸 Easy Integration", "💸 Low Failure Rate"],
-        businessAge: "10 Years",
-        location: "Bangalore",
-        pricing: "1.9%",
-        settlement: "T+2",
-        onboarding: "24 Hours",
-        products: ["UPI", "Cards", "Subscription Billing"],
-        platforms: [
-        { icon: "/logos/shopy.webp", alt: "Shopify", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Google", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
-        ],
-        platformsExtra: 1,
-        offer: { headline: "Zero Setup", code: "RAZFREE" },
-        review: "4.8",
-        reviewCount: 1250,
-        trust: "9.2",
-        featured: true,
-    },
-    {
-        name: "Cashfree",
-        logo: "CF",
-        bestForTags: ["💸 Instant Settlement", "💸 Payouts", "💸 High Success Rate"],
-        businessAge: "8 Years",
-        location: "Bangalore",
-        pricing: "1.75%",
-        settlement: "Instant",
-        onboarding: "12 Hours",
-        products: ["Payouts", "Smart Routing"],
-        platforms: [
-        { icon: "/logos/shopy.webp", alt: "Microsoft", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Google", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Filmora", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Swipe", tone: "light" },
-        ],
-        platformsExtra: 0,
-        offer: { headline: "Startup Offer", code: "CFSTART" },
-        review: "4.7",
-        reviewCount: 980,
-        trust: "9.0",
-        featured: false,
-    },
-    {
-        name: "PhonePe PG",
-        logo: "PP",
-        bestForTags: ["🇮🇳 UPI Strong", "💸 Fast Checkout", "💸 Enterprise Ready","💸 Low Failure Rate"],
-        businessAge: "7 Years",
-        location: "Bangalore",
-        pricing: "1.8%",
-        settlement: "Instant",
-        onboarding: "18 Hours",
-        products: ["UPI", "QR", "Payment Links"],
-        platforms: [
-        { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
-        ],
-        platformsExtra: 1,
-        offer: { headline: "Special Pricing", code: "PPDEAL" },
-        review: "4.9",
-        reviewCount: 850,
-        trust: "9.5",
-        featured: false,
-    },
-    {
-        name: "PayU PG",
-        logo: "PP",
-        bestForTags: ["🇮🇳 UPI Strong", "💸 Fast Checkout", "💸 Enterprise Ready"],
-        businessAge: "7 Years",
-        location: "Bangalore",
-        pricing: "1.8%",
-        settlement: "Instant",
-        onboarding: "18 Hours",
-        products: ["UPI", "QR", "Payment Links"],
-        platforms: [
-        { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
-        ],
-        platformsExtra: 1,
-        offer: { headline: "Special Pricing", code: "PPDEAL" },
-        review: "4.9",
-        reviewCount: 850,
-        trust: "9.5",
-        featured: false,
-    },
-    {
-        name: "Paytm PG",
-        logo: "PP",
-        bestForTags: ["🇮🇳 UPI Strong", "💸 Fast Checkout", "💸 Enterprise Ready"],
-        businessAge: "7 Years",
-        location: "Bangalore",
-        pricing: "1.8%",
-        settlement: "Instant",
-        onboarding: "18 Hours",
-        products: ["UPI", "QR", "Payment Links"],
-        platforms: [
-        { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
-        ],
-        platformsExtra: 1,
-        offer: { headline: "Special Pricing", code: "PPDEAL" },
-        review: "4.9",
-        reviewCount: 850,
-        trust: "9.5",
-        featured: false,
-    },
-    {
-        name: "GPay PG",
-        logo: "PP",
-        bestForTags: ["🇮🇳 UPI Strong", "💸 Fast Checkout", "💸 Enterprise Ready"],
-        businessAge: "7 Years",
-        location: "Bangalore",
-        pricing: "1.8%",
-        settlement: "Instant",
-        onboarding: "18 Hours",
-        products: ["UPI", "QR", "Payment Links"],
-        platforms: [
-        { icon: "/logos/shopy.webp", alt: "Quick Heal", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Vyapar", tone: "light" },
-        { icon: "/logos/shopy.webp", alt: "Keka", tone: "light" },
-        ],
-        platformsExtra: 1,
-        offer: { headline: "Special Pricing", code: "PPDEAL" },
-        review: "4.9",
-        reviewCount: 850,
-        trust: "9.5",
-        featured: false,
-    },
-    ];
+const paymentModes = WEBSITE_PAYMENT_MODE_LABELS;
 
-    const paymentModes = [
-    "UPI Payments",
-    "Credit Card",
-    "Debit Card",
-    "Net Banking",
-    "Wallet Payments",
-    
-    "International",
-    ];
+const paymentModeDropdowns = {
+  "Credit Card": ["Visa", "Mastercard", "Rupay", "Amex"],
+  "Debit Card": ["Visa Debit", "Mastercard Debit", "Rupay Debit"],
+  "Net Banking": ["HDFC Bank", "ICICI Bank", "SBI", "Axis Bank", "Kotak Bank"],
+};
 
-    const paymentModeDropdowns = {
-    "Credit Card": ["Visa", "Mastercard", "Rupay", "Amex"],
-    "Debit Card": ["Visa Debit", "Mastercard Debit", "Rupay Debit"],
-    "Net Banking": ["HDFC Bank", "ICICI Bank", "SBI", "Axis Bank", "Kotak Bank"],
-    };
-
-    const firmModePricing = {
-    Razorpay: {
-        "UPI Payments": "0%",
-        "Credit Card": "1.9%",
-        Visa: "1.9%",
-        Mastercard: "1.95%",
-        Rupay: "1.75%",
-        Amex: "2.5%",
-        "Debit Card": "1.5%",
-        "Visa Debit": "1.5%",
-        "Mastercard Debit": "1.52%",
-        "Rupay Debit": "1.35%",
-        "Net Banking": "1.5%",
-        "HDFC Bank": "1.45%",
-        "ICICI Bank": "1.48%",
-        "SBI": "1.5%",
-        "Axis Bank": "1.52%",
-        "Kotak Bank": "1.55%",
-        "Wallet Payments": "1.8%",
-        "QR Payments": "0%",
-        International: "3%",
-        "Subscription Billing": "2.2%",
-    },
-    Cashfree: {
-        "UPI Payments": "0%",
-        "Credit Card": "1.75%",
-        Visa: "1.75%",
-        Mastercard: "1.78%",
-        Rupay: "1.6%",
-        Amex: "2.4%",
-        "Debit Card": "1.4%",
-        "Visa Debit": "1.4%",
-        "Mastercard Debit": "1.42%",
-        "Rupay Debit": "1.25%",
-        "Net Banking": "1.45%",
-        "HDFC Bank": "1.4%",
-        "ICICI Bank": "1.43%",
-        "SBI": "1.45%",
-        "Axis Bank": "1.47%",
-        "Kotak Bank": "1.5%",
-        "Wallet Payments": "1.7%",
-        "QR Payments": "0%",
-        International: "2.9%",
-        "Subscription Billing": "2%",
-    },
-    "PhonePe PG": {
-        "UPI Payments": "0%",
-        "Credit Card": "1.8%",
-        Visa: "1.8%",
-        Mastercard: "1.82%",
-        Rupay: "1.65%",
-        Amex: "2.45%",
-        "Debit Card": "1.45%",
-        "Visa Debit": "1.45%",
-        "Mastercard Debit": "1.47%",
-        "Rupay Debit": "1.3%",
-        "Net Banking": "1.5%",
-        "HDFC Bank": "1.45%",
-        "ICICI Bank": "1.48%",
-        "SBI": "1.5%",
-        "Axis Bank": "1.52%",
-        "Kotak Bank": "1.54%",
-        "Wallet Payments": "1.75%",
-        "QR Payments": "0%",
-        International: "2.95%",
-        "Subscription Billing": "2.1%",
-    },
-    "PayU PG": {
-        "UPI Payments": "0%",
-        "Credit Card": "1.85%",
-        Visa: "1.85%",
-        Mastercard: "1.88%",
-        Rupay: "1.7%",
-        Amex: "2.55%",
-        "Debit Card": "1.5%",
-        "Visa Debit": "1.5%",
-        "Mastercard Debit": "1.52%",
-        "Rupay Debit": "1.35%",
-        "Net Banking": "1.55%",
-        "HDFC Bank": "1.5%",
-        "ICICI Bank": "1.53%",
-        "SBI": "1.55%",
-        "Axis Bank": "1.57%",
-        "Kotak Bank": "1.6%",
-        "Wallet Payments": "1.8%",
-        "QR Payments": "0%",
-        International: "3.1%",
-        "Subscription Billing": "2.15%",
-    },
-    "Paytm PG": {
-        "UPI Payments": "0%",
-        "Credit Card": "1.7%",
-        Visa: "1.7%",
-        Mastercard: "1.72%",
-        Rupay: "1.55%",
-        Amex: "2.35%",
-        "Debit Card": "1.35%",
-        "Visa Debit": "1.35%",
-        "Mastercard Debit": "1.37%",
-        "Rupay Debit": "1.2%",
-        "Net Banking": "1.4%",
-        "HDFC Bank": "1.35%",
-        "ICICI Bank": "1.38%",
-        "SBI": "1.4%",
-        "Axis Bank": "1.42%",
-        "Kotak Bank": "1.45%",
-        "Wallet Payments": "1.65%",
-        "QR Payments": "0%",
-        International: "2.85%",
-        "Subscription Billing": "1.95%",
-    },
-    "GPay PG": {
-        "UPI Payments": "0%",
-        "Credit Card": "1.82%",
-        Visa: "1.82%",
-        Mastercard: "1.84%",
-        Rupay: "1.68%",
-        Amex: "2.5%",
-        "Debit Card": "1.48%",
-        "Visa Debit": "1.48%",
-        "Mastercard Debit": "1.5%",
-        "Rupay Debit": "1.32%",
-        "Net Banking": "1.52%",
-        "HDFC Bank": "1.48%",
-        "ICICI Bank": "1.5%",
-        "SBI": "1.52%",
-        "Axis Bank": "1.54%",
-        "Kotak Bank": "1.56%",
-        "Wallet Payments": "1.72%",
-        "QR Payments": "0%",
-        International: "3%",
-        "Subscription Billing": "2.05%",
-    },
-    };
-
-    function getPricingForMode(firm, modeIndex, subFilter = null) {
-    const mode = paymentModes[modeIndex];
-    const pricingMap = firmModePricing[firm.name];
-    if (!pricingMap) return firm.pricing;
-
-    if (subFilter && pricingMap[subFilter]) {
-        return pricingMap[subFilter];
-    }
-
-    return pricingMap[mode] ?? firm.pricing;
-    }
-
-    const sortOptions = [
+const sortOptions = [
     { value: "all", label: "All" },
     { value: "emerging", label: "Emerging PG" },
     { value: "papgApproved", label: "PAPG Approved" },
@@ -352,16 +66,31 @@ const MAX_COMPARE_PG = 3;
     const stickyCellShadow =
     "shadow-[4px_0_12px_-4px_rgba(19,32,63,0.12)]";
 
-function FirmPgName({ name, logo }) {
+function FirmPgName({ name, logo, logoUrl, slug }) {
+  const [logoFailed, setLogoFailed] = useState(false);
+  const href = slug ? `/compare-pg/${slug}` : "#";
+
   return (
     <Link
-      href={`/compare-pg/${pgNameToSlug(name)}`}
+      href={href}
       className="flex w-[130px] max-w-[130px] items-center gap-1.5 transition-opacity hover:opacity-90 sm:w-[155px] sm:max-w-[155px] sm:gap-2"
     >
       <div className="relative shrink-0">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-[#2D4CC8] bg-white/80 text-xs font-bold text-black sm:h-10 sm:w-10 sm:text-sm">
-          {logo}
-        </div>
+        {logoUrl && !logoFailed ? (
+          <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border-2 border-[#2D4CC8] bg-white sm:h-10 sm:w-10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={logoUrl}
+              alt=""
+              className="max-h-full max-w-full object-contain p-0.5"
+              onError={() => setLogoFailed(true)}
+            />
+          </div>
+        ) : (
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-[#2D4CC8] bg-white/80 text-xs font-bold text-black sm:h-10 sm:w-10 sm:text-sm">
+            {logo}
+          </div>
+        )}
       </div>
 
       <div className="min-w-0">
@@ -410,18 +139,26 @@ function FirmPgName({ name, logo }) {
     "M 40.38 12.21 A 32 32 0 0 0 25.19 18.11",
     ];
 
-    function parseBusinessAgeYears(businessAge) {
+    function parseBusinessAgeYears(businessAge, businessAgeYears) {
+    if (Number.isFinite(businessAgeYears)) return businessAgeYears;
     return parseHours(businessAge);
     }
 
-    function businessAgeToActiveSegments(businessAge) {
-    const years = parseBusinessAgeYears(businessAge);
+    function businessAgeToActiveSegments(businessAge, businessAgeYears) {
+    const years = parseBusinessAgeYears(businessAge, businessAgeYears);
+    if (!years) return 0;
     return Math.min(AGE_SEGMENT_COUNT, Math.max(1, years));
     }
 
-    function BusinessAgeRing({ businessAge, size = AGE_RING_SIZE }) {
-    const years = parseBusinessAgeYears(businessAge);
-    const activeSegments = businessAgeToActiveSegments(businessAge);
+    function BusinessAgeRing({ businessAge, businessAgeYears, size = AGE_RING_SIZE }) {
+    if (!businessAge && !businessAgeYears) {
+      return (
+        <span className="mx-auto block text-center text-xs text-slate-400">—</span>
+      );
+    }
+
+    const years = parseBusinessAgeYears(businessAge, businessAgeYears);
+    const activeSegments = businessAgeToActiveSegments(businessAge, businessAgeYears);
 
     return (
         <div
@@ -801,19 +538,49 @@ function ComparePgCell({
             aria-label={`Compare ${firm.name}`}
             />
         ) : null}
-        <FirmPgName name={firm.name} logo={firm.logo} />
+        <FirmPgName
+          name={firm.name}
+          logo={firm.logo}
+          logoUrl={firm.logoUrl}
+          slug={firm.slug}
+        />
         </div>
     );
     }
 
 function ComparePGTable() {
   const { openTalkToExpert } = useTalkToExpert();
+  const [firms, setFirms] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [activeFilter, setActiveFilter] = useState(0);
   const [activeSubFilter, setActiveSubFilter] = useState(null);
   const [compareModeOpen, setCompareModeOpen] = useState(false);
   const [selectedCompareFirms, setSelectedCompareFirms] = useState([]);
   const [sortBy, setSortBy] = useState("emerging");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const loadFirms = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError("");
+    try {
+      const data = await fetchPgComparison({ sort: "name_asc" });
+      setFirms(mapPgCompareListToWebsiteRows(data));
+    } catch (err) {
+      setFirms([]);
+      setLoadError(
+        err instanceof ApiError
+          ? err.message
+          : "Failed to load payment gateways. Please try again.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadFirms();
+  }, [loadFirms]);
 
   function selectPaymentMode(index, subOption = null) {
     setActiveFilter(index);
@@ -856,14 +623,11 @@ function ComparePGTable() {
         case "all":
           return 0;
         case "emerging":
-          return parseHours(a.businessAge) - parseHours(b.businessAge);
+          return (a.tatOrder ?? 99) - (b.tatOrder ?? 99);
         case "papgApproved":
           return Number(b.featured) - Number(a.featured);
         case "instantSettlement":
-          return (
-            Number(b.settlement.toLowerCase().includes("instant")) -
-            Number(a.settlement.toLowerCase().includes("instant"))
-          );
+          return Number(b.settlementInstant) - Number(a.settlementInstant);
         case "bestForStartup":
           return (
             Number(b.bestForTags.some((tag) => tag.toLowerCase().includes("startup"))) -
@@ -872,7 +636,7 @@ function ComparePGTable() {
         case "dedicatedSupport":
           return b.reviewCount - a.reviewCount;
         case "fastOnboarding":
-          return parseHours(a.onboarding) - parseHours(b.onboarding);
+          return a.onboardingHours - b.onboardingHours;
         default:
           return 0;
       }
@@ -880,6 +644,18 @@ function ComparePGTable() {
 
   return (
     <section className="mx-auto max-w-8xl px-4 py-14 sm:px-6 lg:px-8">
+      {loadError ? (
+        <div className="mb-4 flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 sm:flex-row sm:items-center sm:justify-between">
+          <span>{loadError}</span>
+          <button
+            type="button"
+            onClick={loadFirms}
+            className="rounded-full border border-red-300 bg-white px-4 py-1.5 text-sm font-semibold text-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      ) : null}
       <div className="flex max-h-none flex-col rounded-2xl border border-slate-200 bg-white shadow-lg shadow-[#13203F]/5 lg:max-h-[min(85vh,780px)]">
         <div className="relative z-30 shrink-0 overflow-visible border-b border-slate-200 bg-[#f8fafc] px-4 py-4 sm:px-5">
           {selectedCompareFirms.length > 0 ? (
@@ -1004,12 +780,31 @@ function ComparePGTable() {
             </thead>
 
             <tbody>
-              {sortedFirms.map((firm) => {
+              {isLoading ? (
+                <tr>
+                  <td
+                    colSpan={tableColumns.length}
+                    className="px-4 py-16 text-center text-sm text-slate-500"
+                  >
+                    Loading active payment gateways…
+                  </td>
+                </tr>
+              ) : sortedFirms.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={tableColumns.length}
+                    className="px-4 py-16 text-center text-sm text-slate-500"
+                  >
+                    No active payment gateways match your search.
+                  </td>
+                </tr>
+              ) : (
+              sortedFirms.map((firm) => {
                 const bg = rowBg(firm.featured);
 
                 return (
                   <tr
-                    key={firm.name}
+                    key={firm.id || firm.slug || firm.name}
                     className={`group transition-colors hover:bg-[#f8fafc] ${bg}`}
                   >
                     <td
@@ -1032,12 +827,15 @@ function ComparePGTable() {
                     </td>
                     <td className={tdBase}>
                       <div className="mx-auto w-fit origin-center scale-[0.72] sm:scale-100">
-                        <BusinessAgeRing businessAge={firm.businessAge} />
+                        <BusinessAgeRing
+                          businessAge={firm.businessAge}
+                          businessAgeYears={firm.businessAgeYears}
+                        />
                       </div>
                     </td>
                     <td className={tdBase}>{firm.location}</td>
                     <td className={`${tdBase} font-medium text-[#13203F]`}>
-                      {getPricingForMode(firm, activeFilter, activeSubFilter)}
+                      {getWebsitePricingForMode(firm, activeFilter, activeSubFilter)}
                     </td>
                     <td className={tdBase}>
                       <SettlementBadge value={firm.settlement} />
@@ -1049,10 +847,14 @@ function ComparePGTable() {
                       <SmartTags labels={firm.products} compact />
                     </td>
                     <td className={tdBase}>
-                      <SupportedPlatforms
-                        platforms={firm.platforms}
-                        extra={firm.platformsExtra}
-                      />
+                      {firm.platforms?.length ? (
+                        <SupportedPlatforms
+                          platforms={firm.platforms}
+                          extra={firm.platformsExtra}
+                        />
+                      ) : (
+                        <span className="block text-center text-xs text-slate-400">—</span>
+                      )}
                     </td>
                     <td className={tdBase}>
                       <OfferCoupon
@@ -1098,7 +900,8 @@ function ComparePGTable() {
                     </td>
                   </tr>
                 );
-              })}
+              })
+              )}
             </tbody>
           </table>
         </div>

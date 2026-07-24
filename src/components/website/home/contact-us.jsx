@@ -319,7 +319,7 @@ export const ContactUs = () => {
                                             type="tel"
                                             inputMode="numeric"
                                             maxLength={11}
-                                            placeholder="10-digit (WhatsApp preferred)"
+                                            placeholder="10–11 digits (WhatsApp preferred)"
                                             onChange={(event) => {
                                                 event.target.value = sanitizePhoneInput(event.target.value);
                                             }}

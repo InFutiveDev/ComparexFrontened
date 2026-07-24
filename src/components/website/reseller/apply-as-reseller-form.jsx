@@ -418,7 +418,7 @@ function ResellerRegistrationForm() {
                     setOtpVerified(false);
                   }}
                   className={inputClass}
-                  placeholder="10-digit (WhatsApp preferred)"
+                  placeholder="10–11 digits (WhatsApp preferred)"
                   required
                 />
               </div>

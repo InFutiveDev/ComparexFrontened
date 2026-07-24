@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 
-export function useDashboardList(fetcher, mapper, { page = 1, limit = 50, refreshToken = 0 } = {}) {
+export function useDashboardList(fetcher, mapper, { refreshToken = 0 } = {}) {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -14,10 +14,26 @@ export function useDashboardList(fetcher, mapper, { page = 1, limit = 50, refres
     setError("");
 
     try {
-      const response = await fetcher({ page, limit });
-      const items = mapper(response);
-      setData(items.rows);
-      setTotal(items.total);
+      const pageSize = 100;
+      let page = 1;
+      let allRows = [];
+      let totalCount = 0;
+
+      while (true) {
+        const response = await fetcher({ page, limit: pageSize });
+        const items = mapper(response);
+        allRows = allRows.concat(items.rows);
+        totalCount = items.total ?? allRows.length;
+
+        if (allRows.length >= totalCount || items.rows.length < pageSize) {
+          break;
+        }
+
+        page += 1;
+      }
+
+      setData(allRows);
+      setTotal(totalCount);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to load data");
       setData([]);
@@ -25,7 +41,7 @@ export function useDashboardList(fetcher, mapper, { page = 1, limit = 50, refres
     } finally {
       setIsLoading(false);
     }
-  }, [fetcher, mapper, page, limit]);
+  }, [fetcher, mapper]);
 
   useEffect(() => {
     reload();

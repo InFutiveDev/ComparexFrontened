@@ -3,6 +3,7 @@ import {
   addMerchantSupportSubmission,
   listMerchantSupportSubmissions,
 } from "@/lib/merchant-support-store";
+import { validateContactFields } from "@/lib/validation";
 
 export async function GET() {
   const submissions = await listMerchantSupportSubmissions();
@@ -23,6 +24,15 @@ export async function POST(request) {
       { message: "Business name, email, and phone are required" },
       { status: 400 }
     );
+  }
+
+  const contactError = validateContactFields({
+    email: payload.email,
+    phone: payload.phone,
+  });
+
+  if (contactError) {
+    return NextResponse.json({ message: contactError }, { status: 400 });
   }
 
   const submission = await addMerchantSupportSubmission(payload);

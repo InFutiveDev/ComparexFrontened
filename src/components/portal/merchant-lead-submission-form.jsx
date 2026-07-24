@@ -210,7 +210,7 @@ export function MerchantLeadSubmissionForm() {
               onChange={(event) =>
                 updateField("phone", sanitizePhoneInput(event.target.value))
               }
-              placeholder="10-digit mobile number"
+              placeholder="10–11 digits mobile number"
             />
           </label>
 
