@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { use } from "react";
 import {
-  HiArrowRight,
   HiTag,
   HiUserCircle,
   HiUserGroup,
@@ -161,6 +159,11 @@ export function MerchantDetails({ id }) {
             <DetailField label="Source">{formatDetailLabel(data.source)}</DetailField>
             <DetailField label="Login Access">
               <AccountStatusBadge status={data.accountStatus} />
+              <p className="mt-1 text-xs font-normal text-slate-500">
+                {data.lastLoginAt
+                  ? `Last login: ${formatDetailDate(data.lastLoginAt)}`
+                  : "No login yet"}
+              </p>
             </DetailField>
             <DetailField label="Form Progress">Step {data.formStep ?? 1} of 3</DetailField>
             <DetailField label="Created At">{formatDetailDate(data.createdAt)}</DetailField>
@@ -192,13 +195,6 @@ export function MerchantDetails({ id }) {
             <DetailField label="Location">{data.location || "—"}</DetailField>
             <DetailField label="Qualification Notes">{data.qualificationNotes || "—"}</DetailField>
           </div>
-          <Link
-            href={`/sub-admin-dashboard/leads/${data.id}`}
-            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2D4CC8] hover:underline"
-          >
-            Open in Lead Ops
-            <HiArrowRight className="size-4" aria-hidden />
-          </Link>
         </InfoCard>
       </div>
     </div>

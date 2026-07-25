@@ -1,6 +1,6 @@
-import { ApiError, apiFetch } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import { getAffiliateParams } from "@/lib/affiliate-tracking";
-import { getStoredToken } from "@/lib/auth";
+import { authApiFetch } from "@/lib/auth-fetch";
 
 function withAffiliateQuery(path, payload = {}) {
   const params = new URLSearchParams();
@@ -31,12 +31,8 @@ export async function updateMerchantLead(id, payload) {
 }
 
 export async function submitMerchantPanelLead(payload) {
-  const token = getStoredToken();
-  if (!token) throw new ApiError("Authentication required", 401);
-
-  return apiFetch("/merchant/lead-submission", {
+  return authApiFetch("/merchant/lead-submission", {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
   });
 }

@@ -16,11 +16,15 @@ const resellerLabels = {
   delete: "Delete Reseller",
 };
 
-export function ResellerTable({ variant = "overview", workTypeFilter = "Reseller" }) {
-  const { data, isLoading, error, reload } = useDashboardList(
-    fetchResellers,
-    mapResellerListResponse,
-  );
+export function ResellerTable({
+  variant = "overview",
+  workTypeFilter = "Reseller",
+  listState,
+}) {
+  const internalListState = useDashboardList(fetchResellers, mapResellerListResponse, {
+    enabled: !listState,
+  });
+  const { data, isLoading, error, reload } = listState ?? internalListState;
 
   return (
     <DashboardListState
@@ -38,6 +42,10 @@ export function ResellerTable({ variant = "overview", workTypeFilter = "Reseller
         searchType="merchant"
         detailsBasePath="/dashboard/resellers"
         detailsWorkType="Reseller"
+        clientColumnLabel="Reseller Name"
+        clientSubtext="email"
+        contactColumn="qualifiedLead"
+        resultLabel="resellers"
         showAccountStatus
         accountStatusResource="reseller"
         onAccountStatusUpdated={reload}

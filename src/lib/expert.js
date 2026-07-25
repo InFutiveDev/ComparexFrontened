@@ -1,5 +1,5 @@
-import { apiFetch, ApiError } from "@/lib/api";
-import { getStoredToken } from "@/lib/auth";
+import { apiFetch } from "@/lib/api";
+import { authApiFetch } from "@/lib/auth-fetch";
 
 export async function submitExpertBooking(payload) {
   return apiFetch("/expert", {
@@ -9,18 +9,7 @@ export async function submitExpertBooking(payload) {
 }
 
 async function authFetch(path, options = {}) {
-  const token = getStoredToken();
-  if (!token) {
-    throw new ApiError("Authentication required", 401);
-  }
-
-  return apiFetch(path, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...options.headers,
-    },
-  });
+  return authApiFetch(path, options);
 }
 
 export function fetchExpertBookings({ page = 1, limit = 50 } = {}) {

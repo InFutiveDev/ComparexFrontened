@@ -1,5 +1,5 @@
-import { apiFetch, apiFormFetch, ApiError } from "@/lib/api";
-import { getStoredToken } from "@/lib/auth";
+import { apiFetch, ApiError } from "@/lib/api";
+import { authApiFetch, authApiFormFetch } from "@/lib/auth-fetch";
 
 export async function submitResellerPartner(payload) {
   return apiFetch("/reseller", {
@@ -16,18 +16,7 @@ export async function updateResellerPartner(id, payload) {
 }
 
 async function authFetch(path, options = {}) {
-  const token = getStoredToken();
-  if (!token) {
-    throw new ApiError("Authentication required", 401);
-  }
-
-  return apiFetch(path, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...options.headers,
-    },
-  });
+  return authApiFetch(path, options);
 }
 
 export function fetchMyResellerProfile() {
@@ -91,20 +80,11 @@ export function submitMyResellerInvoice(payload) {
 }
 
 export async function uploadResellerKycFile(file, folder = "reseller-kyc") {
-  const token = getStoredToken();
-  if (!token) {
-    throw new ApiError("Authentication required", 401);
-  }
-
   const formData = new FormData();
   formData.append("file", file);
   formData.append("folder", folder);
 
-  const data = await apiFormFetch("/upload", formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const data = await authApiFormFetch("/upload", formData);
 
   if (!data?.file) {
     throw new ApiError("File upload did not return file metadata", 500);

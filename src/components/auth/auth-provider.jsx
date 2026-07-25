@@ -7,6 +7,7 @@ import {
   getStoredToken,
   getStoredUser,
   loginAccount,
+  refreshAccessToken,
   registerAccount,
   setAuthSession,
 } from "@/lib/auth";
@@ -19,34 +20,62 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = getStoredToken();
-    const storedUser = getStoredUser();
-
-    if (!storedToken) {
-      setIsLoading(false);
-      return;
+    function handleSessionCleared() {
+      setToken(null);
+      setUser(null);
     }
 
-    setToken(storedToken);
-    setUser(storedUser);
+    window.addEventListener("comparex:auth-session-cleared", handleSessionCleared);
+    return () => {
+      window.removeEventListener("comparex:auth-session-cleared", handleSessionCleared);
+    };
+  }, []);
 
-    fetchCurrentUser(storedToken)
-      .then((data) => {
-        setUser(data.user);
-      })
-      .catch(() => {
-        clearAuthSession();
-        setToken(null);
-        setUser(null);
-      })
-      .finally(() => {
+  useEffect(() => {
+    async function bootstrapSession() {
+      const storedToken = getStoredToken();
+      const storedUser = getStoredUser();
+
+      if (!storedToken) {
         setIsLoading(false);
-      });
+        return;
+      }
+
+      setToken(storedToken);
+      setUser(storedUser);
+
+      try {
+        const data = await fetchCurrentUser(storedToken);
+        setUser(data.user);
+      } catch {
+        try {
+          const refreshedToken = await refreshAccessToken();
+          const data = await fetchCurrentUser(refreshedToken);
+          setToken(refreshedToken);
+          setUser(data.user);
+        } catch {
+          clearAuthSession();
+          setToken(null);
+          setUser(null);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    bootstrapSession();
   }, []);
 
   const applySession = useCallback((session, remember = true) => {
-    setAuthSession(session, remember);
-    setToken(session.token);
+    setAuthSession(
+      {
+        token: session.token || session.accessToken,
+        refreshToken: session.refreshToken,
+        user: session.user,
+      },
+      remember,
+    );
+    setToken(session.token || session.accessToken);
     setUser(session.user);
   }, []);
 

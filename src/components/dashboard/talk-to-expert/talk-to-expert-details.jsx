@@ -6,6 +6,7 @@ import {
   HiCalendarDays,
   HiClock,
   HiCreditCard,
+  HiDocumentText,
   HiUserCircle,
 } from "react-icons/hi2";
 import {
@@ -26,6 +27,7 @@ import { ApiError } from "@/lib/api";
 function StatusBadge({ status }) {
   const styles = {
     new: "bg-blue-50 text-blue-700 ring-blue-200",
+    qualified: "bg-emerald-50 text-emerald-700 ring-emerald-200",
     contacted: "bg-amber-50 text-amber-700 ring-amber-200",
     completed: "bg-emerald-50 text-emerald-700 ring-emerald-200",
     cancelled: "bg-slate-50 text-slate-600 ring-slate-200",
@@ -253,7 +255,7 @@ export function TalkToExpertDetails({ params }) {
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-[#13203F]">Update booking status</h3>
         <div className="mt-3 flex flex-wrap gap-2">
-          {["new", "contacted", "completed", "cancelled"].map((status) => (
+          {["new", "qualified", "contacted", "completed", "cancelled"].map((status) => (
             <button
               key={status}
               type="button"
@@ -291,8 +293,17 @@ export function TalkToExpertDetails({ params }) {
             <DetailField label="Gateway">{data.paymentGatewayName || "—"}</DetailField>
             <DetailField label="Representative">{data.representativeName || "—"}</DetailField>
             <DetailField label="Rep Title">{data.representativeTitle || "—"}</DetailField>
+            <DetailField label="Assignee">{data.assignee || "—"}</DetailField>
           </div>
         </InfoCard>
+
+        {data.adminNotes ? (
+          <InfoCard title="Admin Notes" icon={HiDocumentText}>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+              {data.adminNotes}
+            </p>
+          </InfoCard>
+        ) : null}
 
         <ScheduledSlotCard data={data} />
       </div>

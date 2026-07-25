@@ -1,19 +1,18 @@
 "use client";
 
+import { StatsCards } from "@/components/dashboard/reviews-ratings/stats-cards";
 import { ReviewsRatingsTable } from "@/components/dashboard/reviews-ratings/reviews-ratings-table";
+import { useDashboardList } from "@/hooks/use-dashboard-list";
+import { fetchReviews } from "@/lib/dashboard-api";
+import { mapReviewListResponse } from "@/lib/dashboard-mappers";
 
 export function ReviewsRatingsSection() {
+  const listState = useDashboardList(fetchReviews, mapReviewListResponse);
+
   return (
-    <div className="space-y-5">
-      <div>
-        <h2 className="text-xl font-bold tracking-tight text-[#13203F] sm:text-2xl">
-          Reviews & Ratings
-        </h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Moderate reviews submitted from the website Write a Review form.
-        </p>
-      </div>
-      <ReviewsRatingsTable />
+    <div className="space-y-4">
+      <StatsCards rows={listState.data} isLoading={listState.isLoading} />
+      <ReviewsRatingsTable variant="full" listState={listState} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatDetailDate } from "@/components/dashboard/shared/record-details";
 import { ApiError } from "@/lib/api";
 import {
   updateMerchantAccountStatus,
@@ -63,6 +64,16 @@ export function AccountStatusCell({ row, resource, onUpdated }) {
       >
         {isUpdating ? "Updating..." : formatStatus(status)}
       </button>
+      <p className="text-[10px] leading-snug text-slate-500">
+        {row.lastLoginAt ? (
+          <>
+            Last login:{" "}
+            <span className="font-medium text-slate-600">{formatDetailDate(row.lastLoginAt)}</span>
+          </>
+        ) : (
+          "No login yet"
+        )}
+      </p>
       {error ? <p className="text-[10px] text-red-500">{error}</p> : null}
     </div>
   );

@@ -11,7 +11,6 @@ import {
   HiChartBarSquare,
   HiChatBubbleLeftRight,
   HiChevronUp,
-  HiClipboardDocumentList,
   HiCog6Tooth,
   HiCreditCard,
   HiCurrencyRupee,
@@ -27,7 +26,6 @@ import { formatRoleLabel } from "@/lib/account-roles";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: HiSquares2X2 },
-  { href: "/sub-admin-dashboard", label: "Lead Ops (Sub Admin)", icon: HiClipboardDocumentList },
   { href: "/dashboard/onboarding", label: "Onboarding", icon: HiUserPlus },
   { href: "/dashboard/merchants", label: "Merchants", icon: HiBuildingStorefront },
   { href: "/dashboard/resellers", label: "Resellers", icon: HiUserGroup },
@@ -109,7 +107,7 @@ function SidebarContent({ pathname, onNavigate }) {
 
               return (
                 <Link
-                  key={item.href}
+                  key={`${item.href}-${item.label}`}
                   href={item.href}
                   onClick={onNavigate}
                   className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${

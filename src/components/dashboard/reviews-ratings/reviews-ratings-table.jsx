@@ -19,13 +19,13 @@ const reviewLabels = {
   delete: "Delete Review",
 };
 
-export function ReviewsRatingsTable({ variant = "full", refreshToken = 0 }) {
+export function ReviewsRatingsTable({ variant = "full", listState, refreshToken = 0 }) {
   const [actionError, setActionError] = useState("");
-  const { data, isLoading, error, reload } = useDashboardList(
-    fetchReviews,
-    mapReviewListResponse,
-    { refreshToken },
-  );
+  const internalListState = useDashboardList(fetchReviews, mapReviewListResponse, {
+    enabled: !listState,
+    refreshToken,
+  });
+  const { data, isLoading, error, reload } = listState ?? internalListState;
 
   async function handleDeleteRow(row) {
     const label = row.name || "this review";
@@ -49,27 +49,29 @@ export function ReviewsRatingsTable({ variant = "full", refreshToken = 0 }) {
   }
 
   return (
-    <DashboardListState
-      isLoading={isLoading}
-      error={error}
-      onRetry={reload}
-      emptyMessage="No reviews found"
-    >
-      {actionError ? (
-        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {actionError}
-        </div>
-      ) : null}
-      <CrmDataTable
-        data={data}
-        variant={variant}
-        labels={reviewLabels}
-        searchType="merchant"
-        detailsBasePath="/dashboard/reviews-ratings"
-        detailsWorkType="Reviews & Ratings"
-        hideClientId
-        onDeleteRow={handleDeleteRow}
-      />
-    </DashboardListState>
+    <>
+      <DashboardListState
+        isLoading={isLoading}
+        error={error}
+        onRetry={reload}
+        emptyMessage="No reviews found"
+      >
+        {actionError ? (
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {actionError}
+          </div>
+        ) : null}
+        <CrmDataTable
+          data={data}
+          variant={variant}
+          labels={reviewLabels}
+          searchType="merchant"
+          detailsBasePath="/dashboard/reviews-ratings"
+          detailsWorkType="Reviews & Ratings"
+          hideClientId
+          onDeleteRow={handleDeleteRow}
+        />
+      </DashboardListState>
+    </>
   );
 }

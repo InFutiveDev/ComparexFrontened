@@ -1,20 +1,8 @@
 import { ApiError, apiFetch } from "@/lib/api";
-import { getStoredToken } from "@/lib/auth";
+import { authApiFetch } from "@/lib/auth-fetch";
 
 async function authFetch(path, options = {}) {
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new ApiError("Authentication required", 401);
-  }
-
-  return apiFetch(path, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...options.headers,
-    },
-  });
+  return authApiFetch(path, options);
 }
 
 function withPagination({ page = 1, limit = 50 } = {}) {
@@ -42,6 +30,19 @@ export function fetchResellerById(id) {
   return authFetch(`/reseller/${id}`);
 }
 
+export function fetchResellerGmvSummary({ from, to } = {}) {
+  const params = new URLSearchParams();
+  if (from) {
+    params.set("from", from instanceof Date ? from.toISOString() : String(from));
+  }
+  if (to) {
+    params.set("to", to instanceof Date ? to.toISOString() : String(to));
+  }
+
+  const query = params.toString();
+  return authFetch(`/reseller/admin/gmv-summary${query ? `?${query}` : ""}`);
+}
+
 export function fetchPaymentGateways({ page = 1, limit = 50 } = {}) {
   return authFetch(`/payment?${withPagination({ page, limit })}`);
 }
@@ -58,6 +59,20 @@ export function fetchMerchantSupportById(id) {
   return authFetch(`/support/${id}`);
 }
 
+export function updateMerchantSupportStatus(id, status) {
+  return authFetch(`/support/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function escalateMerchantSupportToPg(id, { paymentGatewayId, notes } = {}) {
+  return authFetch(`/support/${id}/escalate`, {
+    method: "POST",
+    body: JSON.stringify({ paymentGatewayId, notes }),
+  });
+}
+
 export function fetchExpertBookings({ page = 1, limit = 50 } = {}) {
   return authFetch(`/expert?${withPagination({ page, limit })}`);
 }
@@ -70,6 +85,13 @@ export function updateExpertBookingStatus(id, status) {
   return authFetch(`/expert/${id}/status`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
+  });
+}
+
+export function updateExpertBooking(id, payload = {}) {
+  return authFetch(`/expert/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
   });
 }
 

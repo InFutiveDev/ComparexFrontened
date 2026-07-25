@@ -1,19 +1,8 @@
-import { ApiError, apiFetch, apiFormFetch } from "@/lib/api";
-import { getStoredToken } from "@/lib/auth";
+import { ApiError, apiFetch } from "@/lib/api";
+import { authApiFetch, authApiFormFetch } from "@/lib/auth-fetch";
 
 async function authFetch(path, options = {}) {
-  const token = getStoredToken();
-  if (!token) {
-    throw new ApiError("Authentication required", 401);
-  }
-
-  return apiFetch(path, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...options.headers,
-    },
-  });
+  return authApiFetch(path, options);
 }
 
 function toQuery(params = {}) {
@@ -99,20 +88,11 @@ export function fetchRoutableExperts({ search } = {}) {
 }
 
 export async function bulkUploadLeadsToPg({ paymentGatewayId, file }) {
-  const token = getStoredToken();
-  if (!token) {
-    throw new ApiError("Authentication required", 401);
-  }
-
   const formData = new FormData();
   formData.append("paymentGatewayId", paymentGatewayId);
   formData.append("file", file);
 
-  return apiFormFetch("/sub-admin/leads/bulk-upload", formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return authApiFormFetch("/sub-admin/leads/bulk-upload", formData);
 }
 
 export const LEAD_STATUS_OPTIONS = [

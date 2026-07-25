@@ -7,9 +7,10 @@ import {
   createAdminPaymentGateway,
   createAdminReseller,
 } from "@/lib/dashboard-api";
-import { uploadPgOnboardingFile } from "@/lib/payment";
 import { uploadResellerKycFile } from "@/lib/reseller";
-import { sanitizePhoneInput, validateMobilePhone } from "@/lib/validation";
+import { validateMobilePhone } from "@/lib/validation";
+import { PhoneInput } from "@/components/dashboard/shared/phone-input";
+import { PasswordInput } from "@/components/dashboard/shared/password-input";
 import {
   BANK_ACCOUNT_TYPE_OPTIONS,
   PARTNERSHIP_MODEL_OPTIONS,
@@ -62,8 +63,6 @@ const emptyPgForm = {
   phone: "",
   website: "",
   password: "",
-  companyLogo: null,
-  onboardingChecklist: null,
   verificationStatus: "pending_review",
 };
 
@@ -104,16 +103,8 @@ export function OnboardingManagementSection() {
     setUploading(kind);
     setError("");
     try {
-      if (kind === "companyLogo" || kind === "onboardingChecklist") {
-        const uploaded = await uploadPgOnboardingFile(
-          file,
-          kind === "companyLogo" ? "pg-onboarding/logos" : "pg-onboarding/checklists"
-        );
-        setPgForm((prev) => ({ ...prev, [kind]: uploaded }));
-      } else {
-        const uploaded = await uploadResellerKycFile(file);
-        setResellerForm((prev) => ({ ...prev, [kind]: uploaded }));
-      }
+      const uploaded = await uploadResellerKycFile(file);
+      setResellerForm((prev) => ({ ...prev, [kind]: uploaded }));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to upload document");
     } finally {
@@ -181,8 +172,8 @@ export function OnboardingManagementSection() {
         </p>
         <h2 className="mt-1 text-2xl font-bold text-[#13203F]">Onboarding</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
-          Onboard Payment Gateways and Resellers, upload verification documents, and review
-          onboarding status from their detail pages.
+          Onboard Payment Gateways and Resellers, upload verification documents for resellers, and
+          review onboarding status from their detail pages.
         </p>
       </div>
 
@@ -215,10 +206,12 @@ export function OnboardingManagementSection() {
         })}
       </div>
 
-      <p className="text-xs text-slate-500">
-        FR-MA-06 · Documents upload via secure file storage and are saved on the profile for
-        verification.
-      </p>
+      {tab === "reseller" ? (
+        <p className="text-xs text-slate-500">
+          FR-MA-06 · Reseller documents upload via secure file storage and are saved on the profile
+          for verification.
+        </p>
+      ) : null}
 
       {error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -293,15 +286,11 @@ export function OnboardingManagementSection() {
             </div>
             <div>
               <label className={labelClass}>Phone *</label>
-              <input
+              <PhoneInput
                 required
-                inputMode="numeric"
-                maxLength={11}
                 className={inputClass}
                 value={pgForm.phone}
-                onChange={(e) =>
-                  setPgForm((prev) => ({ ...prev, phone: sanitizePhoneInput(e.target.value) }))
-                }
+                onChange={(phone) => setPgForm((prev) => ({ ...prev, phone }))}
               />
             </div>
             <div>
@@ -314,13 +303,12 @@ export function OnboardingManagementSection() {
             </div>
             <div>
               <label className={labelClass}>Login password *</label>
-              <input
+              <PasswordInput
                 required
-                type="password"
                 minLength={8}
                 className={inputClass}
                 value={pgForm.password}
-                onChange={(e) => setPgForm((prev) => ({ ...prev, password: e.target.value }))}
+                onChange={(password) => setPgForm((prev) => ({ ...prev, password }))}
               />
             </div>
             <div>
@@ -340,30 +328,9 @@ export function OnboardingManagementSection() {
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <FileField
-              label="Company logo"
-              hint="PNG/JPG/WEBP"
-              accept="image/png,image/jpeg,image/webp,image/gif"
-              uploading={uploading === "companyLogo"}
-              file={pgForm.companyLogo}
-              onUpload={(file) => handleUpload("companyLogo", file)}
-              onClear={() => setPgForm((prev) => ({ ...prev, companyLogo: null }))}
-            />
-            <FileField
-              label="Onboarding checklist"
-              hint="PDF/DOC/image"
-              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp"
-              uploading={uploading === "onboardingChecklist"}
-              file={pgForm.onboardingChecklist}
-              onUpload={(file) => handleUpload("onboardingChecklist", file)}
-              onClear={() => setPgForm((prev) => ({ ...prev, onboardingChecklist: null }))}
-            />
-          </div>
-
           <button
             type="submit"
-            disabled={isSaving || Boolean(uploading)}
+            disabled={isSaving}
             className="rounded-full bg-[#2D4CC8] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
             style={{ color: "#fff" }}
           >
@@ -411,18 +378,11 @@ export function OnboardingManagementSection() {
             </div>
             <div>
               <label className={labelClass}>Phone *</label>
-              <input
+              <PhoneInput
                 required
-                inputMode="numeric"
-                maxLength={11}
                 className={inputClass}
                 value={resellerForm.phone}
-                onChange={(e) =>
-                  setResellerForm((prev) => ({
-                    ...prev,
-                    phone: sanitizePhoneInput(e.target.value),
-                  }))
-                }
+                onChange={(phone) => setResellerForm((prev) => ({ ...prev, phone }))}
               />
             </div>
             <div>
@@ -435,15 +395,12 @@ export function OnboardingManagementSection() {
             </div>
             <div>
               <label className={labelClass}>Login password *</label>
-              <input
+              <PasswordInput
                 required
-                type="password"
                 minLength={8}
                 className={inputClass}
                 value={resellerForm.password}
-                onChange={(e) =>
-                  setResellerForm((prev) => ({ ...prev, password: e.target.value }))
-                }
+                onChange={(password) => setResellerForm((prev) => ({ ...prev, password }))}
               />
             </div>
             <div>

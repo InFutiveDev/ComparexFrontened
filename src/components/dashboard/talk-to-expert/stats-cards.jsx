@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { HiArrowDown, HiArrowUp } from "react-icons/hi2";
-import { buildPaymentGatewayStatsCardsForRange } from "@/lib/dashboard-mappers";
+import { buildExpertBookingStatsCardsForRange } from "@/lib/dashboard-mappers";
 
 const timeRanges = ["Today", "Week", "Month", "3 Months"];
 
@@ -16,14 +16,19 @@ export function StatsCards({ rows = [], isLoading = false }) {
   const [activeRange, setActiveRange] = useState("Month");
 
   const stats = useMemo(
-    () => buildPaymentGatewayStatsCardsForRange(rows, activeRange),
+    () => buildExpertBookingStatsCardsForRange(rows, activeRange),
     [rows, activeRange],
   );
 
   return (
     <section className="space-y-5 rounded-lg border border-gray-200 bg-white p-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <h2 className="text-2xl font-bold text-[#13203F]">Payment Gateways</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-[#13203F]">Talk to Expert</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Expert call bookings submitted from the website Talk to Expert form.
+          </p>
+        </div>
 
         <div className="inline-flex w-fit rounded-full bg-[#EEF2FC] p-1">
           {timeRanges.map((range) => {

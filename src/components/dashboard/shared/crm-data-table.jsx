@@ -49,15 +49,19 @@ function getUniqueValues(items, key) {
   return [...new Set(items.map((item) => item[key]))].sort();
 }
 
-function countActiveFilters(filters) {
-  return Object.values(filters).filter(Boolean).length;
+function countActiveFilters(filters, { showAssigneeColumn = true } = {}) {
+  return Object.entries(filters).filter(([key, value]) => {
+    if (!value) return false;
+    if (!showAssigneeColumn && key === "assignee") return false;
+    return true;
+  }).length;
 }
 
-function matchesRowFilters(row, filters, lockWorkTypeFilter) {
+function matchesRowFilters(row, filters, lockWorkTypeFilter, showAssigneeColumn = true) {
   if (filters.status && row.status !== filters.status) return false;
   if (filters.category && row.category !== filters.category) return false;
   if (!lockWorkTypeFilter && filters.workType && row.workType !== filters.workType) return false;
-  if (filters.assignee && row.assignee !== filters.assignee) return false;
+  if (showAssigneeColumn && filters.assignee && row.assignee !== filters.assignee) return false;
   return true;
 }
 
@@ -79,6 +83,9 @@ const statusStyles = {
   Cancelled: "bg-red-100 text-red-700",
   Proposal: "bg-amber-100 text-amber-700",
   Won: "bg-[#2D4CC8]/10 text-[#2D4CC8]",
+  Resolved: "bg-emerald-100 text-emerald-700",
+  Escalated: "bg-violet-100 text-violet-700",
+  "In Progress": "bg-amber-100 text-amber-700",
 };
 
 function matchesRowSearch(row, query) {
@@ -91,9 +98,12 @@ function matchesRowSearch(row, query) {
     row.status,
     row.accountStatus,
     row.source,
+    row.qualifiedLead,
+    row.conversionRateLabel,
     row.assignee,
     row.category,
     row.workType,
+    row.leadType,
     String(row.score),
   ]
     .join(" ")
@@ -113,7 +123,18 @@ function StatusBadge({ status }) {
   );
 }
 
-function CrmFilterModal({ open, labels, draftFilters, options, lockWorkTypeFilter, onChange, onClear, onApply, onClose }) {
+function CrmFilterModal({
+  open,
+  labels,
+  draftFilters,
+  options,
+  lockWorkTypeFilter,
+  showAssigneeColumn = true,
+  onChange,
+  onClear,
+  onApply,
+  onClose,
+}) {
   useEffect(() => {
     if (!open) return;
 
@@ -139,7 +160,9 @@ function CrmFilterModal({ open, labels, draftFilters, options, lockWorkTypeFilte
     ...(!lockWorkTypeFilter
       ? [{ key: "workType", label: "Work Type", options: options.workTypes }]
       : []),
-    { key: "assignee", label: "Assignee", options: options.assignees },
+    ...(showAssigneeColumn
+      ? [{ key: "assignee", label: "Assignee", options: options.assignees }]
+      : []),
   ];
 
   return (
@@ -223,7 +246,59 @@ function CrmFilterModal({ open, labels, draftFilters, options, lockWorkTypeFilte
   );
 }
 
-function RowActionsMenu({ row, labels, isOpen, onToggle, onClose, detailsHref, onDeleteRow }) {
+function buildDefaultRowActionItems({ row, labels, detailsHref }) {
+  return [
+    {
+      type: "link",
+      label: "Call",
+      icon: HiPhone,
+      href: `tel:${row.phone}`,
+      className: "text-[#13203F] hover:bg-slate-50",
+      iconClassName: "text-[#2D4CC8]",
+    },
+    {
+      type: "link",
+      label: "Send Email",
+      icon: HiEnvelope,
+      href: `mailto:${row.email}`,
+      className: "text-[#13203F] hover:bg-slate-50",
+      iconClassName: "text-[#40C3CF]",
+    },
+    {
+      type: detailsHref ? "link" : "button",
+      label: "View Details",
+      icon: HiEye,
+      href: detailsHref,
+      className: "text-[#13203F] hover:bg-slate-50",
+      iconClassName: "text-[#2D4CC8]",
+    },
+    {
+      type: "button",
+      label: labels.assign,
+      icon: HiUserPlus,
+      className: "text-[#13203F] hover:bg-slate-50",
+      iconClassName: "text-[#25a36f]",
+    },
+    {
+      type: "button",
+      label: labels.delete,
+      icon: HiTrash,
+      className: "text-red-600 hover:bg-red-50",
+      iconClassName: "text-red-500",
+    },
+  ];
+}
+
+function RowActionsMenu({
+  row,
+  labels,
+  menuItems,
+  isOpen,
+  onToggle,
+  onClose,
+  detailsHref,
+  onDeleteRow,
+}) {
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
   const [menuStyle, setMenuStyle] = useState(null);
@@ -296,57 +371,19 @@ function RowActionsMenu({ row, labels, isOpen, onToggle, onClose, detailsHref, o
     };
   }, [isOpen, onClose]);
 
-  const menuItems = [
-    {
-      type: "link",
-      label: "Call",
-      icon: HiPhone,
-      href: `tel:${row.phone}`,
-      className: "text-[#13203F] hover:bg-slate-50",
-      iconClassName: "text-[#2D4CC8]",
-    },
-    {
-      type: "link",
-      label: "Send Email",
-      icon: HiEnvelope,
-      href: `mailto:${row.email}`,
-      className: "text-[#13203F] hover:bg-slate-50",
-      iconClassName: "text-[#40C3CF]",
-    },
-    {
-      type: detailsHref ? "link" : "button",
-      label: "View Details",
-      icon: HiEye,
-      href: detailsHref,
-      className: "text-[#13203F] hover:bg-slate-50",
-      iconClassName: "text-[#2D4CC8]",
-    },
-    {
-      type: "button",
-      label: labels.assign,
-      icon: HiUserPlus,
-      className: "text-[#13203F] hover:bg-slate-50",
-      iconClassName: "text-[#25a36f]",
-    },
-    {
-      type: "button",
-      label: labels.delete,
-      icon: HiTrash,
-      className: "text-red-600 hover:bg-red-50",
-      iconClassName: "text-red-500",
-    },
-  ];
+  const resolvedMenuItems =
+    menuItems ?? buildDefaultRowActionItems({ row, labels, detailsHref });
 
   const menuContent = isOpen ? (
     <div
       ref={menuRef}
       role="menu"
       style={menuStyle ? { top: menuStyle.top, left: menuStyle.left } : undefined}
-      className={`fixed z-[200] w-44 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl shadow-slate-900/10 ${
+      className={`fixed z-[200] min-w-[11rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl shadow-slate-900/10 ${
         menuStyle ? "visible" : "invisible"
       }`}
     >
-      {menuItems.map((item) => {
+      {resolvedMenuItems.map((item) => {
         const Icon = item.icon;
 
         if (item.type === "link") {
@@ -386,13 +423,21 @@ function RowActionsMenu({ row, labels, isOpen, onToggle, onClose, detailsHref, o
             key={item.label}
             type="button"
             role="menuitem"
+            disabled={item.disabled}
             onClick={() => {
-              if (item.label === labels.delete && onDeleteRow) {
+              if (item.disabled) return;
+              if (item.onClick) {
+                item.onClick(row);
+              } else if (item.label === labels.delete && onDeleteRow) {
                 onDeleteRow(row);
               }
               onClose();
             }}
-            className={`flex w-full cursor-pointer items-center gap-2 px-3 py-2.5 text-left text-sm transition ${item.className}`}
+            className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition ${
+              item.disabled
+                ? "cursor-not-allowed opacity-45"
+                : "cursor-pointer"
+            } ${item.className}`}
           >
             <Icon className={`size-4 ${item.iconClassName}`} aria-hidden />
             {item.label}
@@ -423,6 +468,23 @@ function RowActionsMenu({ row, labels, isOpen, onToggle, onClose, detailsHref, o
   );
 }
 
+const contactColumnLabels = {
+  email: "Email ID",
+  source: "Source",
+  qualifiedLead: "Qualified Lead",
+};
+
+function getPageNumbers(currentPage, totalPages) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages = new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1]);
+  return [...pages]
+    .filter((page) => page >= 1 && page <= totalPages)
+    .sort((a, b) => a - b);
+}
+
 export function CrmDataTable({
   data,
   variant = "overview",
@@ -438,7 +500,16 @@ export function CrmDataTable({
   accountStatusResource,
   onAccountStatusUpdated,
   hideClientId = false,
+  clientColumnLabel = "Client",
+  clientSubtext = "email",
+  contactColumn = "email",
+  showContactColumn = true,
+  showAssigneeColumn = true,
+  showLeadType = false,
+  showConversionRate = false,
+  resultLabel = "records",
   onDeleteRow,
+  getRowActionItems,
 }) {
   const labels = { ...defaultLabels, ...labelsProp };
   const { merchantSearch, setMerchantSearch, leadSearch, setLeadSearch } = useDashboard();
@@ -472,7 +543,8 @@ export function CrmDataTable({
   );
 
   const activeFilterCount = countActiveFilters(
-    lockWorkTypeFilter ? { ...filters, workType: "" } : filters
+    lockWorkTypeFilter ? { ...filters, workType: "" } : filters,
+    { showAssigneeColumn },
   );
 
   useEffect(() => {
@@ -490,9 +562,9 @@ export function CrmDataTable({
 
     return scopedData.filter((row) => {
       if (query && !matchesRowSearch(row, query)) return false;
-      return matchesRowFilters(row, filters, lockWorkTypeFilter);
+      return matchesRowFilters(row, filters, lockWorkTypeFilter, showAssigneeColumn);
     });
-  }, [scopedData, localSearch, contextSearch, filters, lockWorkTypeFilter]);
+  }, [scopedData, localSearch, contextSearch, filters, lockWorkTypeFilter, showAssigneeColumn]);
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / perPage));
 
@@ -504,6 +576,10 @@ export function CrmDataTable({
     const start = (page - 1) * perPage;
     return filteredRows.slice(start, start + perPage);
   }, [filteredRows, page, perPage]);
+
+  const pageNumbers = useMemo(() => getPageNumbers(page, totalPages), [page, totalPages]);
+  const showingFrom = filteredRows.length === 0 ? 0 : (page - 1) * perPage + 1;
+  const showingTo = Math.min(page * perPage, filteredRows.length);
 
   function handleSearchChange(value) {
     setLocalSearch(value);
@@ -671,7 +747,7 @@ export function CrmDataTable({
                 Work Type: {filters.workType} ×
               </button>
             ) : null}
-            {filters.assignee ? (
+            {showAssigneeColumn && filters.assignee ? (
               <button
                 type="button"
                 onClick={() => handleFilterChange("assignee", "")}
@@ -693,13 +769,19 @@ export function CrmDataTable({
             <table className="min-w-[1100px] w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-[#0a27c9] text-[11px] font-semibold uppercase tracking-wide text-white">
-                  <th className="px-4 py-3 sm:px-5">Client</th>
+                  <th className="px-4 py-3 sm:px-5">{clientColumnLabel}</th>
                   <th className="px-3 py-3">Phone Number</th>
-                  <th className="px-3 py-3">Email ID</th>
-                  <th className="px-3 py-3">Assignee</th>
+                  {showContactColumn ? (
+                    <th className="px-3 py-3">
+                      {contactColumnLabels[contactColumn] ?? "Email ID"}
+                    </th>
+                  ) : null}
+                  {showLeadType ? <th className="px-3 py-3">Lead Type</th> : null}
+                  {showAssigneeColumn ? <th className="px-3 py-3">Assignee</th> : null}
                   <th className="px-3 py-3">Category</th>
                   <th className="px-3 py-3">Work Type</th>
                   <th className="px-3 py-3">Status</th>
+                  {showConversionRate ? <th className="px-3 py-3">Conversion Rate</th> : null}
                   {showAccountStatus ? <th className="px-3 py-3">Login Access</th> : null}
                   <th className="px-4 py-3 text-right sm:px-5">Actions</th>
                 </tr>
@@ -709,7 +791,19 @@ export function CrmDataTable({
                   <tr key={row.id} className="border-b border-slate-100 transition last:border-b-0 hover:bg-[#EEF2FC]/35">
                     <td className="px-4 py-3.5 sm:px-5">
                       <p className="font-semibold text-[#13203F]">{row.name}</p>
-                      {!hideClientId ? (
+                      {clientSubtext === "email" ? (
+                        row.email ? (
+                          <a
+                            href={`mailto:${row.email}`}
+                            className="mt-0.5 inline-flex max-w-[220px] items-center gap-1 text-xs text-slate-500 transition hover:text-[#40C3CF]"
+                          >
+                            <HiEnvelope className="size-3.5 shrink-0 text-[#40C3CF]" aria-hidden />
+                            <span className="truncate">{row.email}</span>
+                          </a>
+                        ) : (
+                          <p className="mt-0.5 text-xs text-slate-500">—</p>
+                        )
+                      ) : clientSubtext === "id" && !hideClientId ? (
                         <p className="mt-0.5 text-xs text-slate-500">ID: {row.id}</p>
                       ) : null}
                     </td>
@@ -722,27 +816,40 @@ export function CrmDataTable({
                         {row.phone}
                       </a>
                     </td>
-                    <td className="px-3 py-3.5">
-                      <a
-                        href={`mailto:${row.email}`}
-                        className="inline-flex items-center gap-1.5 text-slate-700 transition hover:text-[#40C3CF]"
-                      >
-                        <HiEnvelope className="size-4 shrink-0 text-[#40C3CF]" aria-hidden />
-                        <span className="max-w-[200px] truncate">{row.email}</span>
-                      </a>
-                    </td>
-                    <td className="px-3 py-3.5">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="flex size-8 items-center justify-center rounded-full text-xs font-bold text-white"
-                          style={{ backgroundColor: row.assigneeColor }}
-                          title={row.assignee}
-                        >
-                          {row.assigneeInitials}
+                    {showContactColumn ? (
+                      <td className="px-3 py-3.5">
+                        {contactColumn === "source" ? (
+                          <span className="text-slate-700">{row.source || "—"}</span>
+                        ) : contactColumn === "qualifiedLead" ? (
+                          <span className="font-medium text-[#13203F]">{row.qualifiedLead ?? 0}</span>
+                        ) : (
+                          <a
+                            href={`mailto:${row.email}`}
+                            className="inline-flex items-center gap-1.5 text-slate-700 transition hover:text-[#40C3CF]"
+                          >
+                            <HiEnvelope className="size-4 shrink-0 text-[#40C3CF]" aria-hidden />
+                            <span className="max-w-[200px] truncate">{row.email}</span>
+                          </a>
+                        )}
+                      </td>
+                    ) : null}
+                    {showLeadType ? (
+                      <td className="px-3 py-3.5 text-slate-700">{row.leadType || "—"}</td>
+                    ) : null}
+                    {showAssigneeColumn ? (
+                      <td className="px-3 py-3.5">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="flex size-8 items-center justify-center rounded-full text-xs font-bold text-white"
+                            style={{ backgroundColor: row.assigneeColor }}
+                            title={row.assignee}
+                          >
+                            {row.assigneeInitials}
+                          </div>
+                          <span className="hidden text-xs text-slate-600 xl:inline">{row.assignee}</span>
                         </div>
-                        <span className="hidden text-xs text-slate-600 xl:inline">{row.assignee}</span>
-                      </div>
-                    </td>
+                      </td>
+                    ) : null}
                     <td className="px-3 py-3.5">
                       <span className="rounded-lg bg-[#EEF2FC] px-2.5 py-1 text-xs font-medium text-[#2D4CC8] ring-1 ring-[#2D4CC8]/10">
                         {row.category}
@@ -752,6 +859,20 @@ export function CrmDataTable({
                     <td className="px-3 py-3.5">
                       <StatusBadge status={row.status} />
                     </td>
+                    {showConversionRate ? (
+                      <td className="px-3 py-3.5">
+                        <span
+                          className="font-medium text-[#13203F]"
+                          title={
+                            row.acceptedLeadCount != null
+                              ? `${row.onboardedLeadCount ?? 0} onboarded of ${row.acceptedLeadCount} accepted leads`
+                              : undefined
+                          }
+                        >
+                          {row.conversionRateLabel ?? "0%"}
+                        </span>
+                      </td>
+                    ) : null}
                     {showAccountStatus ? (
                       <td className="px-3 py-3.5">
                         <AccountStatusCell
@@ -765,6 +886,14 @@ export function CrmDataTable({
                       <RowActionsMenu
                         row={row}
                         labels={labels}
+                        menuItems={
+                          getRowActionItems
+                            ? getRowActionItems(row, {
+                                detailsHref: getRowDetailsHref(row),
+                                labels,
+                              })
+                            : undefined
+                        }
                         isOpen={openActionMenuId === row.id}
                         onToggle={() =>
                           setOpenActionMenuId((current) => (current === row.id ? null : row.id))
@@ -783,22 +912,27 @@ export function CrmDataTable({
 
         {filteredRows.length > 0 ? (
           <div className="flex flex-col gap-3 border-t border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <span>Show</span>
-              <select
-                value={perPage}
-                onChange={(event) => {
-                  setPerPage(Number(event.target.value));
-                  setPage(1);
-                }}
-                className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-[#13203F] outline-none focus:border-[#40C3CF] focus:ring-2 focus:ring-[#40C3CF]/20"
-              >
-                {perPageOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option} per page
-                  </option>
-                ))}
-              </select>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+              <p className="text-sm text-slate-500">
+                Showing {showingFrom}–{showingTo} of {filteredRows.length} {resultLabel}
+              </p>
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <span>Show</span>
+                <select
+                  value={perPage}
+                  onChange={(event) => {
+                    setPerPage(Number(event.target.value));
+                    setPage(1);
+                  }}
+                  className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-[#13203F] outline-none focus:border-[#40C3CF] focus:ring-2 focus:ring-[#40C3CF]/20"
+                >
+                  {perPageOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option} per page
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="flex items-center gap-1">
@@ -812,20 +946,27 @@ export function CrmDataTable({
                 Prev
               </button>
 
-              {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-                <button
-                  key={pageNumber}
-                  type="button"
-                  onClick={() => setPage(pageNumber)}
-                  className={`min-w-8 cursor-pointer rounded-lg px-2.5 py-1.5 text-sm font-medium transition ${
-                    pageNumber === page
-                      ? "bg-[#25a36f]/15 text-[#25a36f]"
-                      : "text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  {pageNumber}
-                </button>
-              ))}
+              {pageNumbers.map((pageNumber, index) => {
+                const previousPage = pageNumbers[index - 1];
+                const showEllipsis = index > 0 && pageNumber - previousPage > 1;
+
+                return (
+                  <span key={pageNumber} className="inline-flex items-center gap-1">
+                    {showEllipsis ? <span className="px-1 text-slate-400">…</span> : null}
+                    <button
+                      type="button"
+                      onClick={() => setPage(pageNumber)}
+                      className={`min-w-8 cursor-pointer rounded-lg px-2.5 py-1.5 text-sm font-medium transition ${
+                        pageNumber === page
+                          ? "bg-[#25a36f]/15 text-[#25a36f]"
+                          : "text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  </span>
+                );
+              })}
 
               <button
                 type="button"
@@ -847,6 +988,7 @@ export function CrmDataTable({
         draftFilters={draftFilters}
         options={filterOptions}
         lockWorkTypeFilter={lockWorkTypeFilter}
+        showAssigneeColumn={showAssigneeColumn}
         onChange={handleDraftFilterChange}
         onClear={clearDraftFilters}
         onApply={applyFilters}

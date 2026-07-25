@@ -329,6 +329,11 @@ export function PaymentGatewayDetails({ id }) {
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <DetailField label="Login Access">
               <AccountStatusBadge status={data.accountStatus} />
+              <p className="mt-1 text-xs font-normal text-slate-500">
+                {data.lastLoginAt
+                  ? `Last login: ${formatDetailDate(data.lastLoginAt)}`
+                  : "No login yet"}
+              </p>
             </DetailField>
             <DetailField label="Created At">{formatDetailDate(data.createdAt)}</DetailField>
           </div>

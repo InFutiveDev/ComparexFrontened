@@ -3,13 +3,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 
-export function useDashboardList(fetcher, mapper, { refreshToken = 0 } = {}) {
+export function useDashboardList(fetcher, mapper, { refreshToken = 0, enabled = true } = {}) {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(enabled);
   const [error, setError] = useState("");
 
   const reload = useCallback(async () => {
+    if (!enabled) return;
+
     setIsLoading(true);
     setError("");
 
@@ -18,12 +20,22 @@ export function useDashboardList(fetcher, mapper, { refreshToken = 0 } = {}) {
       let page = 1;
       let allRows = [];
       let totalCount = 0;
+      const seenIds = new Set();
 
-      while (true) {
+      while (page <= 100) {
         const response = await fetcher({ page, limit: pageSize });
         const items = mapper(response);
-        allRows = allRows.concat(items.rows);
-        totalCount = items.total ?? allRows.length;
+        totalCount = items.total ?? totalCount ?? allRows.length;
+
+        for (const row of items.rows) {
+          if (!row?.id || seenIds.has(row.id)) continue;
+          seenIds.add(row.id);
+          allRows.push(row);
+        }
+
+        if (items.rows.length === 0) {
+          break;
+        }
 
         if (allRows.length >= totalCount || items.rows.length < pageSize) {
           break;
@@ -33,7 +45,7 @@ export function useDashboardList(fetcher, mapper, { refreshToken = 0 } = {}) {
       }
 
       setData(allRows);
-      setTotal(totalCount);
+      setTotal(totalCount || allRows.length);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to load data");
       setData([]);
@@ -41,11 +53,16 @@ export function useDashboardList(fetcher, mapper, { refreshToken = 0 } = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [fetcher, mapper]);
+  }, [enabled, fetcher, mapper]);
 
   useEffect(() => {
+    if (!enabled) {
+      setIsLoading(false);
+      return;
+    }
+
     reload();
-  }, [reload, refreshToken]);
+  }, [enabled, reload, refreshToken]);
 
   return { data, total, isLoading, error, reload };
 }

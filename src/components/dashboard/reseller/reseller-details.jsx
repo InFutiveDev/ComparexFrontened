@@ -255,6 +255,11 @@ export function ResellerDetails({ id }) {
             </DetailField>
             <DetailField label="Login Access">
               <AccountStatusBadge status={data.accountStatus} />
+              <p className="mt-1 text-xs font-normal text-slate-500">
+                {data.lastLoginAt
+                  ? `Last login: ${formatDetailDate(data.lastLoginAt)}`
+                  : "No login yet"}
+              </p>
             </DetailField>
           </div>
         </InfoCard>

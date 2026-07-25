@@ -16,11 +16,15 @@ const merchantLabels = {
   delete: "Delete Merchant",
 };
 
-export function MerchantTable({ variant = "overview", workTypeFilter = "Merchant" }) {
-  const { data, isLoading, error, reload } = useDashboardList(
-    fetchMerchants,
-    mapMerchantListResponse,
-  );
+export function MerchantTable({
+  variant = "overview",
+  workTypeFilter = "Merchant",
+  listState,
+}) {
+  const internalListState = useDashboardList(fetchMerchants, mapMerchantListResponse, {
+    enabled: !listState,
+  });
+  const { data, isLoading, error, reload } = listState ?? internalListState;
 
   return (
     <DashboardListState
@@ -38,6 +42,9 @@ export function MerchantTable({ variant = "overview", workTypeFilter = "Merchant
         searchType="merchant"
         detailsBasePath="/dashboard/merchants"
         detailsWorkType="Merchant"
+        clientSubtext="email"
+        contactColumn="source"
+        showLeadType
         showAccountStatus
         accountStatusResource="merchant"
         onAccountStatusUpdated={reload}

@@ -1,5 +1,5 @@
-import { API_BASE_URL, apiFetch, apiFormFetch, ApiError } from "@/lib/api";
-import { getStoredToken } from "@/lib/auth";
+import { apiFetch, ApiError } from "@/lib/api";
+import { authApiFetch, authApiFormFetch, authApiRequest } from "@/lib/auth-fetch";
 
 export async function submitPaymentProvider(payload) {
   return apiFetch("/payment", {
@@ -41,18 +41,7 @@ export async function updatePaymentProvider(id, payload) {
 }
 
 async function authFetch(path, options = {}) {
-  const token = getStoredToken();
-  if (!token) {
-    throw new ApiError("Authentication required", 401);
-  }
-
-  return apiFetch(path, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...options.headers,
-    },
-  });
+  return authApiFetch(path, options);
 }
 
 export function fetchMyPaymentProfile() {
@@ -131,17 +120,12 @@ export async function downloadMyPgLeads({
   source,
   search,
 } = {}) {
-  const token = getStoredToken();
-  if (!token) throw new ApiError("Authentication required", 401);
-
   const params = new URLSearchParams({ format });
   if (status) params.set("status", status);
   if (source) params.set("source", source);
   if (search?.trim()) params.set("search", search.trim());
 
-  const response = await fetch(`${API_BASE_URL}/pg/leads/export?${params.toString()}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await authApiRequest(`/pg/leads/export?${params.toString()}`);
   if (!response.ok) {
     let data = null;
     try {
@@ -167,21 +151,11 @@ export async function downloadMyPgLeads({
 }
 
 export async function uploadPgOnboardingFile(file, folder = "pg-onboarding") {
-  const token = getStoredToken();
-  if (!token) {
-    throw new ApiError("Authentication required", 401);
-  }
-
   const formData = new FormData();
   formData.append("file", file);
   formData.append("folder", folder);
 
-  const data = await apiFormFetch("/upload", formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
+  const data = await authApiFormFetch("/upload", formData);
   return data.file;
 }
 

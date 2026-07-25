@@ -54,7 +54,10 @@ export function LeadsTableSection({
   title = "Lead Qualification",
   description = "Review and qualify incoming merchant leads.",
   defaultStatus = "",
+  assignedPgId = "",
   showAssignCta = true,
+  hideAssignedPgColumn = false,
+  leadDetailBasePath = "/sub-admin-dashboard/leads",
 }) {
   const [leads, setLeads] = useState([]);
   const [total, setTotal] = useState(0);
@@ -83,6 +86,7 @@ export function LeadsTableSection({
         status: filters.status || undefined,
         industry: filters.industry || undefined,
         location: filters.location || undefined,
+        assignedPgId: assignedPgId || undefined,
         search: filters.search || undefined,
       });
       setLeads(data.leads || []);
@@ -94,7 +98,7 @@ export function LeadsTableSection({
     } finally {
       setIsLoading(false);
     }
-  }, [filters, page, perPage]);
+  }, [assignedPgId, filters, page, perPage]);
 
   useEffect(() => {
     loadLeads();
@@ -216,14 +220,19 @@ export function LeadsTableSection({
                 <th className="px-4 py-3">Industry</th>
                 <th className="px-4 py-3">Location</th>
                 <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Assigned PG</th>
+                {hideAssignedPgColumn ? null : (
+                  <th className="px-4 py-3">Assigned PG</th>
+                )}
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {!isLoading && leads.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-slate-500">
+                  <td
+                    colSpan={hideAssignedPgColumn ? 6 : 7}
+                    className="px-4 py-10 text-center text-slate-500"
+                  >
                     No leads found for the selected filters.
                   </td>
                 </tr>
@@ -243,10 +252,12 @@ export function LeadsTableSection({
                   <td className="px-4 py-3">
                     <LeadStatusBadge status={lead.leadStatus} />
                   </td>
-                  <td className="px-4 py-3 text-slate-700">{lead.assignedPgName || "—"}</td>
+                  {hideAssignedPgColumn ? null : (
+                    <td className="px-4 py-3 text-slate-700">{lead.assignedPgName || "—"}</td>
+                  )}
                   <td className="px-4 py-3 text-right">
                     <Link
-                      href={`/sub-admin-dashboard/leads/${lead.id}`}
+                      href={`${leadDetailBasePath}/${lead.id}`}
                       className="font-semibold text-[#2D4CC8] hover:underline"
                     >
                       Review

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { HiArrowPath, HiEye, HiEyeSlash } from "react-icons/hi2";
+import { HiArrowPath } from "react-icons/hi2";
 import { ApiError } from "@/lib/api";
 import {
   createAdminUser,
   fetchAdminUsers,
   updateAdminUser,
 } from "@/lib/dashboard-api";
+import { PasswordInput } from "@/components/dashboard/shared/password-input";
 
 const PAGE_SIZE = 10;
 
@@ -47,7 +48,6 @@ export function UsersManagementSection() {
   const [updatingId, setUpdatingId] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true);
@@ -91,7 +91,6 @@ export function UsersManagementSection() {
         role: "sub_admin",
         status: "active",
       });
-      setShowPassword(false);
       await loadUsers();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to create user");
@@ -167,29 +166,14 @@ export function UsersManagementSection() {
             onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
             required
           />
-          <div className="relative">
-            <input
-              className={`${inputClass} pr-12`}
-              type={showPassword ? "text" : "password"}
-              minLength={6}
-              placeholder="Password (min 6 chars)"
-              value={form.password}
-              onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600"
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? (
-                <HiEyeSlash className="size-5" />
-              ) : (
-                <HiEye className="size-5" />
-              )}
-            </button>
-          </div>
+          <PasswordInput
+            className={inputClass}
+            minLength={6}
+            placeholder="Password (min 6 chars)"
+            value={form.password}
+            onChange={(password) => setForm((prev) => ({ ...prev, password }))}
+            required
+          />
           <select
             className={inputClass}
             value={form.role}
