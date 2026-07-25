@@ -68,7 +68,9 @@ export function ReviewsRatingsTable({ variant = "full", listState, refreshToken 
           searchType="merchant"
           detailsBasePath="/dashboard/reviews-ratings"
           detailsWorkType="Reviews & Ratings"
-          hideClientId
+          clientSubtext="email"
+          showContactColumn={false}
+          showAssigneeColumn={false}
           onDeleteRow={handleDeleteRow}
         />
       </DashboardListState>
