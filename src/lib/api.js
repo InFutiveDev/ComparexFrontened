@@ -1,8 +1,25 @@
 const DEFAULT_API_URL = "http://localhost:3001/api";
 
-export const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL
-).replace(/\/$/, "");
+export function getApiBaseUrl() {
+  const configured = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+  if (configured) {
+    return configured;
+  }
+
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return `${window.location.origin}/api`;
+  }
+
+  const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL?.replace(/\/$/, "");
+  if (frontendUrl) {
+    return `${frontendUrl}/api`;
+  }
+
+  return DEFAULT_API_URL;
+}
+
+/** @deprecated Prefer getApiBaseUrl() — value can be wrong if env was missing at build time. */
+export const API_BASE_URL = getApiBaseUrl();
 
 export class ApiError extends Error {
   constructor(message, status) {
@@ -13,9 +30,10 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch(path, options = {}) {
+  const baseUrl = getApiBaseUrl();
   const url = path.startsWith("http")
     ? path
-    : `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+    : `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 
   let response;
   try {
@@ -28,7 +46,7 @@ export async function apiFetch(path, options = {}) {
     });
   } catch {
     throw new ApiError(
-      `Cannot reach API at ${API_BASE_URL}. Make sure the API server is running.`,
+      `Cannot reach API at ${baseUrl}. Make sure the API server is running.`,
       0
     );
   }
@@ -53,9 +71,10 @@ export async function apiFetch(path, options = {}) {
 }
 
 export async function apiFormFetch(path, formData, options = {}) {
+  const baseUrl = getApiBaseUrl();
   const url = path.startsWith("http")
     ? path
-    : `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+    : `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 
   const response = await fetch(url, {
     method: "POST",
@@ -63,8 +82,8 @@ export async function apiFormFetch(path, formData, options = {}) {
     ...options,
   }).catch(() => {
     throw new ApiError(
-      `Cannot reach API at ${API_BASE_URL}. Make sure the API server is running.`,
-      0,
+      `Cannot reach API at ${baseUrl}. Make sure the API server is running.`,
+      0
     );
   });
 

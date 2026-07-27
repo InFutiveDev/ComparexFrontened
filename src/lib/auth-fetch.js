@@ -1,4 +1,4 @@
-import { API_BASE_URL, ApiError, apiFetch, apiFormFetch } from "@/lib/api";
+import { ApiError, apiFetch, apiFormFetch, getApiBaseUrl } from "@/lib/api";
 import {
   clearAuthSession,
   getStoredRefreshToken,
@@ -76,7 +76,7 @@ export async function authApiRequest(path, options = {}, retried = false) {
 
   const url = path.startsWith("http")
     ? path
-    : `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+    : `${getApiBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
 
   const response = await fetch(url, {
     ...options,
