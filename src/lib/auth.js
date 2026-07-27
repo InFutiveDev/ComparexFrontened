@@ -143,3 +143,18 @@ export async function fetchCurrentUser(token = getStoredToken()) {
     },
   });
 }
+
+export async function changePassword({ currentPassword, newPassword }) {
+  const token = getStoredToken();
+  if (!token) {
+    throw new ApiError("Authentication required", 401);
+  }
+
+  return apiFetch("/auth/password", {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+}

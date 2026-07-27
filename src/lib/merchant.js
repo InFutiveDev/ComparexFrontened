@@ -36,3 +36,14 @@ export async function submitMerchantPanelLead(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+export async function fetchMyMerchantProfile() {
+  return authApiFetch("/merchant/me");
+}
+
+export async function updateMyMerchantProfile(payload) {
+  return authApiFetch("/merchant/me", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}

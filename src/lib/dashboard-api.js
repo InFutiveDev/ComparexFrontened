@@ -130,6 +130,13 @@ export function updateMerchantAdmin(id, payload = {}) {
   });
 }
 
+export function updateMerchantPassword(id, password) {
+  return authFetch(`/merchant/${id}/password`, {
+    method: "PATCH",
+    body: JSON.stringify({ password }),
+  });
+}
+
 export function updateResellerAccountStatus(id, status) {
   return authFetch(`/reseller/${id}/account-status`, {
     method: "PATCH",

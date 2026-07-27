@@ -42,6 +42,7 @@ const initialForm = {
   company: "",
   business: "",
   businessName: "",
+  website: "",
   industry: "",
   role: "",
   department: "",
@@ -194,6 +195,7 @@ export function HeroAdviceForm() {
           businessName: form.businessName.trim(),
           email: form.email.trim(),
           phone: form.phone.trim(),
+          website: form.website.trim() || undefined,
           pgId: pgId || undefined,
           resellerId: resellerId || undefined,
         };
@@ -400,6 +402,19 @@ export function HeroAdviceForm() {
                     className={inputClass}
                     placeholder="you@company.com"
                     required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="hero-website" className={labelClass}>
+                    Website URL
+                  </label>
+                  <input
+                    id="hero-website"
+                    type="url"
+                    value={form.website}
+                    onChange={(e) => updateField("website", e.target.value)}
+                    className={inputClass}
+                    placeholder="https://yourcompany.com"
                   />
                 </div>
               </div>

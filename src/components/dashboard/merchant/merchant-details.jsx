@@ -6,6 +6,7 @@ import {
   HiUserCircle,
   HiUserGroup,
 } from "react-icons/hi2";
+import { MerchantLoginPasswordSection } from "@/components/dashboard/merchant/merchant-login-password-section";
 import {
   AccountStatusBadge,
   DetailErrorState,
@@ -197,6 +198,13 @@ export function MerchantDetails({ id }) {
           </div>
         </InfoCard>
       </div>
+
+      <MerchantLoginPasswordSection
+        merchantId={data.id}
+        email={data.email}
+        userId={data.userId}
+        onUpdated={reload}
+      />
     </div>
   );
 }
