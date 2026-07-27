@@ -55,6 +55,7 @@ export function LeadsTableSection({
   description = "Review and qualify incoming merchant leads.",
   defaultStatus = "",
   assignedPgId = "",
+  registeredViaResellerId = "",
   showAssignCta = true,
   hideAssignedPgColumn = false,
   leadDetailBasePath = "/sub-admin-dashboard/leads",
@@ -87,6 +88,7 @@ export function LeadsTableSection({
         industry: filters.industry || undefined,
         location: filters.location || undefined,
         assignedPgId: assignedPgId || undefined,
+        registeredViaResellerId: registeredViaResellerId || undefined,
         search: filters.search || undefined,
       });
       setLeads(data.leads || []);
@@ -98,7 +100,7 @@ export function LeadsTableSection({
     } finally {
       setIsLoading(false);
     }
-  }, [assignedPgId, filters, page, perPage]);
+  }, [assignedPgId, registeredViaResellerId, filters, page, perPage]);
 
   useEffect(() => {
     loadLeads();

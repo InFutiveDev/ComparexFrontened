@@ -123,6 +123,13 @@ export function updateMerchantAccountStatus(id, status) {
   });
 }
 
+export function updateMerchantAdmin(id, payload = {}) {
+  return authFetch(`/merchant/${id}/admin`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
 export function updateResellerAccountStatus(id, status) {
   return authFetch(`/reseller/${id}/account-status`, {
     method: "PATCH",
@@ -134,6 +141,13 @@ export function updateResellerVerificationStatus(id, status) {
   return authFetch(`/reseller/${id}/verification-status`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
+  });
+}
+
+export function updateResellerAdmin(id, payload = {}) {
+  return authFetch(`/reseller/${id}/admin`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
   });
 }
 

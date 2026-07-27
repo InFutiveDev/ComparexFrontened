@@ -26,10 +26,20 @@ export function fetchSubAdminLeads({
   industry,
   location,
   assignedPgId,
+  registeredViaResellerId,
   search,
 } = {}) {
   return authFetch(
-    `/sub-admin/leads${toQuery({ page, limit, status, industry, location, assignedPgId, search })}`
+    `/sub-admin/leads${toQuery({
+      page,
+      limit,
+      status,
+      industry,
+      location,
+      assignedPgId,
+      registeredViaResellerId,
+      search,
+    })}`
   );
 }
 

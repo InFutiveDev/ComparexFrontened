@@ -8,13 +8,11 @@ import {
   HiArrowRightOnRectangle,
   HiBuildingStorefront,
   HiCalendarDays,
-  HiChartBarSquare,
   HiChatBubbleLeftRight,
   HiChevronUp,
   HiCog6Tooth,
   HiCreditCard,
   HiCurrencyRupee,
-  HiLifebuoy,
   HiSquares2X2,
   HiStar,
   HiUserGroup,
@@ -34,10 +32,8 @@ const navItems = [
   { href: "/dashboard/merchant-support", label: "Merchant Support", icon: HiChatBubbleLeftRight },
   { href: "/dashboard/talk-to-expert", label: "Talk to Expert", icon: HiCalendarDays },
   { href: "/dashboard/reviews-ratings", label: "Reviews & Ratings", icon: HiStar },
-  { href: "/dashboard/reports", label: "Reports", icon: HiChartBarSquare },
   { href: "/dashboard/users", label: "Users & Access", icon: HiUsers },
   { href: "/dashboard/settings", label: "System Settings", icon: HiCog6Tooth },
-  { href: "/dashboard/merchant-support", label: "Help & Support", icon: HiLifebuoy },
 ];
 
 function isActive(pathname, href) {
