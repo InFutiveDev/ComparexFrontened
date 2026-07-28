@@ -29,6 +29,18 @@ export class ApiError extends Error {
   }
 }
 
+function apiErrorMessage(data, status) {
+  return (
+    data?.error ||
+    data?.message ||
+    (status === 502
+      ? "Live API returned 502 Bad Gateway — nginx is up but the Node.js API is not running. Restart the API on the server or use local API."
+      : status === 404
+        ? "API route not found. Restart or redeploy the API server with the latest code."
+        : `API error: ${status}`)
+  );
+}
+
 export async function apiFetch(path, options = {}) {
   const baseUrl = getApiBaseUrl();
   const url = path.startsWith("http")
@@ -46,7 +58,7 @@ export async function apiFetch(path, options = {}) {
     });
   } catch {
     throw new ApiError(
-      `Cannot reach API at ${baseUrl}. Make sure the API server is running.`,
+      `Cannot reach API at ${baseUrl}. Check your network, or if using the live server ensure the API process is running (nginx 502 = backend down).`,
       0
     );
   }
@@ -59,12 +71,7 @@ export async function apiFetch(path, options = {}) {
   }
 
   if (!response.ok) {
-    const message =
-      data?.message ||
-      (response.status === 404
-        ? "API route not found. Restart or redeploy the API server with the latest code."
-        : `API error: ${response.status}`);
-    throw new ApiError(message, response.status);
+    throw new ApiError(apiErrorMessage(data, response.status), response.status);
   }
 
   return data;
@@ -82,7 +89,7 @@ export async function apiFormFetch(path, formData, options = {}) {
     ...options,
   }).catch(() => {
     throw new ApiError(
-      `Cannot reach API at ${baseUrl}. Make sure the API server is running.`,
+      `Cannot reach API at ${baseUrl}. Check your network, or if using the live server ensure the API process is running (nginx 502 = backend down).`,
       0
     );
   });
@@ -95,12 +102,7 @@ export async function apiFormFetch(path, formData, options = {}) {
   }
 
   if (!response.ok) {
-    const message =
-      data?.message ||
-      (response.status === 404
-        ? "API route not found. Restart or redeploy the API server with the latest code."
-        : `API error: ${response.status}`);
-    throw new ApiError(message, response.status);
+    throw new ApiError(apiErrorMessage(data, response.status), response.status);
   }
 
   return data;
