@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import {
   HiOutlineChevronDown,
@@ -9,6 +10,7 @@ import {
   HiOutlineClipboardDocument,
   HiOutlineMagnifyingGlass,
 } from "react-icons/hi2";
+import { buildCompareSideHref } from "@/lib/compare-side-href";
 import { useTalkToExpert } from "@/components/website/talk-to-expert/talk-to-expert-provider";
 import { pgNameToSlug } from "@/lib/pg-slug";
 const firms = [
@@ -807,6 +809,7 @@ function ComparePgCell({
 }
 
 export function HomeComparisonTable() {
+  const router = useRouter();
   const { openTalkToExpert } = useTalkToExpert();
   const [activeFilter, setActiveFilter] = useState(0);
   const [activeSubFilter, setActiveSubFilter] = useState(null);
@@ -872,7 +875,7 @@ export function HomeComparisonTable() {
   });
 
   return (
-    <section className="mx-auto max-w-8xl px-4 py-14 sm:px-6 lg:px-8">
+    <section className="mx-auto w-full max-w-8xl overflow-x-hidden px-4 py-14 sm:px-6 lg:px-8">
       <div className="mb-8 max-w-3xl">
         <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#13203F] sm:text-4xl">
           Compare Payment Gateways
@@ -883,9 +886,9 @@ export function HomeComparisonTable() {
         </p>
       </div>
 
-      <div className="flex max-h-none flex-col rounded-2xl border border-slate-200 bg-white shadow-lg shadow-[#13203F]/5 lg:max-h-[min(85vh,780px)]">
+      <div className="flex max-h-none w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-[#13203F]/5 lg:max-h-[min(85vh,780px)]">
         {/* Filters — fixed */}
-        <div className="relative z-30 shrink-0 overflow-visible border-b border-slate-200 bg-[#f8fafc] px-4 py-4 sm:px-5">
+        <div className="relative z-30 w-full min-w-0 shrink-0 border-b border-slate-200 bg-[#f8fafc] px-3 py-4 sm:px-5">
           {selectedCompareFirms.length > 0 ? (
             <div className="mb-4 flex flex-col gap-3 border-b border-slate-200/80 pb-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -916,7 +919,7 @@ export function HomeComparisonTable() {
                   })}
                 </div>
               </div>
-              <div className="flex items-center justify-end gap-2">
+              <div className="flex flex-wrap items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={clearCompareFirms}
@@ -927,6 +930,11 @@ export function HomeComparisonTable() {
                 <button
                   type="button"
                   disabled={selectedCompareFirms.length < 2}
+                  onClick={() =>
+                    router.push(
+                      buildCompareSideHref(firms, selectedCompareFirms),
+                    )
+                  }
                   className="inline-flex h-9 cursor-pointer items-center justify-center rounded-full bg-[#2D4CC8] px-5 text-sm font-semibold text-white shadow-md shadow-[#2D4CC8]/25 transition-colors hover:bg-[#2542b6] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
                   style={{ color: "#fff" }}
                 >
@@ -936,8 +944,8 @@ export function HomeComparisonTable() {
             </div>
           ) : null}
 
-          <div className="flex flex-nowrap items-center gap-1.5 overflow-visible">
-            <div className="flex min-w-0 flex-1 flex-nowrap items-center gap-1.5 overflow-visible">
+          <div className="flex w-full min-w-0 flex-col gap-2 lg:flex-row lg:items-center lg:gap-1.5">
+            <div className="-mx-1 flex min-w-0 gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:thin] lg:flex-1 lg:overflow-visible lg:pb-0">
               {paymentModes.map((mode, index) => (
                 <PaymentModeFilterButton
                   key={mode}
@@ -953,47 +961,49 @@ export function HomeComparisonTable() {
                 />
               ))}
             </div>
-            {/* search bar */}
-            <div className="relative w-50 shrink-0 sm:w-80">
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search PG"
-                aria-label="Search payment gateways"
-                className="h-8 w-full rounded-full border border-[#2D4CC8] bg-white py-0 pl-3 pr-8 text-xs font-medium text-slate-600 placeholder:text-slate-400 outline-none transition-colors hover:border-[#2D4CC8]/40 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20"
-              />
-              <HiOutlineMagnifyingGlass
-                className="pointer-events-none absolute right-2.5 top-1/2 size-3.5 -translate-y-1/2 text-[#2D4CC8]"
-                aria-hidden
-              />
-            </div>
 
-            <div className="ml-auto flex shrink-0 flex-nowrap items-center gap-1.5 overflow-visible pl-2">
-              <button
-                type="button"
-                onClick={() => setCompareModeOpen((prev) => !prev)}
-                className={`${toolbarPillBaseClass} ${
-                  compareModeOpen
-                    ? "border-[#2D4CC8] bg-[#4f39f6] text-white shadow-sm shadow-[#4f39f6]/20"
-                    : "border-[#2D4CC8] bg-white text-slate-600 hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8]"
-                }`}
-              >
-                Compare
-              </button>
+            <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:items-center lg:w-auto lg:shrink-0">
+              <div className="relative w-full min-w-0 sm:max-w-xs sm:flex-1 lg:w-72 lg:flex-none">
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search PG"
+                  aria-label="Search payment gateways"
+                  className="h-8 w-full rounded-full border border-[#2D4CC8] bg-white py-0 pl-3 pr-8 text-xs font-medium text-slate-600 placeholder:text-slate-400 outline-none transition-colors hover:border-[#2D4CC8]/40 focus:border-[#2D4CC8] focus:ring-2 focus:ring-[#2D4CC8]/20"
+                />
+                <HiOutlineMagnifyingGlass
+                  className="pointer-events-none absolute right-2.5 top-1/2 size-3.5 -translate-y-1/2 text-[#2D4CC8]"
+                  aria-hidden
+                />
+              </div>
 
-              <ToolbarFilterDropdown
-                title={FILTER_DROPDOWN_TITLE}
-                options={sortOptions}
-                value={sortBy}
-                onChange={setSortBy}
-              />
+              <div className="flex shrink-0 items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setCompareModeOpen((prev) => !prev)}
+                  className={`${toolbarPillBaseClass} ${
+                    compareModeOpen
+                      ? "border-[#2D4CC8] bg-[#4f39f6] text-white shadow-sm shadow-[#4f39f6]/20"
+                      : "border-[#2D4CC8] bg-white text-slate-600 hover:border-[#2D4CC8]/40 hover:text-[#2D4CC8]"
+                  }`}
+                >
+                  Compare
+                </button>
+
+                <ToolbarFilterDropdown
+                  title={FILTER_DROPDOWN_TITLE}
+                  options={sortOptions}
+                  value={sortBy}
+                  onChange={setSortBy}
+                />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Table — horizontal scroll; mobile shows 4 rows */}
-        <div className="h-[252px] min-h-0 shrink-0 overflow-auto sm:h-[300px] lg:h-auto lg:max-h-none lg:flex-1">
+        <div className="h-[252px] min-h-0 w-full min-w-0 shrink-0 overflow-auto sm:h-[300px] lg:h-auto lg:max-h-none lg:flex-1">
           <table className="w-full min-w-[2135px] border-collapse">
             <thead className="sticky top-0 z-10 bg-[#f4f6fc] shadow-sm">
               <tr>

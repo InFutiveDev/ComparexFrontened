@@ -31,6 +31,7 @@ const websiteRoutes = [
   "reviews",
   "talk-to-expert",
   "pg-plugin",
+  "compare-side",
 ];
 
 const nextConfig = {
