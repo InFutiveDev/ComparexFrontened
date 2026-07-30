@@ -550,7 +550,7 @@ function ComparePgCell({
     );
     }
 
-function ComparePGTable() {
+function ComparePGTable({ title = null, description = null }) {
   const router = useRouter();
   const { openTalkToExpert } = useTalkToExpert();
   const [firms, setFirms] = useState([]);
@@ -647,6 +647,16 @@ function ComparePGTable() {
 
   return (
     <section className="mx-auto w-full max-w-8xl overflow-x-hidden px-4 py-14 sm:px-6 lg:px-8">
+      {title ? (
+        <div className="mb-8 max-w-3xl">
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#13203F] sm:text-4xl">
+            {title}
+          </h2>
+          {description ? (
+            <p className="mt-3 text-slate-600">{description}</p>
+          ) : null}
+        </div>
+      ) : null}
       {loadError ? (
         <div className="mb-4 flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 sm:flex-row sm:items-center sm:justify-between">
           <span>{loadError}</span>

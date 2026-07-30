@@ -37,7 +37,9 @@ function apiErrorMessage(data, status) {
       ? "Live API returned 502 Bad Gateway — nginx is up but the Node.js API is not running. Restart the API on the server or use local API."
       : status === 404
         ? "API route not found. Restart or redeploy the API server with the latest code."
-        : `API error: ${status}`)
+        : status === 500 && !data
+          ? "API request failed (500). If you are on localhost, start ComparexFrontApi on port 3001: cd ComparexFrontApi && npm run dev."
+          : `API error: ${status}`)
   );
 }
 
