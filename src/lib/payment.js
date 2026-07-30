@@ -55,7 +55,7 @@ export function updateMyPaymentProfile(payload) {
   });
 }
 
-/** FR-PG-01 — update PG identity, logo, description, and contacts. */
+/** FR-PG-01 — identity, offers, features, talk to expert, technical, and contacts. */
 export function updateMyPgProfile(payload) {
   return updateMyPaymentProfile({
     section: "profile",
@@ -67,6 +67,14 @@ export function updateMyPgProfile(payload) {
 export function updateMyPgConfiguration(onboarding) {
   return updateMyPaymentProfile({
     section: "config",
+    onboarding,
+  });
+}
+
+/** Profile & Configuration — update all onboarding fields (except expert routing). */
+export function updateMyPgManagementOnboarding(onboarding) {
+  return updateMyPaymentProfile({
+    section: "management",
     onboarding,
   });
 }

@@ -216,6 +216,7 @@ function FirmPgName({ name, logo, logoUrl, slug }) {
     }
 
     function maskCouponCode(code) {
+    if (!code) return "—";
     return `${code.charAt(0)}${"*".repeat(6)}`;
     }
 
@@ -226,6 +227,7 @@ function FirmPgName({ name, logo, logoUrl, slug }) {
     const masked = maskCouponCode(code);
 
     const copyCode = () => {
+        if (!code) return;
         void navigator.clipboard.writeText(code);
     };
 
@@ -234,12 +236,13 @@ function FirmPgName({ name, logo, logoUrl, slug }) {
         <p className="px-1 py-2 text-center text-[11px] font-bold uppercase leading-tight text-[#13203F]">
             {headline}
         </p>
+        {code ? (
         <div className="flex items-center justify-between gap-1 rounded-lg bg-white px-2 py-2">
             <span className="text-[11px] font-bold tracking-wide text-gray-600">
             {masked}
             </span>
-            
         </div>
+        ) : null}
         </div>
     );
     }

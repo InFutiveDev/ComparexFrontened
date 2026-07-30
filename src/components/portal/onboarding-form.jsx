@@ -13,6 +13,7 @@ import { savePgOnboardingProfile } from "@/lib/pg-onboarding-storage";
 import {
   serializeOnboardingForApi,
   updateMyPaymentProfile,
+  updateMyPgManagementOnboarding,
   uploadPgOnboardingFile,
 } from "@/lib/payment";
 import { ApiError } from "@/lib/api";
@@ -635,7 +636,18 @@ function FileUploadField({
   );
 }
 
-function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi = true }) {
+function OnboardingFormModal({
+  open,
+  onClose,
+  initialData,
+  onSaved,
+  persistToApi = true,
+  variant = "modal",
+  managementStepIds = null,
+  managementSaveSection = "management",
+  accountProfile = null,
+}) {
+  const isManagement = variant === "management";
   const [stepIndex, setStepIndex] = useState(0);
   const [form, setForm] = useState(() =>
     normalizeOnboardingForm({
@@ -652,7 +664,18 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
   const [uploadingField, setUploadingField] = useState("");
   const [uploadError, setUploadError] = useState("");
 
-  const visibleSteps = useMemo(() => getVisibleSteps(form.serviceType), [form.serviceType]);
+  const visibleSteps = useMemo(() => {
+    let steps = getVisibleSteps(form.serviceType);
+    if (isManagement) {
+      steps = steps.filter((step) => step.id !== "recommendation");
+      if (Array.isArray(managementStepIds) && managementStepIds.length > 0) {
+        const allowed = new Set(managementStepIds);
+        const byId = new Map(steps.filter((step) => allowed.has(step.id)).map((s) => [s.id, s]));
+        steps = managementStepIds.map((id) => byId.get(id)).filter(Boolean);
+      }
+    }
+    return steps;
+  }, [form.serviceType, isManagement, managementStepIds]);
   const currentStep = visibleSteps[stepIndex] || visibleSteps[0];
   const isLastStep = stepIndex === visibleSteps.length - 1;
 
@@ -669,16 +692,16 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
   });
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || isManagement) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [open]);
+  }, [open, isManagement]);
 
   useEffect(() => {
-    if (!open) {
+    if (!open && !isManagement) {
       setStepIndex(0);
       setSubmitted(false);
       setDraftSaved(false);
@@ -686,6 +709,21 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
       setFeatureMenuOpen(false);
       return;
     }
+
+    if (isManagement) {
+      if (!initialData) return;
+      setForm(
+        normalizeOnboardingForm({
+          ...initialOnboardingForm,
+          ...initialData,
+          companyLogo: getFileMeta(initialData?.companyLogo),
+          onboardingChecklist: getFileMeta(initialData?.onboardingChecklist),
+        }),
+      );
+      return;
+    }
+
+    if (!open) return;
 
     setStepIndex(0);
     setForm(
@@ -706,7 +744,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
     setUploadError("");
     // Only reset when modal opens, not when parent profile refreshes mid-submit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, isManagement, initialData]);
 
   useEffect(() => {
     if (stepIndex > visibleSteps.length - 1) {
@@ -839,6 +877,59 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
     return saved;
   }
 
+  async function persistManagement() {
+    if (!persistToApi) {
+      onSaved?.(form);
+      return form;
+    }
+
+    const payload = {
+      section: managementSaveSection,
+      onboarding: serializeOnboardingForApi(form),
+    };
+
+    if (managementSaveSection === "profile" && accountProfile) {
+      payload.companyName = accountProfile.companyName;
+      payload.contactPerson = accountProfile.contactPerson;
+      payload.designation = accountProfile.designation;
+      payload.email = accountProfile.email;
+      payload.phone = accountProfile.phone;
+      payload.website = accountProfile.website;
+    }
+
+    const response = await updateMyPaymentProfile(payload);
+    const gateway = response?.paymentGateway;
+    const nextOnboarding = gateway?.onboarding || {};
+    const saved = normalizeOnboardingForm({
+      ...form,
+      ...nextOnboarding,
+      companyLogo: getFileMeta(nextOnboarding.companyLogo ?? form.companyLogo),
+      onboardingChecklist: getFileMeta(
+        nextOnboarding.onboardingChecklist ?? form.onboardingChecklist,
+      ),
+    });
+
+    onSaved?.(saved, gateway);
+    return saved;
+  }
+
+  async function handleSaveManagement() {
+    if (isSaving) return;
+    setIsSaving(true);
+    setSaveError("");
+    try {
+      await persistManagement();
+      setDraftSaved(true);
+      window.setTimeout(() => setDraftSaved(false), 2500);
+    } catch (err) {
+      setSaveError(
+        err instanceof ApiError ? err.message : "Failed to save PG configuration",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   async function handleSaveDraft() {
     if (isSaving) return;
     setIsSaving(true);
@@ -884,26 +975,34 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
     [form.serviceType]
   );
 
-  if (!open) return null;
+  if (!open && !isManagement) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-      <button
-        type="button"
-        className="absolute inset-0 bg-[#13203F]/50"
-        aria-label="Close dialog"
-        onClick={handleClose}
-      />
+  const panelBody = (
       <div
-        role="dialog"
-        aria-modal="true"
+        role={isManagement ? undefined : "dialog"}
+        aria-modal={isManagement ? undefined : "true"}
         aria-labelledby="onboarding-form-title"
-        className="relative flex max-h-[min(92vh,820px)] w-full max-w-4xl flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-[#eef2fa] shadow-2xl shadow-[#13203F]/20"
+        className={
+          isManagement
+            ? "relative flex max-h-[min(85vh,900px)] w-full min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-[#eef2fa] shadow-sm"
+            : "relative flex max-h-[min(92vh,820px)] w-full max-w-4xl flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-[#eef2fa] shadow-2xl shadow-[#13203F]/20"
+        }
       >
-        <div className="flex items-center justify-between border-b border-slate-200/80 bg-white px-5 py-4">
-          <h2 id="onboarding-form-title" className="text-lg font-bold text-[#13203F] sm:text-xl">
-            Onboarding Form
-          </h2>
+        <div className="relative z-20 shrink-0 flex items-center justify-between border-b border-slate-200/80 bg-white px-5 py-4">
+          <div>
+            <h2
+              id="onboarding-form-title"
+              className="text-lg font-bold text-[#13203F] sm:text-xl"
+            >
+              {isManagement ? "PG profile fields" : "Onboarding Form"}
+            </h2>
+            {isManagement ? (
+              <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
+                Edit service type, pricing, operations, tags, features, and integrations.
+              </p>
+            ) : null}
+          </div>
+          {!isManagement ? (
           <button
             type="button"
             onClick={handleClose}
@@ -912,9 +1011,30 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
           >
             <HiOutlineXMark className="size-5" />
           </button>
+          ) : null}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+        {isManagement && visibleSteps.length > 1 ? (
+          <div className="relative z-20 flex shrink-0 gap-2 overflow-x-auto border-b border-slate-200 bg-white px-3 py-3 [scrollbar-width:thin] sm:px-5">
+            {visibleSteps.map((step, index) => (
+              <button
+                key={step.id}
+                type="button"
+                onClick={() => setStepIndex(index)}
+                className={`shrink-0 rounded-full px-4 py-2 text-xs font-semibold leading-snug sm:text-sm ${
+                  stepIndex === index
+                    ? "bg-[#2D4CC8] text-white shadow-sm shadow-[#2D4CC8]/25"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+                style={stepIndex === index ? { color: "#fff" } : undefined}
+              >
+                {step.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="relative z-0 min-h-0 flex-1 overflow-y-auto bg-[#eef2fa] px-4 py-5 sm:px-6">
           {submitted ? (
             <div className="py-8 text-center">
               <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#25a36f] text-white shadow-lg shadow-[#25a36f]/30">
@@ -940,11 +1060,13 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
             </div>
           ) : (
             <>
-              <ProgressBar
-                step={stepIndex + 1}
-                total={visibleSteps.length}
-                label={currentStep?.label}
-              />
+              {!isManagement || visibleSteps.length <= 1 ? (
+                <ProgressBar
+                  step={stepIndex + 1}
+                  total={visibleSteps.length}
+                  label={currentStep?.label}
+                />
+              ) : null}
 
               {currentStep?.id === "service-type" ? (
                 <div className="space-y-6">
@@ -1686,7 +1808,13 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
               {currentStep?.id === "features" ? (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-2xl font-bold tracking-tight text-[#13203F] sm:text-[28px]">
+                    <h3
+                      className={
+                        isManagement
+                          ? "text-lg font-bold tracking-tight text-[#13203F] sm:text-xl"
+                          : "text-2xl font-bold tracking-tight text-[#13203F] sm:text-[28px]"
+                      }
+                    >
                       Product Features
                     </h3>
                     <p className="mt-2 text-sm text-slate-500 sm:text-base">
@@ -1780,13 +1908,26 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
               {currentStep?.id === "technical" ? (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-2xl font-bold tracking-tight text-[#13203F] sm:text-[28px]">
+                    <h3
+                      className={
+                        isManagement
+                          ? "text-lg font-bold tracking-tight text-[#13203F] sm:text-xl"
+                          : "text-2xl font-bold tracking-tight text-[#13203F] sm:text-[28px]"
+                      }
+                    >
                       Technical Integration
                     </h3>
                     <p className="mt-2 text-sm text-slate-500 sm:text-base">
                       APIs, SDKs, plugins, and developer tools.
                     </p>
                   </div>
+                  <div
+                    className={
+                      isManagement
+                        ? "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+                        : undefined
+                    }
+                  >
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="sm:col-span-2">
                       <label className={labelClass}>API Documentation URL</label>
@@ -1843,6 +1984,7 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                       />
                     </div>
                   </div>
+                  </div>
                 </div>
               ) : null}
 
@@ -1875,7 +2017,13 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
               {currentStep?.id === "talk-to-expert" ? (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-2xl font-bold tracking-tight text-[#13203F] sm:text-[28px]">
+                    <h3
+                      className={
+                        isManagement
+                          ? "text-lg font-bold tracking-tight text-[#13203F] sm:text-xl"
+                          : "text-2xl font-bold tracking-tight text-[#13203F] sm:text-[28px]"
+                      }
+                    >
                       Talk to Expert
                     </h3>
                     <p className="mt-2 text-sm text-slate-500 sm:text-base">
@@ -2044,8 +2192,57 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
                 </div>
               ) : null}
 
+              {saveError && isManagement ? (
+                <p className="mb-4 text-sm font-medium text-red-600">{saveError}</p>
+              ) : null}
+              {uploadError && isManagement ? (
+                <p className="mb-4 text-sm font-medium text-red-600">{uploadError}</p>
+              ) : null}
+
+              {draftSaved && isManagement ? (
+                <p className="mt-4 text-sm font-medium text-[#25a36f]">
+                  Changes saved successfully.
+                </p>
+              ) : null}
+
               <div className="mt-6 flex items-center justify-between gap-3 border-t border-slate-200/70 pt-5">
-                {isLastStep ? (
+                {isManagement ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setStepIndex((s) => Math.max(0, s - 1))}
+                      disabled={stepIndex === 0}
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-[#2D4CC8]/40 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <HiArrowLeft className="size-4" aria-hidden />
+                      Back
+                    </button>
+                    <div className="flex flex-wrap items-center justify-end gap-3">
+                      {!isLastStep ? (
+                        <button
+                          type="button"
+                          disabled={!canContinue() || Boolean(uploadingField)}
+                          onClick={() =>
+                            setStepIndex((s) => Math.min(s + 1, visibleSteps.length - 1))
+                          }
+                          className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#2D4CC8] bg-white px-5 py-3 text-sm font-semibold text-[#2D4CC8] transition hover:bg-[#EEF2FC] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Next
+                          <HiArrowRight className="size-4" aria-hidden />
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        disabled={isSaving || Boolean(uploadingField)}
+                        onClick={handleSaveManagement}
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#2D4CC8] px-6 py-3 text-sm font-semibold text-white shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+                        style={{ color: "#fff" }}
+                      >
+                        {isSaving ? "Saving…" : "Save changes"}
+                      </button>
+                    </div>
+                  </>
+                ) : isLastStep ? (
                   <>
                     <button
                       type="button"
@@ -2109,11 +2306,36 @@ function OnboardingFormModal({ open, onClose, initialData, onSaved, persistToApi
           )}
         </div>
       </div>
+  );
+
+  if (isManagement) {
+    return panelBody;
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+      <button
+        type="button"
+        className="absolute inset-0 bg-[#13203F]/50"
+        aria-label="Close dialog"
+        onClick={handleClose}
+      />
+      {panelBody}
     </div>
   );
 }
 
-export function OnboardingForm({ open, onClose, initialData, onSaved, persistToApi = true }) {
+export function OnboardingForm({
+  open,
+  onClose,
+  initialData,
+  onSaved,
+  persistToApi = true,
+  variant = "modal",
+  managementStepIds = null,
+  managementSaveSection = "management",
+  accountProfile = null,
+}) {
   return (
     <OnboardingFormModal
       open={open}
@@ -2121,6 +2343,10 @@ export function OnboardingForm({ open, onClose, initialData, onSaved, persistToA
       initialData={initialData}
       onSaved={onSaved}
       persistToApi={persistToApi}
+      variant={variant}
+      managementStepIds={managementStepIds}
+      managementSaveSection={managementSaveSection}
+      accountProfile={accountProfile}
     />
   );
 }
