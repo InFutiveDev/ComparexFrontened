@@ -1,14 +1,42 @@
 const DEFAULT_API_URL = "http://localhost:3001/api";
 
+function isLocalDevApiUrl(url) {
+  if (!url) return false;
+  try {
+    const { hostname } = new URL(url);
+    return hostname === "localhost" || hostname === "127.0.0.1";
+  } catch {
+    return url.includes("localhost") || url.includes("127.0.0.1");
+  }
+}
+
+/**
+ * API base URL for fetch calls.
+ * - Dev (browser): always same-origin `/api` → Next.js proxy (works on localhost + LAN IP).
+ * - Dev (SSR): loopback through the dev server proxy.
+ * - Production: NEXT_PUBLIC_API_URL from env (live server).
+ */
 export function getApiBaseUrl() {
   const configured = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
-  if (configured) {
-    return configured;
-  }
+  const productionApi =
+    configured && !isLocalDevApiUrl(configured) ? configured : null;
 
-  if (typeof window !== "undefined" && window.location?.origin) {
+  if (typeof window !== "undefined") {
+    if (process.env.NODE_ENV === "development") {
+      return `${window.location.origin}/api`;
+    }
+    if (productionApi) return productionApi;
+    if (configured) return configured;
     return `${window.location.origin}/api`;
   }
+
+  if (process.env.NODE_ENV === "development") {
+    const port = process.env.PORT || "3000";
+    return `http://127.0.0.1:${port}/api`;
+  }
+
+  if (productionApi) return productionApi;
+  if (configured) return configured;
 
   const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL?.replace(/\/$/, "");
   if (frontendUrl) {
@@ -38,7 +66,7 @@ function apiErrorMessage(data, status) {
       : status === 404
         ? "API route not found. Restart or redeploy the API server with the latest code."
         : status === 500 && !data
-          ? "API request failed (500). If you are on localhost, start ComparexFrontApi on port 3001: cd ComparexFrontApi && npm run dev."
+          ? "API request failed (500). In dev, ensure npm run dev is running and API_PROXY_TARGET is reachable (or set USE_LOCAL_API=true with ComparexFrontApi on 3001)."
           : `API error: ${status}`)
   );
 }
@@ -60,7 +88,7 @@ export async function apiFetch(path, options = {}) {
     });
   } catch {
     throw new ApiError(
-      `Cannot reach API at ${baseUrl}. Check your network, or if using the live server ensure the API process is running (nginx 502 = backend down).`,
+      `Cannot reach API at ${baseUrl}. On another machine, use the dev server Network URL (not localhost) and copy .env.local from .env.example. Ensure API_PROXY_TARGET is reachable from your network.`,
       0
     );
   }
@@ -91,7 +119,7 @@ export async function apiFormFetch(path, formData, options = {}) {
     ...options,
   }).catch(() => {
     throw new ApiError(
-      `Cannot reach API at ${baseUrl}. Check your network, or if using the live server ensure the API process is running (nginx 502 = backend down).`,
+      `Cannot reach API at ${baseUrl}. On another machine, use the dev server Network URL (not localhost) and copy .env.local from .env.example. Ensure API_PROXY_TARGET is reachable from your network.`,
       0
     );
   });
