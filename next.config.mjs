@@ -31,6 +31,7 @@ const websiteRoutes = [
   "reviews",
   "talk-to-expert",
   "pg-plugin",
+  "compare-side",
 ];
 
 const nextConfig = {
@@ -51,7 +52,7 @@ const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   async rewrites() {
-    return [
+    const rewrites = [
       ...websiteRoutes.map((route) => ({
         source: `/${route}`,
         destination: `/website/${route}`,
@@ -61,6 +62,20 @@ const nextConfig = {
         destination: "/website/compare-pg/:slug",
       },
     ];
+
+    const apiProxyTarget = process.env.API_PROXY_TARGET?.replace(/\/$/, "");
+    const usesLocalApiUrl = process.env.NEXT_PUBLIC_API_URL?.includes("localhost");
+
+    if (process.env.NODE_ENV === "development" && usesLocalApiUrl) {
+      rewrites.unshift({
+        source: "/api/:path*",
+        destination: apiProxyTarget
+          ? `${apiProxyTarget}/:path*`
+          : "http://localhost:3001/api/:path*",
+      });
+    }
+
+    return rewrites;
   },
 };
 

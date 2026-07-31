@@ -81,12 +81,74 @@ function formatOnboardingHours(tat) {
   return TAT_SORT_HOURS[tat] ?? 999;
 }
 
+/** Parse PG onboarding offers/promotions text for website display. */
+export function buildWebsiteOfferFromPg(pg, ratingCount = 0) {
+  const text = String(pg?.offersPromotions || "").trim();
+  if (text) {
+    const firstLine = text.split(/\n/)[0]?.trim() || "Partner Offer";
+    const codeMatch = text.match(
+      /(?:promo\s*)?(?:code|coupon)\s*[:\-]?\s*([A-Za-z0-9-]+)/i,
+    );
+    return {
+      headline: firstLine.length > 72 ? `${firstLine.slice(0, 69)}…` : firstLine,
+      code: codeMatch?.[1]?.toUpperCase() || null,
+      description: text,
+    };
+  }
+
+  if (ratingCount > 0) {
+    return {
+      headline: "Merchant Rated on CompareX",
+      code: null,
+      description: "",
+    };
+  }
+
+  return {
+    headline: "Activate via CompareX",
+    code: null,
+    description: "",
+  };
+}
+
+export function buildWebsiteOfferCardsFromPg(firm) {
+  const text = String(
+    firm?.offersPromotions || firm?.offer?.description || firm?._raw?.offersPromotions || "",
+  ).trim();
+
+  if (!text) return [];
+
+  const blocks = text.split(/\n\s*\n+/).filter(Boolean);
+  const segments = blocks.length > 1 ? blocks : text.split(/\n/).filter(Boolean);
+
+  return segments.map((block, index) => {
+    const lines = block
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const title = lines[0] || `Offer ${index + 1}`;
+    const codeMatch =
+      block.match(/(?:promo\s*)?(?:code|coupon)\s*[:\-]?\s*([A-Za-z0-9-]+)/i) ||
+      lines.find((line) => /code|coupon/i.test(line))?.match(/[:\s]([A-Za-z0-9-]+)/);
+
+    return {
+      id: `offer-${index}`,
+      title,
+      description: lines.length > 1 ? lines.slice(1).join(" ") : block,
+      code: codeMatch?.[1]?.toUpperCase() || null,
+      featured: index === 0,
+      badge: index === 0 ? "From PG" : null,
+    };
+  });
+}
+
 /** Map `/payment/compare` row into the website compare table shape. */
 export function mapPgToWebsiteCompareRow(pg) {
   const name = pg.name || "Payment Gateway";
   const ratingAverage = Number(pg.rating?.average || 0);
   const ratingCount = Number(pg.rating?.count || 0);
   const defaultPricing = formatMdrDisplay(pg.defaultMdr);
+  const offer = buildWebsiteOfferFromPg(pg, ratingCount);
 
   return {
     id: pg.id,
@@ -113,10 +175,8 @@ export function mapPgToWebsiteCompareRow(pg) {
         : ["Payment Gateway"],
     platforms: [],
     platformsExtra: 0,
-    offer: {
-      headline: ratingCount > 0 ? "Merchant Rated" : "CompareX Offer",
-      code: "COMPAREX",
-    },
+    offersPromotions: String(pg.offersPromotions || "").trim() || "",
+    offer,
     review: ratingCount > 0 ? ratingAverage.toFixed(1) : "—",
     reviewCount: ratingCount,
     trust: ratingCount > 0 ? (ratingAverage * 2).toFixed(1) : "—",

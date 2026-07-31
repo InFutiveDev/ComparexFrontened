@@ -146,6 +146,7 @@ export function MerchantTable({
           clientSubtext="email"
           contactColumn="source"
           showLeadType
+          showWorkTypeColumn={false}
           showAccountStatus
           accountStatusResource="merchant"
           onAccountStatusUpdated={reload}

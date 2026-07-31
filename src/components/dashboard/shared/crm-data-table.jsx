@@ -507,9 +507,11 @@ export function CrmDataTable({
   showAssigneeColumn = true,
   showLeadType = false,
   showConversionRate = false,
+  showWorkTypeColumn = true,
   resultLabel = "records",
   onDeleteRow,
   getRowActionItems,
+  rowActionsVariant = "menu",
 }) {
   const labels = { ...defaultLabels, ...labelsProp };
   const { merchantSearch, setMerchantSearch, leadSearch, setLeadSearch } = useDashboard();
@@ -779,7 +781,7 @@ export function CrmDataTable({
                   {showLeadType ? <th className="px-3 py-3">Lead Type</th> : null}
                   {showAssigneeColumn ? <th className="px-3 py-3">Assignee</th> : null}
                   <th className="px-3 py-3">Category</th>
-                  <th className="px-3 py-3">Work Type</th>
+                  {showWorkTypeColumn ? <th className="px-3 py-3">Work Type</th> : null}
                   <th className="px-3 py-3">Status</th>
                   {showConversionRate ? <th className="px-3 py-3">Conversion Rate</th> : null}
                   {showAccountStatus ? <th className="px-3 py-3">Login Access</th> : null}
@@ -855,7 +857,9 @@ export function CrmDataTable({
                         {row.category}
                       </span>
                     </td>
+                    {showWorkTypeColumn ? (
                     <td className="px-3 py-3.5 text-slate-700">{row.workType}</td>
+                    ) : null}
                     <td className="px-3 py-3.5">
                       <StatusBadge status={row.status} />
                     </td>
@@ -883,6 +887,19 @@ export function CrmDataTable({
                       </td>
                     ) : null}
                     <td className="relative overflow-visible px-4 py-3.5 sm:px-5">
+                      {rowActionsVariant === "view-link" ? (
+                        getRowDetailsHref(row) ? (
+                          <Link
+                            href={getRowDetailsHref(row)}
+                            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#2D4CC8]/30 bg-[#EEF2FC] px-3 py-1.5 text-xs font-semibold text-[#2D4CC8] transition hover:bg-[#2D4CC8] hover:!text-white"
+                          >
+                            <HiEye className="size-4" aria-hidden />
+                            View
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-slate-400">—</span>
+                        )
+                      ) : (
                       <RowActionsMenu
                         row={row}
                         labels={labels}
@@ -902,6 +919,7 @@ export function CrmDataTable({
                         detailsHref={getRowDetailsHref(row)}
                         onDeleteRow={onDeleteRow}
                       />
+                      )}
                     </td>
                   </tr>
                 ))}

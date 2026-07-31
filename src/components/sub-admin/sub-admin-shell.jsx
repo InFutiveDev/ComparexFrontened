@@ -10,6 +10,7 @@ import {
   HiCalendarDays,
   HiClipboardDocumentList,
   HiCloudArrowUp,
+  HiDocumentChartBar,
   HiSquares2X2,
   HiUserGroup,
 } from "react-icons/hi2";
@@ -28,6 +29,7 @@ const navItems = [
     ? [{ href: "/sub-admin-dashboard/notifications", label: "Notifications", icon: HiBell }]
     : []),
   { href: "/sub-admin-dashboard/bulk-upload", label: "Bulk Upload", icon: HiCloudArrowUp },
+  { href: "/sub-admin-dashboard/reports", label: "Reports", icon: HiDocumentChartBar },
 ];
 
 function isActive(pathname, href) {

@@ -22,6 +22,7 @@ import {
   pgFirms,
 } from "@/lib/pg-catalog";
 import {
+  buildWebsiteOfferCardsFromPg,
   buildWebsitePricingMap,
   mapPgToWebsiteCompareRow,
 } from "@/lib/pg-website-compare";
@@ -56,7 +57,8 @@ const pgFaqs = [
 ];
 
 function maskCouponCode(code) {
-  return `${code.charAt(0)}${"*".repeat(6)}`;
+  if (!code || code.length < 2) return "—";
+  return `${code.charAt(0)}${"*".repeat(Math.max(6, code.length - 1))}`;
 }
 
 function parseYears(businessAge) {
@@ -138,6 +140,7 @@ function PgDetailsHero({ firm, openTalkToExpert }) {
   const foundedYear = getFoundedYear(firm.businessAge);
 
   async function copyOfferCode() {
+    if (!firm.offer?.code) return;
     try {
       await navigator.clipboard.writeText(firm.offer.code);
       setCopied(true);
@@ -390,11 +393,14 @@ function PgDetailsHero({ firm, openTalkToExpert }) {
                 </span>
               </div>
               <p className="mt-1 text-sm text-slate-600">
-                {firm.offer.headline} — activate through CompareX
+                {firm.offer?.description
+                  ? firm.offer.description.split("\n")[0]
+                  : `${firm.offer.headline} — activate through CompareX`}
               </p>
             </div>
           </div>
 
+          {firm.offer?.code ? (
           <button
             type="button"
             onClick={copyOfferCode}
@@ -406,6 +412,7 @@ function PgDetailsHero({ firm, openTalkToExpert }) {
             </span>
             <HiOutlineClipboardDocument className="size-4 shrink-0 text-[#2D4CC8]" aria-hidden />
           </button>
+          ) : null}
         </div>
       </div>
     </section>
@@ -446,34 +453,10 @@ function buildKeyFeatures(firm) {
 }
 
 function getPgOffers(firm) {
-  return [
-    {
-      id: "primary",
-      title: firm.offer.headline,
-      code: firm.offer.code,
-      description: `Activate ${firm.name} through CompareX and apply this exclusive partner offer at onboarding.`,
-      featured: true,
-    },
-    {
-      id: "mdr",
-      title: "Introductory MDR Pricing",
-      description: `New merchants may qualify for reduced MDR on ${firm.name} for the first billing cycle based on business category.`,
-      badge: "New Merchant",
-    },
-    {
-      id: "setup",
-      title: "Partner Onboarding Support",
-      description:
-        "Get guided KYC, integration, and go-live support from CompareX when you activate through our platform.",
-      badge: "CompareX Exclusive",
-    },
-    {
-      id: "settlement",
-      title: `${firm.settlement} Settlement Advantage`,
-      description: `Evaluate how ${firm.name}'s ${firm.settlement.toLowerCase()} settlement cycle fits your cash-flow needs before you switch.`,
-      badge: "Cash Flow",
-    },
-  ];
+  const fromApi = buildWebsiteOfferCardsFromPg(firm);
+  if (fromApi.length > 0) return fromApi;
+
+  return [];
 }
 
 function OfferCard({ offer }) {
@@ -931,13 +914,26 @@ function PgDetailsMainContent({
           </table>
         </div>
 
+        {firm.offer?.headline || firm.offersPromotions ? (
         <div className="mt-6 rounded-2xl border border-[#2D4CC8]/25 bg-[#EEF2FC] p-5">
-          <p className="text-sm font-semibold text-[#13203F]">Exclusive Offer: {firm.offer.headline}</p>
+          <p className="text-sm font-semibold text-[#13203F]">
+            {firm.offer?.headline || "Partner offers"}
+          </p>
           <p className="mt-1 text-sm text-slate-600">
-            Use code <span className="font-bold text-[#2D4CC8]">{firm.offer.code}</span> when you
-            activate through CompareX.
+            {firm.offer?.code ? (
+              <>
+                Use code{" "}
+                <span className="font-bold text-[#2D4CC8]">{firm.offer.code}</span> when you
+                activate through CompareX.
+              </>
+            ) : (
+              firm.offer?.description ||
+              firm.offersPromotions ||
+              "Contact CompareX for the latest onboarding benefits."
+            )}
           </p>
         </div>
+        ) : null}
       </div>
     );
   }
@@ -955,9 +951,14 @@ function PgDetailsMainContent({
         </div>
 
         <div className="space-y-4">
-          {offers.map((offer) => (
-            <OfferCard key={offer.id} offer={offer} />
-          ))}
+          {offers.length > 0 ? (
+            offers.map((offer) => <OfferCard key={offer.id} offer={offer} />)
+          ) : (
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
+              {firm.name} has not published any offers on CompareX yet. Request a quote and our
+              team will share current promotions when you onboard.
+            </div>
+          )}
         </div>
 
         <div className="rounded-2xl border border-[#2D4CC8]/20 bg-[#EEF2FC] p-5">
@@ -1045,13 +1046,11 @@ export default function PgDetails({ slug }) {
   const { openTalkToExpert } = useTalkToExpert();
   const catalogFirm = getPgBySlug(slug);
   const [apiFirm, setApiFirm] = useState(null);
-  const [isLoadingApi, setIsLoadingApi] = useState(!catalogFirm);
+  const [isLoadingApi, setIsLoadingApi] = useState(true);
   const [activeTab, setActiveTab] = useState("product-information");
   const [openFaq, setOpenFaq] = useState(0);
 
   useEffect(() => {
-    if (catalogFirm) return undefined;
-
     let cancelled = false;
     setIsLoadingApi(true);
 
@@ -1068,9 +1067,8 @@ export default function PgDetails({ slug }) {
         setApiFirm({
           ...mapped,
           overview:
-            mapped._raw?.companyName || mapped.name
-              ? `${mapped.name} is an active payment gateway on CompareX. Compare MDR, settlement, onboarding timelines, and merchant ratings before you sign up.`
-              : "Payment gateway profile on CompareX.",
+            match.offersPromotions?.trim() ||
+            `${mapped.name} is an active payment gateway on CompareX. Compare MDR, settlement, onboarding timelines, and merchant ratings before you sign up.`,
         });
       })
       .catch(() => {
@@ -1083,9 +1081,9 @@ export default function PgDetails({ slug }) {
     return () => {
       cancelled = true;
     };
-  }, [slug, catalogFirm]);
+  }, [slug]);
 
-  const firm = catalogFirm || apiFirm;
+  const firm = apiFirm || catalogFirm;
   const firmId = firm?.id ?? apiFirm?.id ?? null;
   const firmSlug = firm?.slug ?? slug ?? (firm ? pgNameToSlug(firm.name) : null);
   const resolvedFirm = firm
