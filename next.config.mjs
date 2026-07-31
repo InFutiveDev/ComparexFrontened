@@ -63,15 +63,20 @@ const nextConfig = {
       },
     ];
 
-    const apiProxyTarget = process.env.API_PROXY_TARGET?.replace(/\/$/, "");
+    const apiProxyTarget = (
+      process.env.API_PROXY_TARGET ||
+      process.env.LIVE_API_URL ||
+      "http://100.54.237.0/api"
+    ).replace(/\/$/, "");
     const usesLocalApiUrl = process.env.NEXT_PUBLIC_API_URL?.includes("localhost");
+    const useLocalBackend = process.env.USE_LOCAL_API === "true";
 
     if (process.env.NODE_ENV === "development" && usesLocalApiUrl) {
       rewrites.unshift({
         source: "/api/:path*",
-        destination: apiProxyTarget
-          ? `${apiProxyTarget}/:path*`
-          : "http://localhost:3001/api/:path*",
+        destination: useLocalBackend
+          ? "http://localhost:3001/api/:path*"
+          : `${apiProxyTarget}/:path*`,
       });
     }
 
