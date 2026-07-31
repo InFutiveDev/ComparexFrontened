@@ -507,6 +507,7 @@ export function CrmDataTable({
   showAssigneeColumn = true,
   showLeadType = false,
   showConversionRate = false,
+  showWorkTypeColumn = true,
   resultLabel = "records",
   onDeleteRow,
   getRowActionItems,
@@ -780,7 +781,7 @@ export function CrmDataTable({
                   {showLeadType ? <th className="px-3 py-3">Lead Type</th> : null}
                   {showAssigneeColumn ? <th className="px-3 py-3">Assignee</th> : null}
                   <th className="px-3 py-3">Category</th>
-                  <th className="px-3 py-3">Work Type</th>
+                  {showWorkTypeColumn ? <th className="px-3 py-3">Work Type</th> : null}
                   <th className="px-3 py-3">Status</th>
                   {showConversionRate ? <th className="px-3 py-3">Conversion Rate</th> : null}
                   {showAccountStatus ? <th className="px-3 py-3">Login Access</th> : null}
@@ -856,7 +857,9 @@ export function CrmDataTable({
                         {row.category}
                       </span>
                     </td>
+                    {showWorkTypeColumn ? (
                     <td className="px-3 py-3.5 text-slate-700">{row.workType}</td>
+                    ) : null}
                     <td className="px-3 py-3.5">
                       <StatusBadge status={row.status} />
                     </td>

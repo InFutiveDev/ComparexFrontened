@@ -16,26 +16,6 @@ const tabs = ["Merchant", "Reseller", "Payment Gateway"];
 
 const chartConfig = {
   Merchant: {
-    title: "GMV trend — Onboarded vs Active",
-    primaryKey: "onboarded",
-    secondaryKey: "active",
-    primaryLabel: "Onboarded GMV",
-    secondaryLabel: "Active GMV",
-    primaryLight: "#9db8f5",
-    primaryDark: "#2D4CC8",
-    secondaryLight: "#8ee4cf",
-    secondaryDark: "#25a36f",
-    data: [
-      { month: "Jan", onboarded: 52, active: 44 },
-      { month: "Feb", onboarded: 58, active: 49 },
-      { month: "Mar", onboarded: 61, active: 53 },
-      { month: "Apr", onboarded: 64, active: 56 },
-      { month: "May", onboarded: 68, active: 60 },
-      { month: "Jun", onboarded: 72, active: 63 },
-      { month: "Jul", onboarded: 80, active: 71 },
-    ],
-  },
-  Reseller: {
     title: "GMV trend — Organic vs Reseller",
     primaryKey: "organic",
     secondaryKey: "reseller",
@@ -55,24 +35,44 @@ const chartConfig = {
       { month: "Jul", organic: 82, reseller: 68 },
     ],
   },
+  Reseller: {
+    title: "GMV trend — Referred Lead vs Onboarded",
+    primaryKey: "referred",
+    secondaryKey: "onboarded",
+    primaryLabel: "Referred Lead GMV",
+    secondaryLabel: "Onboarded GMV",
+    primaryLight: "#9db8f5",
+    primaryDark: "#2D4CC8",
+    secondaryLight: "#8ee4cf",
+    secondaryDark: "#25a36f",
+    data: [
+      { month: "Jan", referred: 48, onboarded: 38 },
+      { month: "Feb", referred: 52, onboarded: 42 },
+      { month: "Mar", referred: 55, onboarded: 46 },
+      { month: "Apr", referred: 58, onboarded: 49 },
+      { month: "May", referred: 62, onboarded: 53 },
+      { month: "Jun", referred: 66, onboarded: 57 },
+      { month: "Jul", referred: 72, onboarded: 64 },
+    ],
+  },
   "Payment Gateway": {
-    title: "GMV trend — Volume vs Settlements",
-    primaryKey: "volume",
-    secondaryKey: "settlements",
-    primaryLabel: "Transaction Volume",
-    secondaryLabel: "Settlement Volume",
+    title: "Revenue — MDR vs Per Lead",
+    primaryKey: "mdr",
+    secondaryKey: "perLead",
+    primaryLabel: "MDR Revenue",
+    secondaryLabel: "Per Lead Revenue",
     primaryLight: "#9db8f5",
     primaryDark: "#2D4CC8",
     secondaryLight: "#8de8ef",
     secondaryDark: "#40C3CF",
     data: [
-      { month: "Jan", volume: 55, settlements: 48 },
-      { month: "Feb", volume: 59, settlements: 51 },
-      { month: "Mar", volume: 62, settlements: 54 },
-      { month: "Apr", volume: 67, settlements: 58 },
-      { month: "May", volume: 71, settlements: 61 },
-      { month: "Jun", volume: 76, settlements: 65 },
-      { month: "Jul", volume: 84, settlements: 73 },
+      { month: "Jan", mdr: 42, perLead: 18 },
+      { month: "Feb", mdr: 45, perLead: 19 },
+      { month: "Mar", mdr: 48, perLead: 21 },
+      { month: "Apr", mdr: 51, perLead: 22 },
+      { month: "May", mdr: 54, perLead: 24 },
+      { month: "Jun", mdr: 58, perLead: 26 },
+      { month: "Jul", mdr: 63, perLead: 28 },
     ],
   },
 };
@@ -82,7 +82,7 @@ function formatGmv(value) {
 }
 
 export function OverviewBarChart() {
-  const [activeTab, setActiveTab] = useState("Reseller");
+  const [activeTab, setActiveTab] = useState("Merchant");
   const config = chartConfig[activeTab];
 
   const chartData = useMemo(() => config.data, [config]);
