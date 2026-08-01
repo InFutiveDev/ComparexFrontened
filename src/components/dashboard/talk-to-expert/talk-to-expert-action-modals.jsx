@@ -113,6 +113,204 @@ export function TalkToExpertNotesModal({ row, onClose, onSaved }) {
   );
 }
 
+export function TalkToExpertQualifyModal({ row, onClose, onSaved }) {
+  const [paymentGateways, setPaymentGateways] = useState([]);
+  const [experts, setExperts] = useState([]);
+  const [paymentGatewayId, setPaymentGatewayId] = useState(row?.paymentGatewayId || "");
+  const [expertId, setExpertId] = useState(row?.expertId || "");
+  const [isLoadingGateways, setIsLoadingGateways] = useState(true);
+  const [isLoadingExperts, setIsLoadingExperts] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!row) return;
+
+    setPaymentGatewayId(row.paymentGatewayId || "");
+    setExpertId(row.expertId || "");
+    setError("");
+
+    let cancelled = false;
+
+    async function loadPaymentGateways() {
+      setIsLoadingGateways(true);
+      try {
+        const response = await fetchPaymentGateways({ page: 1, limit: 100 });
+        const { rows: gatewayRows } = mapPaymentGatewayListResponse(response);
+        if (!cancelled) setPaymentGateways(gatewayRows);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof ApiError ? err.message : "Failed to load payment gateways");
+        }
+      } finally {
+        if (!cancelled) setIsLoadingGateways(false);
+      }
+    }
+
+    loadPaymentGateways();
+    return () => {
+      cancelled = true;
+    };
+  }, [row]);
+
+  useEffect(() => {
+    if (!paymentGatewayId) {
+      setExperts([]);
+      setExpertId("");
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadExperts() {
+      setIsLoadingExperts(true);
+      try {
+        const response = await fetchPaymentGatewayById(paymentGatewayId);
+        const gateway = pickPaymentGateway(response);
+        const gatewayExperts = Array.isArray(gateway?.onboarding?.experts)
+          ? gateway.onboarding.experts.filter((expert) => expert.status !== "inactive")
+          : [];
+        if (!cancelled) {
+          setExperts(gatewayExperts);
+          setExpertId((current) =>
+            gatewayExperts.some((expert) => expert.id === current) ? current : "",
+          );
+        }
+      } catch {
+        if (!cancelled) {
+          setExperts([]);
+          setExpertId("");
+        }
+      } finally {
+        if (!cancelled) setIsLoadingExperts(false);
+      }
+    }
+
+    loadExperts();
+    return () => {
+      cancelled = true;
+    };
+  }, [paymentGatewayId]);
+
+  if (!row) return null;
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    if (!paymentGatewayId) {
+      setError("Select a payment gateway — same as the Talk to Expert onboarding form.");
+      return;
+    }
+    if (!expertId) {
+      setError("Select a PG representative to qualify this booking.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      const result = await updateExpertBooking(row.id, {
+        paymentGatewayId,
+        expertId,
+        status: "qualified",
+        onboardingStatus: "in_progress",
+      });
+      onSaved?.(result.message || "Booking qualified for onboarding");
+      onClose();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to qualify booking");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <ModalShell title="Qualify" onClose={onClose}>
+      <p className="mb-4 text-sm text-slate-600">
+        Confirm payment gateway and PG rep. for{" "}
+        <span className="font-semibold text-[#13203F]">{row.merchantName || row.name}</span> —
+        same fields as the Talk to Expert onboarding form.
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Payment gateway *
+          </label>
+          <select
+            className={inputClass}
+            value={paymentGatewayId}
+            onChange={(event) => setPaymentGatewayId(event.target.value)}
+            disabled={isLoadingGateways || isSubmitting}
+          >
+            <option value="">
+              {isLoadingGateways ? "Loading payment gateways…" : "Select payment gateway"}
+            </option>
+            {paymentGateways.map((gateway) => (
+              <option key={gateway.id} value={gateway.id}>
+                {gateway.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {paymentGatewayId ? (
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              PG rep. *
+            </label>
+            <select
+              className={inputClass}
+              value={expertId}
+              onChange={(event) => setExpertId(event.target.value)}
+              disabled={isLoadingExperts || isSubmitting}
+            >
+              <option value="">
+                {isLoadingExperts
+                  ? "Loading PG reps…"
+                  : experts.length > 0
+                    ? "Select PG representative"
+                    : "No PG reps configured"}
+              </option>
+              {experts.map((expert) => (
+                <option key={expert.id} value={expert.id}>
+                  {expert.name}
+                  {expert.designation ? ` · ${expert.designation}` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+
+        {error ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
+
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="cursor-pointer rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#13203F] transition hover:bg-slate-50 disabled:opacity-60"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting || isLoadingGateways}
+            className="cursor-pointer rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? "Qualifying…" : "Qualify"}
+          </button>
+        </div>
+      </form>
+    </ModalShell>
+  );
+}
+
 export function TalkToExpertAssignModal({ row, onClose, onSaved }) {
   const [paymentGateways, setPaymentGateways] = useState([]);
   const [experts, setExperts] = useState([]);
@@ -242,29 +440,16 @@ export function TalkToExpertAssignModal({ row, onClose, onSaved }) {
   }
 
   return (
-    <ModalShell title="Assign Booking" onClose={onClose}>
+    <ModalShell title="Assign PG rep." onClose={onClose}>
       <p className="mb-4 text-sm text-slate-600">
-        Assign <span className="font-semibold text-[#13203F]">{row.name}</span> to a payment
-        gateway team member.
+        Assign a payment gateway representative for{" "}
+        <span className="font-semibold text-[#13203F]">{row.merchantName || row.name}</span>.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Assignee
-          </label>
-          <input
-            className={inputClass}
-            value={assignee}
-            onChange={(event) => setAssignee(event.target.value)}
-            placeholder="Admin or coordinator name"
-            disabled={isSubmitting}
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Payment Gateway
+            Payment gateway *
           </label>
           <select
             className={inputClass}
@@ -286,7 +471,7 @@ export function TalkToExpertAssignModal({ row, onClose, onSaved }) {
         {paymentGatewayId ? (
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-              PG Expert (optional)
+              PG rep.
             </label>
             <select
               className={inputClass}
@@ -331,7 +516,7 @@ export function TalkToExpertAssignModal({ row, onClose, onSaved }) {
             disabled={isSubmitting || isLoadingGateways}
             className="cursor-pointer rounded-full bg-[#2D4CC8] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#243da8] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? "Assigning…" : "Assign"}
+            {isSubmitting ? "Assigning…" : "Save PG rep."}
           </button>
         </div>
       </form>

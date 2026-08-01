@@ -22,6 +22,7 @@ import {
 } from "@/components/dashboard/shared/record-details";
 import { fetchMerchantSupportById } from "@/lib/dashboard-api";
 import { pickMerchantSupport } from "@/lib/dashboard-detail-pickers";
+import { SupportFlowTimeline } from "@/components/dashboard/merchant-support/support-flow-timeline";
 
 function formatFileSize(bytes) {
   const size = Number(bytes);
@@ -169,6 +170,8 @@ export function MerchantSupportDetails({ id }) {
           </span>,
         ]}
       />
+
+      <SupportFlowTimeline ticket={data} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

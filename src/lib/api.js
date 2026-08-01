@@ -1,4 +1,4 @@
-const DEFAULT_API_URL = "http://localhost:3001/api";
+const DEFAULT_API_URL = "http://127.0.0.1:3001/api";
 
 function isLocalDevApiUrl(url) {
   if (!url) return false;
@@ -64,7 +64,7 @@ function apiErrorMessage(data, status) {
     (status === 502
       ? "Live API returned 502 Bad Gateway — nginx is up but the Node.js API is not running. Restart the API on the server or use local API."
       : status === 404
-        ? "API route not found. Restart or redeploy the API server with the latest code."
+        ? "API route not found. If using local ComparexFrontApi, set USE_LOCAL_API=true in .env.local, restart npm run dev, and ensure the API is running on port 3001 (npm run dev in ComparexFrontApi)."
         : status === 500 && !data
           ? "API request failed (500). In dev, ensure npm run dev is running and API_PROXY_TARGET is reachable (or set USE_LOCAL_API=true with ComparexFrontApi on 3001)."
           : `API error: ${status}`)
@@ -88,7 +88,9 @@ export async function apiFetch(path, options = {}) {
     });
   } catch {
     throw new ApiError(
-      `Cannot reach API at ${baseUrl}. On another machine, use the dev server Network URL (not localhost) and copy .env.local from .env.example. Ensure API_PROXY_TARGET is reachable from your network.`,
+      process.env.NODE_ENV === "development"
+        ? `Cannot reach API at ${baseUrl}. With USE_LOCAL_API=true, start ComparexFrontApi in another terminal: cd ComparexFrontApi && npm run dev (port 3001). Or set USE_LOCAL_API=false in .env.local to use live API and restart Next.`
+        : `Cannot reach API at ${baseUrl}. On another machine, use the dev server Network URL (not localhost) and copy .env.local from .env.example. Ensure API_PROXY_TARGET is reachable from your network.`,
       0
     );
   }

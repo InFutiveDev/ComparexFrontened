@@ -59,6 +59,7 @@ export function LeadsTableSection({
   showAssignCta = true,
   hideAssignedPgColumn = false,
   leadDetailBasePath = "/sub-admin-dashboard/leads",
+  leadView = "",
 }) {
   const [leads, setLeads] = useState([]);
   const [total, setTotal] = useState(0);
@@ -90,6 +91,8 @@ export function LeadsTableSection({
         assignedPgId: assignedPgId || undefined,
         registeredViaResellerId: registeredViaResellerId || undefined,
         search: filters.search || undefined,
+        leadChannel:
+          leadView === "tte" ? "tte" : leadView === "regular" ? "regular" : undefined,
       });
       setLeads(data.leads || []);
       setTotal(data.total || 0);
@@ -100,7 +103,7 @@ export function LeadsTableSection({
     } finally {
       setIsLoading(false);
     }
-  }, [assignedPgId, registeredViaResellerId, filters, page, perPage]);
+  }, [assignedPgId, registeredViaResellerId, filters, page, perPage, leadView]);
 
   useEffect(() => {
     loadLeads();

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { use } from "react";
+import { useSearchParams } from "next/navigation";
 import { HiArrowLeft } from "react-icons/hi2";
 import {
   DetailErrorState,
@@ -13,6 +14,9 @@ import { fetchPaymentGatewayById } from "@/lib/dashboard-api";
 import { pickPaymentGateway } from "@/lib/dashboard-detail-pickers";
 
 export function PgLeadsPage({ id }) {
+  const searchParams = useSearchParams();
+  const leadView = searchParams.get("leadView") === "tte" ? "tte" : searchParams.get("leadView") === "regular" ? "regular" : "";
+
   const { data, isLoading, error, reload } = useDashboardDetail(
     id,
     fetchPaymentGatewayById,
@@ -33,6 +37,16 @@ export function PgLeadsPage({ id }) {
 
   const pgName = data.companyName || data.name || "Payment Gateway";
 
+  let leadsTitle = `Leads — ${pgName}`;
+  let leadsDescription = `Merchant leads assigned to ${pgName}.`;
+  if (leadView === "tte") {
+    leadsTitle = `TTE leads — ${pgName}`;
+    leadsDescription = `Talk to Expert leads shared with ${pgName}.`;
+  } else if (leadView === "regular") {
+    leadsTitle = `Regular leads — ${pgName}`;
+    leadsDescription = `Regular merchant leads shared with ${pgName}.`;
+  }
+
   return (
     <div className="space-y-5">
       <Link
@@ -44,12 +58,13 @@ export function PgLeadsPage({ id }) {
       </Link>
 
       <LeadsTableSection
-        title={`Leads — ${pgName}`}
-        description={`Merchant leads assigned to ${pgName}.`}
+        title={leadsTitle}
+        description={leadsDescription}
         assignedPgId={id}
         showAssignCta={false}
         hideAssignedPgColumn
         leadDetailBasePath="/sub-admin-dashboard/leads"
+        leadView={leadView}
       />
     </div>
   );

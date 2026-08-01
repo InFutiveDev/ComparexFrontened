@@ -41,6 +41,11 @@ export const PAYMENT_GATEWAY_PORTAL_NAV = [
   { href: "/payment-gateway-dashboard", label: "Overview", icon: "squares" },
   { href: "/payment-gateway-dashboard/leads", label: "Leads", icon: "document" },
   {
+    href: "/payment-gateway-dashboard/mdr-approvals",
+    label: "Website MDR",
+    icon: "chart",
+  },
+  {
     href: "/payment-gateway-dashboard/experts",
     label: "Expert Routing",
     icon: "users",

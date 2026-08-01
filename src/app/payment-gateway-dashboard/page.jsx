@@ -14,6 +14,11 @@ export default function PaymentGatewayDashboardPage() {
           description: "Finish onboarding and publish your marketplace profile.",
         },
         {
+          href: "/payment-gateway-dashboard/mdr-approvals",
+          title: "Website MDR",
+          description: "Review and approve compare-page MDR updates from CompareX admin.",
+        },
+        {
           href: "/payment-gateway-dashboard/support",
           title: "Help & Support",
           description: "Get help with onboarding and partnership requests.",

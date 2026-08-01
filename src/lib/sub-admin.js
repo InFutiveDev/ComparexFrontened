@@ -28,6 +28,7 @@ export function fetchSubAdminLeads({
   assignedPgId,
   registeredViaResellerId,
   search,
+  leadChannel,
 } = {}) {
   return authFetch(
     `/sub-admin/leads${toQuery({
@@ -39,6 +40,7 @@ export function fetchSubAdminLeads({
       assignedPgId,
       registeredViaResellerId,
       search,
+      leadChannel,
     })}`
   );
 }

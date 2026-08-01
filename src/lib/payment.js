@@ -91,6 +91,25 @@ export function updateMyPgExperts(experts) {
   });
 }
 
+/** Website compare MDR proposals — pending admin changes require PG approval. */
+export function fetchMyPgMdrChanges({ status } = {}) {
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  const query = params.toString();
+  return authFetch(`/payment/me/mdr-changes${query ? `?${query}` : ""}`);
+}
+
+export function approveMyPgMdrChange(id) {
+  return authFetch(`/payment/me/mdr-changes/${id}/approve`, { method: "POST" });
+}
+
+export function rejectMyPgMdrChange(id, note) {
+  return authFetch(`/payment/me/mdr-changes/${id}/reject`, {
+    method: "POST",
+    body: JSON.stringify({ note }),
+  });
+}
+
 /** FR-PG-03 — leads assigned by Sub Admin or registered via PG affiliate link. */
 export function fetchMyPgLeads({
   page = 1,

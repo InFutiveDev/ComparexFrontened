@@ -12,8 +12,22 @@ const trendStyles = {
   neutral: "bg-slate-100 text-slate-500",
 };
 
-export function StatsCards({ rows = [], isLoading = false }) {
-  const [activeRange, setActiveRange] = useState("Month");
+export function StatsCards({
+  rows = [],
+  isLoading = false,
+  activeRange: activeRangeProp,
+  onRangeChange,
+}) {
+  const [internalRange, setInternalRange] = useState("Month");
+  const activeRange = activeRangeProp ?? internalRange;
+
+  function handleRangeChange(range) {
+    if (onRangeChange) {
+      onRangeChange(range);
+    } else {
+      setInternalRange(range);
+    }
+  }
 
   const stats = useMemo(
     () => buildPaymentGatewayStatsCardsForRange(rows, activeRange),
@@ -32,7 +46,7 @@ export function StatsCards({ rows = [], isLoading = false }) {
               <button
                 key={range}
                 type="button"
-                onClick={() => setActiveRange(range)}
+                onClick={() => handleRangeChange(range)}
                 className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition ${
                   active
                     ? "bg-gradient-to-r from-[#2D4CC8] to-[#40C3CF] text-white shadow-sm"

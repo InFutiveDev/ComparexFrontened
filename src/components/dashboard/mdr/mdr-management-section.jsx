@@ -5,10 +5,13 @@ import { ApiError } from "@/lib/api";
 import {
   fetchAdminMdrAudit,
   fetchAdminMdrSettings,
+  fetchPaymentGatewayById,
   fetchPaymentGateways,
+  proposeAdminPgPublicMdr,
   updateAdminGlobalMdr,
   updateAdminMdrTiers,
 } from "@/lib/dashboard-api";
+import { formatMdrStatus, ratesFromPgOnboarding } from "@/lib/mdr-public";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-[#13203F] outline-none focus:border-[#40C3CF] focus:ring-2 focus:ring-[#40C3CF]/20";
@@ -18,6 +21,7 @@ const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-wide tex
 const TABS = [
   { id: "global", label: "Global MDR", fr: "FR-MA-07" },
   { id: "tiers", label: "Per-PG Tiers", fr: "FR-MA-08" },
+  { id: "pg-public", label: "PG website MDR", fr: "PG approve" },
   { id: "audit", label: "Change Log", fr: "FR-MA-09" },
 ];
 
@@ -79,6 +83,11 @@ export function MdrManagementSection() {
   const [auditTotal, setAuditTotal] = useState(0);
   const [auditLoading, setAuditLoading] = useState(false);
 
+  const [pgPublicId, setPgPublicId] = useState("");
+  const [pgLiveRates, setPgLiveRates] = useState({});
+  const [pgProposedRates, setPgProposedRates] = useState({});
+  const [pgPublicLoading, setPgPublicLoading] = useState(false);
+
   const loadSettings = useCallback(async () => {
     setIsLoading(true);
     setError("");
@@ -128,6 +137,63 @@ export function MdrManagementSection() {
   useEffect(() => {
     if (tab === "audit") loadAudit();
   }, [tab, loadAudit]);
+
+  async function loadPgPublicRates(providerId) {
+    if (!providerId) {
+      setPgLiveRates({});
+      setPgProposedRates({});
+      return;
+    }
+    setPgPublicLoading(true);
+    setError("");
+    try {
+      const data = await fetchPaymentGatewayById(providerId);
+      const onboarding = data.paymentGateway?.onboarding || {};
+      const live = ratesFromPgOnboarding(onboarding);
+      setPgLiveRates(live);
+      setPgProposedRates({ ...live });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to load PG MDR");
+    } finally {
+      setPgPublicLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (tab === "pg-public" && pgPublicId) {
+      loadPgPublicRates(pgPublicId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, pgPublicId]);
+
+  function updateProposedRate(mode, value) {
+    setPgProposedRates((prev) => ({ ...prev, [mode]: value }));
+  }
+
+  async function handleProposePgPublic() {
+    if (!pgPublicId) {
+      setError("Select a payment gateway first");
+      return;
+    }
+    setIsSaving(true);
+    setError("");
+    setMessage("");
+    try {
+      const response = await proposeAdminPgPublicMdr({
+        paymentProviderId: pgPublicId,
+        rates: pgProposedRates,
+      });
+      setMessage(response.message || "Proposal sent to PG for approval");
+      if (response.liveRates) {
+        setPgLiveRates(response.liveRates);
+      }
+      if (tab === "audit") loadAudit();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to propose MDR");
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   function updateGlobalRate(index, key, value) {
     setGlobalRates((prev) =>
@@ -220,8 +286,8 @@ export function MdrManagementSection() {
           MDR Management
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Configure Merchant Discount Rates (MDR) globally and per payment gateway. Every change
-          is logged with the responsible admin and timestamp.
+          Configure Merchant Discount Rates (MDR) globally and per payment gateway. Website compare
+          rates for a PG require PG approval before they go live. Every change is logged.
         </p>
         <p className="mt-2 text-xs text-slate-500">{formatUpdatedMeta(updatedAt, updatedBy)}</p>
       </div>
@@ -521,6 +587,82 @@ export function MdrManagementSection() {
         </section>
       ) : null}
 
+      {tab === "pg-public" ? (
+        <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div>
+            <h3 className="text-lg font-bold text-[#13203F]">Public website MDR (per PG)</h3>
+            <p className="mt-1 text-sm text-slate-600">
+              Propose MDR values shown on the merchant compare page. The payment gateway must
+              approve before onboarding profile rates update and merchants see the change.
+            </p>
+          </div>
+
+          <div className="max-w-md">
+            <label className={labelClass}>Payment gateway</label>
+            <select
+              className={inputClass}
+              value={pgPublicId}
+              onChange={(e) => setPgPublicId(e.target.value)}
+            >
+              <option value="">Choose PG…</option>
+              {paymentGateways.map((pg) => (
+                <option key={pg.id} value={pg.id}>
+                  {pg.companyName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {pgPublicLoading ? (
+            <p className="text-sm text-slate-500">Loading live compare MDR…</p>
+          ) : null}
+
+          {pgPublicId && !pgPublicLoading ? (
+            <div className="space-y-3">
+              {(options.paymentModes || [])
+                .filter((mode) => mode.value !== "other")
+                .map((mode) => (
+                  <div
+                    key={mode.value}
+                    className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-3"
+                  >
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        {mode.label}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Live:{" "}
+                        <span className="font-semibold text-[#13203F]">
+                          {pgLiveRates[mode.value] || "—"}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className={labelClass}>Proposed compare rate</label>
+                      <input
+                        className={inputClass}
+                        placeholder="e.g. 1.8% or ₹2"
+                        value={pgProposedRates[mode.value] ?? ""}
+                        onChange={(e) => updateProposedRate(mode.value, e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={handleProposePgPublic}
+                className="rounded-full bg-[#2D4CC8] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                style={{ color: "#fff" }}
+              >
+                {isSaving ? "Sending…" : "Send proposal to PG for approval"}
+              </button>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
       {tab === "audit" ? (
         <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -553,6 +695,7 @@ export function MdrManagementSection() {
                     <th className="px-3 py-2 font-semibold">When</th>
                     <th className="px-3 py-2 font-semibold">Admin</th>
                     <th className="px-3 py-2 font-semibold">Scope</th>
+                    <th className="px-3 py-2 font-semibold">Status</th>
                     <th className="px-3 py-2 font-semibold">Action</th>
                     <th className="px-3 py-2 font-semibold">Message</th>
                   </tr>
@@ -573,6 +716,7 @@ export function MdrManagementSection() {
                         </p>
                       </td>
                       <td className="px-3 py-3 capitalize text-slate-600">{log.scope}</td>
+                      <td className="px-3 py-3 text-slate-600">{formatMdrStatus(log.status)}</td>
                       <td className="px-3 py-3 capitalize text-slate-600">{log.action}</td>
                       <td className="px-3 py-3 text-slate-700">{log.message}</td>
                     </tr>

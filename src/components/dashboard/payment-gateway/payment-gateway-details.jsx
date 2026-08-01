@@ -19,6 +19,7 @@ import {
   InfoCard,
   useDashboardDetail,
 } from "@/components/dashboard/shared/record-details";
+import { PgCommercialSummaryCard } from "@/components/dashboard/payment-gateway/pg-commercial-summary-card";
 import { PgRatingSummary } from "@/components/shared/pg-rating-summary";
 import {
   fetchPaymentGatewayById,
@@ -248,6 +249,10 @@ export function PaymentGatewayDetails({ id }) {
                 {data.email}
               </a>
             </DetailField>
+            <DetailField label="CompareX RM">{data.comparexRm || "—"}</DetailField>
+            <DetailField label="Commercial model">
+              {data.commercialModel === "per_lead" ? "Per lead" : "Revenue (MDR share)"}
+            </DetailField>
             <DetailField label="Source">{formatDetailLabel(data.source)}</DetailField>
           </div>
         </InfoCard>
@@ -367,6 +372,8 @@ export function PaymentGatewayDetails({ id }) {
             </DetailField>
           </div>
         </InfoCard>
+
+        <PgCommercialSummaryCard pgId={data.id} commercialModel={data.commercialModel} />
 
         <InfoCard title="MDR & Commercials" icon={HiTag}>
           <div className="grid gap-4 sm:grid-cols-2">

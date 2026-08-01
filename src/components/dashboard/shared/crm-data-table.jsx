@@ -1,14 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useMemo, useState } from "react";
 import {
   HiArrowDownTray,
   HiArrowUpTray,
   HiChevronLeft,
   HiChevronRight,
-  HiEllipsisVertical,
   HiEnvelope,
   HiEye,
   HiFunnel,
@@ -22,7 +20,10 @@ import {
   HiViewColumns,
 } from "react-icons/hi2";
 import { AccountStatusCell } from "@/components/dashboard/shared/account-status-cell";
+import { RowActionsMenu } from "@/components/dashboard/shared/row-actions-menu";
 import { useDashboard } from "@/components/dashboard/layout/dashboard-context";
+
+export { RowActionsMenu } from "@/components/dashboard/shared/row-actions-menu";
 
 const perPageOptions = [5, 10, 20];
 
@@ -49,19 +50,26 @@ function getUniqueValues(items, key) {
   return [...new Set(items.map((item) => item[key]))].sort();
 }
 
-function countActiveFilters(filters, { showAssigneeColumn = true } = {}) {
+function countActiveFilters(filters, { assigneeFilterEnabled = true, categoryFilterEnabled = true } = {}) {
   return Object.entries(filters).filter(([key, value]) => {
     if (!value) return false;
-    if (!showAssigneeColumn && key === "assignee") return false;
+    if (!assigneeFilterEnabled && key === "assignee") return false;
+    if (!categoryFilterEnabled && key === "category") return false;
     return true;
   }).length;
 }
 
-function matchesRowFilters(row, filters, lockWorkTypeFilter, showAssigneeColumn = true) {
+function matchesRowFilters(
+  row,
+  filters,
+  lockWorkTypeFilter,
+  assigneeFilterEnabled = true,
+  categoryFilterEnabled = true,
+) {
   if (filters.status && row.status !== filters.status) return false;
-  if (filters.category && row.category !== filters.category) return false;
+  if (categoryFilterEnabled && filters.category && row.category !== filters.category) return false;
   if (!lockWorkTypeFilter && filters.workType && row.workType !== filters.workType) return false;
-  if (showAssigneeColumn && filters.assignee && row.assignee !== filters.assignee) return false;
+  if (assigneeFilterEnabled && filters.assignee && row.assignee !== filters.assignee) return false;
   return true;
 }
 
@@ -98,7 +106,9 @@ function matchesRowSearch(row, query) {
     row.status,
     row.accountStatus,
     row.source,
-    row.qualifiedLead,
+    row.resellerType,
+    row.totalLead != null ? String(row.totalLead) : "",
+    row.qualifiedLead != null ? String(row.qualifiedLead) : "",
     row.conversionRateLabel,
     row.assignee,
     row.category,
@@ -130,11 +140,15 @@ function CrmFilterModal({
   options,
   lockWorkTypeFilter,
   showAssigneeColumn = true,
+  assigneeFilterEnabled,
+  categoryFilterEnabled,
   onChange,
   onClear,
   onApply,
   onClose,
 }) {
+  const canFilterAssignee = assigneeFilterEnabled ?? showAssigneeColumn;
+  const canFilterCategory = categoryFilterEnabled ?? true;
   useEffect(() => {
     if (!open) return;
 
@@ -156,11 +170,13 @@ function CrmFilterModal({
 
   const fields = [
     { key: "status", label: "Status", options: options.statuses },
-    { key: "category", label: "Category", options: options.categories },
+    ...(canFilterCategory
+      ? [{ key: "category", label: "Category", options: options.categories }]
+      : []),
     ...(!lockWorkTypeFilter
       ? [{ key: "workType", label: "Work Type", options: options.workTypes }]
       : []),
-    ...(showAssigneeColumn
+    ...(canFilterAssignee
       ? [{ key: "assignee", label: "Assignee", options: options.assignees }]
       : []),
   ];
@@ -246,232 +262,20 @@ function CrmFilterModal({
   );
 }
 
-function buildDefaultRowActionItems({ row, labels, detailsHref }) {
-  return [
-    {
-      type: "link",
-      label: "Call",
-      icon: HiPhone,
-      href: `tel:${row.phone}`,
-      className: "text-[#13203F] hover:bg-slate-50",
-      iconClassName: "text-[#2D4CC8]",
-    },
-    {
-      type: "link",
-      label: "Send Email",
-      icon: HiEnvelope,
-      href: `mailto:${row.email}`,
-      className: "text-[#13203F] hover:bg-slate-50",
-      iconClassName: "text-[#40C3CF]",
-    },
-    {
-      type: detailsHref ? "link" : "button",
-      label: "View Details",
-      icon: HiEye,
-      href: detailsHref,
-      className: "text-[#13203F] hover:bg-slate-50",
-      iconClassName: "text-[#2D4CC8]",
-    },
-    {
-      type: "button",
-      label: labels.assign,
-      icon: HiUserPlus,
-      className: "text-[#13203F] hover:bg-slate-50",
-      iconClassName: "text-[#25a36f]",
-    },
-    {
-      type: "button",
-      label: labels.delete,
-      icon: HiTrash,
-      className: "text-red-600 hover:bg-red-50",
-      iconClassName: "text-red-500",
-    },
-  ];
-}
-
-function RowActionsMenu({
-  row,
-  labels,
-  menuItems,
-  isOpen,
-  onToggle,
-  onClose,
-  detailsHref,
-  onDeleteRow,
-}) {
-  const triggerRef = useRef(null);
-  const menuRef = useRef(null);
-  const [menuStyle, setMenuStyle] = useState(null);
-
-  function updateMenuPosition() {
-    const trigger = triggerRef.current;
-    const menu = menuRef.current;
-    if (!trigger) return;
-
-    const rect = trigger.getBoundingClientRect();
-    const menuWidth = menu?.offsetWidth ?? 176;
-    const menuHeight = menu?.offsetHeight ?? 220;
-    const gap = 6;
-    const padding = 8;
-
-    let left = rect.right - menuWidth;
-    let top = rect.bottom + gap;
-
-    left = Math.max(padding, Math.min(left, window.innerWidth - menuWidth - padding));
-
-    if (top + menuHeight > window.innerHeight - padding) {
-      top = Math.max(padding, rect.top - menuHeight - gap);
-    }
-
-    setMenuStyle({ top, left });
-  }
-
-  useLayoutEffect(() => {
-    if (!isOpen) {
-      setMenuStyle(null);
-      return;
-    }
-
-    updateMenuPosition();
-    const frame = requestAnimationFrame(() => updateMenuPosition());
-
-    return () => cancelAnimationFrame(frame);
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    function handleClickOutside(event) {
-      if (
-        !triggerRef.current?.contains(event.target) &&
-        !menuRef.current?.contains(event.target)
-      ) {
-        onClose();
-      }
-    }
-
-    function handleEscape(event) {
-      if (event.key === "Escape") onClose();
-    }
-
-    function handleReposition() {
-      updateMenuPosition();
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-    window.addEventListener("resize", handleReposition);
-    window.addEventListener("scroll", handleReposition, true);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-      window.removeEventListener("resize", handleReposition);
-      window.removeEventListener("scroll", handleReposition, true);
-    };
-  }, [isOpen, onClose]);
-
-  const resolvedMenuItems =
-    menuItems ?? buildDefaultRowActionItems({ row, labels, detailsHref });
-
-  const menuContent = isOpen ? (
-    <div
-      ref={menuRef}
-      role="menu"
-      style={menuStyle ? { top: menuStyle.top, left: menuStyle.left } : undefined}
-      className={`fixed z-[200] min-w-[11rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl shadow-slate-900/10 ${
-        menuStyle ? "visible" : "invisible"
-      }`}
-    >
-      {resolvedMenuItems.map((item) => {
-        const Icon = item.icon;
-
-        if (item.type === "link") {
-          const className = `flex cursor-pointer items-center gap-2 px-3 py-2.5 text-sm transition ${item.className}`;
-
-          if (item.href?.startsWith("/")) {
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                role="menuitem"
-                onClick={onClose}
-                className={className}
-              >
-                <Icon className={`size-4 ${item.iconClassName}`} aria-hidden />
-                {item.label}
-              </Link>
-            );
-          }
-
-          return (
-            <a
-              key={item.label}
-              href={item.href}
-              role="menuitem"
-              onClick={onClose}
-              className={className}
-            >
-              <Icon className={`size-4 ${item.iconClassName}`} aria-hidden />
-              {item.label}
-            </a>
-          );
-        }
-
-        return (
-          <button
-            key={item.label}
-            type="button"
-            role="menuitem"
-            disabled={item.disabled}
-            onClick={() => {
-              if (item.disabled) return;
-              if (item.onClick) {
-                item.onClick(row);
-              } else if (item.label === labels.delete && onDeleteRow) {
-                onDeleteRow(row);
-              }
-              onClose();
-            }}
-            className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition ${
-              item.disabled
-                ? "cursor-not-allowed opacity-45"
-                : "cursor-pointer"
-            } ${item.className}`}
-          >
-            <Icon className={`size-4 ${item.iconClassName}`} aria-hidden />
-            {item.label}
-          </button>
-        );
-      })}
-    </div>
-  ) : null;
-
-  return (
-    <div className="flex justify-end">
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={onToggle}
-        className="flex size-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-[#2D4CC8]/30 hover:bg-slate-50 hover:text-[#13203F]"
-        aria-expanded={isOpen}
-        aria-haspopup="menu"
-        aria-label={`Actions for ${row.name}`}
-      >
-        <HiEllipsisVertical className="size-5" aria-hidden />
-      </button>
-
-      {typeof document !== "undefined" && menuContent
-        ? createPortal(menuContent, document.body)
-        : null}
-    </div>
-  );
-}
-
 const contactColumnLabels = {
   email: "Email ID",
   source: "Source",
-  qualifiedLead: "Qualified Lead",
+  resellerType: "Type",
+};
+
+const assigneeColumnLabels = {
+  assignee: "Assignee",
+  totalLead: "Total Lead",
+};
+
+const categoryColumnLabels = {
+  category: "Category",
+  qualifiedLead: "Qualified",
 };
 
 function getPageNumbers(currentPage, totalPages) {
@@ -505,6 +309,8 @@ export function CrmDataTable({
   contactColumn = "email",
   showContactColumn = true,
   showAssigneeColumn = true,
+  assigneeColumn = "assignee",
+  categoryColumn = "category",
   showLeadType = false,
   showConversionRate = false,
   showWorkTypeColumn = true,
@@ -528,6 +334,8 @@ export function CrmDataTable({
   const [draftFilters, setDraftFilters] = useState(emptyFilters);
 
   const isFullPage = variant === "full";
+  const assigneeFilterEnabled = showAssigneeColumn && assigneeColumn === "assignee";
+  const categoryFilterEnabled = categoryColumn === "category";
 
   const scopedData = useMemo(() => {
     if (!workTypeFilter) return data;
@@ -546,7 +354,7 @@ export function CrmDataTable({
 
   const activeFilterCount = countActiveFilters(
     lockWorkTypeFilter ? { ...filters, workType: "" } : filters,
-    { showAssigneeColumn },
+    { assigneeFilterEnabled, categoryFilterEnabled },
   );
 
   useEffect(() => {
@@ -564,9 +372,9 @@ export function CrmDataTable({
 
     return scopedData.filter((row) => {
       if (query && !matchesRowSearch(row, query)) return false;
-      return matchesRowFilters(row, filters, lockWorkTypeFilter, showAssigneeColumn);
+      return matchesRowFilters(row, filters, lockWorkTypeFilter, assigneeFilterEnabled, categoryFilterEnabled);
     });
-  }, [scopedData, localSearch, contextSearch, filters, lockWorkTypeFilter, showAssigneeColumn]);
+  }, [scopedData, localSearch, contextSearch, filters, lockWorkTypeFilter, assigneeFilterEnabled, categoryFilterEnabled]);
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / perPage));
 
@@ -731,7 +539,7 @@ export function CrmDataTable({
                 Status: {filters.status} ×
               </button>
             ) : null}
-            {filters.category ? (
+            {categoryFilterEnabled && filters.category ? (
               <button
                 type="button"
                 onClick={() => handleFilterChange("category", "")}
@@ -749,7 +557,7 @@ export function CrmDataTable({
                 Work Type: {filters.workType} ×
               </button>
             ) : null}
-            {showAssigneeColumn && filters.assignee ? (
+            {assigneeFilterEnabled && filters.assignee ? (
               <button
                 type="button"
                 onClick={() => handleFilterChange("assignee", "")}
@@ -779,8 +587,14 @@ export function CrmDataTable({
                     </th>
                   ) : null}
                   {showLeadType ? <th className="px-3 py-3">Lead Type</th> : null}
-                  {showAssigneeColumn ? <th className="px-3 py-3">Assignee</th> : null}
-                  <th className="px-3 py-3">Category</th>
+                  {showAssigneeColumn ? (
+                    <th className="px-3 py-3">
+                      {assigneeColumnLabels[assigneeColumn] ?? "Assignee"}
+                    </th>
+                  ) : null}
+                  <th className="px-3 py-3">
+                    {categoryColumnLabels[categoryColumn] ?? "Category"}
+                  </th>
                   {showWorkTypeColumn ? <th className="px-3 py-3">Work Type</th> : null}
                   <th className="px-3 py-3">Status</th>
                   {showConversionRate ? <th className="px-3 py-3">Conversion Rate</th> : null}
@@ -822,8 +636,8 @@ export function CrmDataTable({
                       <td className="px-3 py-3.5">
                         {contactColumn === "source" ? (
                           <span className="text-slate-700">{row.source || "—"}</span>
-                        ) : contactColumn === "qualifiedLead" ? (
-                          <span className="font-medium text-[#13203F]">{row.qualifiedLead ?? 0}</span>
+                        ) : contactColumn === "resellerType" ? (
+                          <span className="font-medium text-[#13203F]">{row.resellerType || "—"}</span>
                         ) : (
                           <a
                             href={`mailto:${row.email}`}
@@ -840,22 +654,30 @@ export function CrmDataTable({
                     ) : null}
                     {showAssigneeColumn ? (
                       <td className="px-3 py-3.5">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="flex size-8 items-center justify-center rounded-full text-xs font-bold text-white"
-                            style={{ backgroundColor: row.assigneeColor }}
-                            title={row.assignee}
-                          >
-                            {row.assigneeInitials}
+                        {assigneeColumn === "totalLead" ? (
+                          <span className="font-medium text-[#13203F]">{row.totalLead ?? 0}</span>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="flex size-8 items-center justify-center rounded-full text-xs font-bold text-white"
+                              style={{ backgroundColor: row.assigneeColor }}
+                              title={row.assignee}
+                            >
+                              {row.assigneeInitials}
+                            </div>
+                            <span className="hidden text-xs text-slate-600 xl:inline">{row.assignee}</span>
                           </div>
-                          <span className="hidden text-xs text-slate-600 xl:inline">{row.assignee}</span>
-                        </div>
+                        )}
                       </td>
                     ) : null}
                     <td className="px-3 py-3.5">
-                      <span className="rounded-lg bg-[#EEF2FC] px-2.5 py-1 text-xs font-medium text-[#2D4CC8] ring-1 ring-[#2D4CC8]/10">
-                        {row.category}
-                      </span>
+                      {categoryColumn === "qualifiedLead" ? (
+                        <span className="font-medium text-[#13203F]">{row.qualifiedLead ?? 0}</span>
+                      ) : (
+                        <span className="rounded-lg bg-[#EEF2FC] px-2.5 py-1 text-xs font-medium text-[#2D4CC8] ring-1 ring-[#2D4CC8]/10">
+                          {row.category}
+                        </span>
+                      )}
                     </td>
                     {showWorkTypeColumn ? (
                     <td className="px-3 py-3.5 text-slate-700">{row.workType}</td>
@@ -1007,6 +829,8 @@ export function CrmDataTable({
         options={filterOptions}
         lockWorkTypeFilter={lockWorkTypeFilter}
         showAssigneeColumn={showAssigneeColumn}
+        assigneeFilterEnabled={assigneeFilterEnabled}
+        categoryFilterEnabled={categoryFilterEnabled}
         onChange={handleDraftFilterChange}
         onClear={clearDraftFilters}
         onApply={applyFilters}

@@ -111,7 +111,9 @@ export function ResellerTable({
           detailsWorkType="Reseller"
           clientColumnLabel="Reseller Name"
           clientSubtext="email"
-          contactColumn="qualifiedLead"
+          contactColumn="resellerType"
+          assigneeColumn="totalLead"
+          categoryColumn="qualifiedLead"
           resultLabel="resellers"
           showAccountStatus
           accountStatusResource="reseller"

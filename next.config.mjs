@@ -69,12 +69,15 @@ const nextConfig = {
       "http://100.54.237.0/api"
     ).replace(/\/$/, "");
     const useLocalBackend = process.env.USE_LOCAL_API === "true";
+    const localApiTarget = (
+      process.env.LOCAL_API_URL || "http://127.0.0.1:3001/api"
+    ).replace(/\/$/, "");
 
     if (process.env.NODE_ENV === "development" && process.env.DISABLE_API_PROXY !== "true") {
       rewrites.unshift({
         source: "/api/:path*",
         destination: useLocalBackend
-          ? "http://localhost:3001/api/:path*"
+          ? `${localApiTarget}/:path*`
           : `${apiProxyTarget}/:path*`,
       });
     }

@@ -74,7 +74,13 @@ export function StatsCards({ rows = [], isLoading = false, onRefresh, isRefreshi
               {isLoading ? (
                 <div className="h-9 w-16 animate-pulse rounded-lg bg-slate-200" />
               ) : (
-                <p className="text-3xl font-bold tracking-tight text-[#13203F]">{stat.value}</p>
+                <p
+                  className={`font-bold tracking-tight text-[#13203F] ${
+                    stat.valueClassName || "text-3xl"
+                  }`}
+                >
+                  {stat.value}
+                </p>
               )}
 
               {!isLoading ? (

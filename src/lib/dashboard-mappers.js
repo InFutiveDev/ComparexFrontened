@@ -50,6 +50,12 @@ function formatLabel(value) {
     .join(" ");
 }
 
+function formatResellerCommissionType(partnershipModel) {
+  if (partnershipModel === "revenue-sharing") return "Revenue";
+  if (partnershipModel === "qualified-opportunity-fee") return "Per Lead";
+  return "—";
+}
+
 export function mapMerchantToTableRow(item) {
   const leadStatus = item.leadStatus || "new";
   const assignee = item.assignedPgName || "Unassigned";
@@ -99,6 +105,8 @@ export function mapResellerToTableRow(item) {
     company: item.businessName,
     email: item.email,
     phone: item.phone,
+    resellerType: formatResellerCommissionType(item.partnershipModel),
+    totalLead: item.totalLeadCount ?? 0,
     qualifiedLead: item.qualifiedLeadCount ?? 0,
     source: item.source || "Reseller Form",
     priority: formatLabel(item.partnershipModel) || formatLabel(item.paymentFamiliarity),
@@ -122,16 +130,17 @@ function formatConversionRate(value) {
   return `${rate.toFixed(1)}%`;
 }
 
+function formatPgAdminVerificationStatus(verificationStatus) {
+  if (verificationStatus === "approved") return "Approved";
+  if (verificationStatus === "rejected") return "Query Raised";
+  if (verificationStatus === "pending_review" || verificationStatus === "incomplete") {
+    return "In Review";
+  }
+  return formatLabel(verificationStatus);
+}
+
 export function mapPaymentGatewayToTableRow(item) {
   const verificationStatus = item.verificationStatus || "incomplete";
-  const statusLabel =
-    verificationStatus === "pending_review"
-      ? "Pending Review"
-      : verificationStatus === "approved"
-        ? "Approved"
-        : verificationStatus === "rejected"
-          ? "Rejected"
-          : "Incomplete";
 
   return {
     ...defaultRowMeta,
@@ -140,6 +149,7 @@ export function mapPaymentGatewayToTableRow(item) {
     company: item.companyName,
     email: item.email,
     phone: item.phone,
+    comparexRm: item.comparexRm || "—",
     source: item.source || "Payment Form",
     priority: item.partnershipGoals?.[0] ? formatLabel(item.partnershipGoals[0]) : "—",
     category: item.paymentCapabilities?.[0]
@@ -154,11 +164,18 @@ export function mapPaymentGatewayToTableRow(item) {
     profileCompletionPercent: item.profileCompletionPercent ?? 0,
     ratingAverage: item.rating?.count > 0 ? Number(item.rating.average).toFixed(1) : "—",
     ratingCount: item.rating?.count ?? 0,
+    totalLeadCount: item.totalLeadCount ?? 0,
     acceptedLeadCount: item.acceptedLeadCount ?? 0,
     onboardedLeadCount: item.onboardedLeadCount ?? 0,
+    pendingLeadCount: item.pendingLeadCount ?? 0,
     conversionRate: item.conversionRate ?? 0,
     conversionRateLabel: formatConversionRate(item.conversionRate ?? 0),
-    status: statusLabel,
+    tteLeadCount: item.tteLeadCount ?? 0,
+    tteConversionRate: item.tteConversionRate ?? 0,
+    tteConversionRateLabel: formatConversionRate(item.tteConversionRate ?? 0),
+    commercialModel: item.commercialModel ?? "revenue",
+    perLeadFee: item.perLeadFee ?? null,
+    status: formatPgAdminVerificationStatus(verificationStatus),
   };
 }
 
@@ -173,31 +190,123 @@ function formatSupportStatus(status) {
   return labels[status] || "New";
 }
 
+/** Admin list: Open | InProgress | Resolved | NA */
+export function formatMerchantSupportListStatus(supportStatus) {
+  const raw = String(supportStatus || "").toLowerCase();
+  if (raw === "in_progress") return "InProgress";
+  if (raw === "resolved") return "Resolved";
+  if (raw === "new" || raw === "escalated") return "Open";
+  return "NA";
+}
+
+export function formatMerchantSupportPriority(priority) {
+  const raw = String(priority || "medium").toLowerCase();
+  if (raw === "low") return "Low";
+  if (raw === "high") return "High";
+  if (raw === "medium") return "Med";
+  return "NA";
+}
+
+export function formatMerchantSupportResponseTime(createdAt, firstResponseAt) {
+  if (!createdAt || !firstResponseAt) return "—";
+  const start = new Date(createdAt);
+  const end = new Date(firstResponseAt);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) {
+    return "—";
+  }
+  const diffMs = end.getTime() - start.getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "<1m";
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const rem = minutes % 60;
+  if (hours < 24) return rem > 0 ? `${hours}h ${rem}m` : `${hours}h`;
+  const days = Math.floor(hours / 24);
+  const remHours = hours % 24;
+  return remHours > 0 ? `${days}d ${remHours}h` : `${days}d`;
+}
+
 export function mapMerchantSupportToTableRow(item) {
   const supportStatus = item.status ?? "new";
+  const assigneeName = item.assigneeName?.trim() || "Unassigned";
+  const pgLabel = item.escalatedPgName || item.paymentGateway || "—";
+  const ticketPriority = item.priority ?? "medium";
 
   return {
     ...defaultRowMeta,
     id: item.id,
+    ticketId: item.ticketNumber || `MS-${String(item.id).slice(-8).toUpperCase()}`,
     name: item.businessName,
     company: item.businessName,
     email: item.businessEmail,
     phone: item.contactNumber,
     source: item.source || "Merchant Support Desk",
-    priority: item.paymentGateway || "—",
+    priority: formatMerchantSupportPriority(ticketPriority),
+    supportPriority: ticketPriority,
     category: item.issueCategory || "—",
     workType: "Merchant Support",
     submittedAt: item.createdAt,
     createdAt: item.createdAt,
+    firstResponseAt: item.firstResponseAt ?? null,
+    responseTimeLabel: formatMerchantSupportResponseTime(
+      item.createdAt,
+      item.firstResponseAt,
+    ),
     issueDescription: item.issueDescription,
     website: item.website,
     attachments: item.attachments ?? [],
     issueCategory: item.issueCategory || "—",
     paymentGateway: item.paymentGateway || "—",
+    pgLabel,
     supportStatus,
     escalatedPgName: item.escalatedPgName ?? null,
+    escalatedAt: item.escalatedAt ?? null,
+    pgResponseAt: item.pgResponseAt ?? null,
+    finalStatusAt: item.finalStatusAt ?? null,
+    statusUpdatedAt: item.statusUpdatedAt ?? null,
+    listStatus: formatMerchantSupportListStatus(supportStatus),
+    assignee: assigneeName,
+    assigneeInitials: assigneeName === "Unassigned" ? "—" : getInitials(assigneeName),
+    assigneeColor: assigneeName === "Unassigned" ? "#94a3b8" : "#2D4CC8",
     status: formatSupportStatus(supportStatus),
   };
+}
+
+function formatExpertDemoDateTime(item, slotSummary) {
+  if (item.scheduledAt) {
+    return new Intl.DateTimeFormat("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(item.scheduledAt));
+  }
+  if (slotSummary) return slotSummary;
+  if (item.slotDateLabel && item.slotTime) {
+    return `${item.slotDateLabel} · ${item.slotTime}`;
+  }
+  if (item.slotDateLabel) return item.slotDateLabel;
+  if (item.bookingSource === "calendly") return "Calendly — see invite";
+  return "—";
+}
+
+export function formatExpertDemoStatusLabel(demoStatus) {
+  const map = {
+    scheduled: "Scheduled",
+    completed: "Completed",
+    cancelled: "Cancelled",
+    no_show: "No show",
+    rescheduled: "Rescheduled",
+  };
+  return map[String(demoStatus || "scheduled")] ?? "Scheduled";
+}
+
+export function formatExpertOnboardingStatusLabel(onboardingStatus) {
+  const map = {
+    yes: "Yes",
+    no: "No",
+    in_progress: "Inprogress",
+    rejected: "Rejected",
+  };
+  return map[String(onboardingStatus || "no")] ?? "No";
 }
 
 export function mapExpertBookingToTableRow(item) {
@@ -216,12 +325,23 @@ export function mapExpertBookingToTableRow(item) {
   const gateway = item.paymentGatewayName || formatLabel(item.industry);
   const assigneeName = item.assignee?.trim() || "Unassigned";
   const expertStatus = item.status ?? "new";
+  const demoStatus = item.demoStatus ?? "scheduled";
+  const onboardingStatus = item.onboardingStatus ?? "no";
+  const expertName =
+    item.representativeName?.trim() ||
+    item.assignee?.trim() ||
+    "—";
+  const pgName = item.paymentGatewayName || gateway || "—";
+  const demoDateTime = formatExpertDemoDateTime(item, slotSummary);
 
   return {
     ...defaultRowMeta,
     id: item.id,
+    bookingId: item.bookingNumber || `TE-${String(item.id).slice(-8).toUpperCase()}`,
     name: item.fullName,
+    merchantName: item.businessName || item.fullName,
     company: item.businessName,
+    expertName,
     email: item.email,
     phone: item.phone,
     source: item.source || "Talk to Expert",
@@ -237,6 +357,14 @@ export function mapExpertBookingToTableRow(item) {
     paymentGatewayId: item.paymentGatewayId ?? null,
     paymentGatewayName: item.paymentGatewayName ?? null,
     expertId: item.expertId ?? null,
+    merchantLeadId: item.merchantLeadId ?? null,
+    scheduledAt: item.scheduledAt ?? null,
+    demoStatus,
+    onboardingStatus,
+    demoStatusLabel: formatExpertDemoStatusLabel(demoStatus),
+    onboardingStatusLabel: formatExpertOnboardingStatusLabel(onboardingStatus),
+    demoDateTime,
+    pgName,
     adminNotes: item.adminNotes ?? "",
     verificationStatus: expertStatus,
     expertStatus,
@@ -517,13 +645,27 @@ export function buildResellerStatsCards(
 }
 
 export function computePaymentGatewayStats(rows = []) {
+  const total = rows.length;
+  const active = rows.filter((row) => row.accountStatus === "active").length;
+
+  const acceptedTotal = rows.reduce((sum, row) => sum + (row.acceptedLeadCount ?? 0), 0);
+  const onboardedTotal = rows.reduce((sum, row) => sum + (row.onboardedLeadCount ?? 0), 0);
+  const leadActivationRate =
+    acceptedTotal > 0 ? Math.round((onboardedTotal / acceptedTotal) * 1000) / 10 : 0;
+
+  const pgRates = rows
+    .filter((row) => (row.acceptedLeadCount ?? 0) > 0)
+    .map((row) => Number(row.conversionRate) || 0);
+  const avgLeadActivationRate =
+    pgRates.length > 0
+      ? Math.round((pgRates.reduce((sum, rate) => sum + rate, 0) / pgRates.length) * 10) / 10
+      : 0;
+
   return {
-    total: rows.length,
-    active: rows.filter((row) => row.accountStatus === "active").length,
-    applications: rows.filter((row) =>
-      ["pending_review", "incomplete"].includes(row.verificationStatus),
-    ).length,
-    onboardings: rows.reduce((sum, row) => sum + (row.onboardedLeadCount ?? 0), 0),
+    total,
+    active,
+    leadActivationRate,
+    avgLeadActivationRate,
   };
 }
 
@@ -533,37 +675,41 @@ export function buildPaymentGatewayStatsCards(currentRows = [], previousRows = [
 
   const metrics = [
     {
-      key: "active",
-      label: "Total Active PG Partners",
-      cardClass: "from-[#ecfdf9] to-[#f2fcfa]",
-    },
-    {
-      key: "applications",
-      label: "Total PG Applications",
-      cardClass: "from-[#ecfdf5] to-[#f3fdf8]",
-    },
-    {
       key: "total",
-      label: "Total Payment Gateways",
+      label: "Total PGs",
       cardClass: "from-[#EEF2FC] to-[#f5f8ff]",
+      format: (value) => String(value),
     },
     {
-      key: "onboardings",
-      label: "PG Merchant Onboardings",
+      key: "active",
+      label: "Total Active PGs",
+      cardClass: "from-[#ecfdf9] to-[#f2fcfa]",
+      format: (value) => String(value),
+    },
+    {
+      key: "leadActivationRate",
+      label: "Lead Activation Rate",
+      cardClass: "from-[#ecfdf5] to-[#f3fdf8]",
+      format: (value) => formatConversionRate(value),
+    },
+    {
+      key: "avgLeadActivationRate",
+      label: "Avg. lead activation rate",
       cardClass: "from-[#eef0f8] to-[#f6f7fc]",
+      format: (value) => formatConversionRate(value),
     },
   ];
 
-  return metrics.map(({ key, label, cardClass }) => {
+  return metrics.map(({ key, label, cardClass, format }) => {
     const trend = calculatePercentChange(current[key], previous[key]);
 
     return {
       label,
-      value: String(current[key]),
+      value: format(current[key]),
       trend: formatPercentTrend(trend),
       trendDirection: trend.direction,
       previousLabel: "vs previous period",
-      previousValue: String(previous[key]),
+      previousValue: format(previous[key]),
       cardClass,
     };
   });
@@ -587,22 +733,76 @@ export function buildPaymentGatewayStatsCardsForRange(rows = [], range) {
   return buildPaymentGatewayStatsCards(currentRows, previousRows);
 }
 
-function hasSupportAttachments(row) {
-  return Array.isArray(row.attachments) && row.attachments.length > 0;
+export function buildPgActivationLeaders(rows = [], limit = 8) {
+  return [...rows]
+    .sort((a, b) => {
+      const liveDiff = (b.onboardedLeadCount ?? 0) - (a.onboardedLeadCount ?? 0);
+      if (liveDiff !== 0) return liveDiff;
+      return (b.conversionRate ?? 0) - (a.conversionRate ?? 0);
+    })
+    .slice(0, limit)
+    .map((row, index) => ({
+      rank: index + 1,
+      id: row.id,
+      name: row.name || row.company || "Payment Gateway",
+      activations: row.onboardedLeadCount ?? 0,
+      acceptedLeads: row.acceptedLeadCount ?? 0,
+      activationRate: row.conversionRateLabel ?? formatConversionRate(row.conversionRate ?? 0),
+    }));
 }
 
 function getSupportIssueCategory(row) {
   return row.issueCategory || row.category || "";
 }
 
+function normalizeSupportStatus(row) {
+  const raw = row.supportStatus ?? row.status ?? "new";
+  if (typeof raw !== "string") return "new";
+  const normalized = raw.trim().toLowerCase().replace(/\s+/g, "_");
+  if (normalized === "resolved") return "resolved";
+  if (normalized === "in_progress" || normalized === "in progress") return "in_progress";
+  if (normalized === "escalated") return "escalated";
+  if (normalized === "new") return "new";
+  return normalized;
+}
+
+function isSupportResolved(row) {
+  return normalizeSupportStatus(row) === "resolved";
+}
+
+function isSupportOpen(row) {
+  return !isSupportResolved(row);
+}
+
+function computeTopIssueCategory(rows = []) {
+  const counts = new Map();
+  for (const row of rows) {
+    const label = String(getSupportIssueCategory(row) || "").trim();
+    if (!label || label === "—") continue;
+    counts.set(label, (counts.get(label) || 0) + 1);
+  }
+
+  let top = { name: "—", count: 0 };
+  for (const [name, count] of counts) {
+    if (count > top.count) top = { name, count };
+  }
+  return top;
+}
+
 export function computeMerchantSupportStats(rows = []) {
+  const total = rows.length;
+  const open = rows.filter(isSupportOpen).length;
+  const resolvedCount = rows.filter(isSupportResolved).length;
+  const resolvedRate =
+    total > 0 ? Math.round((resolvedCount / total) * 1000) / 10 : 0;
+  const topIssue = computeTopIssueCategory(rows);
+
   return {
-    total: rows.length,
-    onboarding: rows.filter((row) => getSupportIssueCategory(row) === "Onboarding Delay").length,
-    withAttachments: rows.filter(hasSupportAttachments).length,
-    settlement: rows.filter(
-      (row) => getSupportIssueCategory(row) === "Settlement & Reconciliation Query",
-    ).length,
+    total,
+    open,
+    resolvedRate,
+    topIssueCategory: topIssue.name,
+    topIssueCount: topIssue.count,
   };
 }
 
@@ -613,39 +813,53 @@ export function buildMerchantSupportStatsCards(currentRows = [], previousRows = 
   const metrics = [
     {
       key: "total",
-      label: "Total Form Submissions",
+      label: "Total Ticket",
       cardClass: "from-[#EEF2FC] to-[#f5f8ff]",
+      format: (value) => String(value),
+      previousFormat: (value) => String(value),
     },
     {
-      key: "onboarding",
-      label: "Onboarding Issues",
+      key: "open",
+      label: "Open Ticket",
       cardClass: "from-[#ecfdf9] to-[#f2fcfa]",
+      format: (value) => String(value),
+      previousFormat: (value) => String(value),
     },
     {
-      key: "withAttachments",
-      label: "With Attachments",
+      key: "resolvedRate",
+      label: "Resolved % Rate",
       cardClass: "from-[#ecfdf5] to-[#f3fdf8]",
+      format: (value) => formatConversionRate(value),
+      previousFormat: (value) => formatConversionRate(value),
     },
     {
-      key: "settlement",
-      label: "Settlement Queries",
+      key: "topIssueCategory",
+      label: "Top Issue category",
       cardClass: "from-[#eef0f8] to-[#f6f7fc]",
+      format: (value) => String(value || "—"),
+      previousFormat: (value) => String(value || "—"),
+      trendKey: "topIssueCount",
+      valueClassName: "text-xl sm:text-2xl leading-snug line-clamp-2",
     },
   ];
 
-  return metrics.map(({ key, label, cardClass }) => {
-    const trend = calculatePercentChange(current[key], previous[key]);
+  return metrics.map(
+    ({ key, label, cardClass, format, previousFormat, trendKey, valueClassName }) => {
+      const trendSourceKey = trendKey || key;
+      const trend = calculatePercentChange(current[trendSourceKey], previous[trendSourceKey]);
 
-    return {
-      label,
-      value: String(current[key]),
-      trend: formatPercentTrend(trend),
-      trendDirection: trend.direction,
-      previousLabel: "vs previous period",
-      previousValue: String(previous[key]),
-      cardClass,
-    };
-  });
+      return {
+        label,
+        value: format(current[key]),
+        valueClassName: valueClassName || "",
+        trend: formatPercentTrend(trend),
+        trendDirection: trend.direction,
+        previousLabel: "vs previous period",
+        previousValue: previousFormat(previous[key]),
+        cardClass,
+      };
+    },
+  );
 }
 
 export function buildMerchantSupportStatsCardsForRange(rows = [], range) {
@@ -666,13 +880,58 @@ export function buildMerchantSupportStatsCardsForRange(rows = [], range) {
   return buildMerchantSupportStatsCards(currentRows, previousRows);
 }
 
+function countTopLabels(rows, getLabel, limit = 5) {
+  const counts = new Map();
+  for (const row of rows) {
+    const label = String(getLabel(row) || "").trim();
+    if (!label || label === "—") continue;
+    counts.set(label, (counts.get(label) || 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([name, count]) => ({ name, count }));
+}
+
+function isExpertBookingOnboarding(row) {
+  if (row.onboardingStatus === "in_progress" || row.onboardingStatus === "yes") {
+    return true;
+  }
+  const status = row.expertStatus ?? row.status ?? "new";
+  const normalized =
+    typeof status === "string" && status.includes(" ")
+      ? status.toLowerCase()
+      : String(status).toLowerCase();
+  if (normalized === "qualified" || normalized === "contacted") return true;
+  if (status === "Qualified" || status === "Contacted") return true;
+  if (row.merchantLeadId) return true;
+  return false;
+}
+
+function expertDisplayName(row) {
+  return (
+    row.representativeName?.trim() ||
+    row.assignee?.trim() ||
+    null
+  );
+}
+
 export function computeExpertBookingStats(rows = []) {
+  const total = rows.length;
+  const onboarding = rows.filter(isExpertBookingOnboarding).length;
+  const topPgs = countTopLabels(
+    rows,
+    (row) => row.paymentGatewayName || row.category?.split(" · ")?.[0],
+    5,
+  );
+  const topExperts = countTopLabels(rows, expertDisplayName, 5);
+
   return {
-    total: rows.length,
-    new: rows.filter((row) => row.expertStatus === "new").length,
-    qualified: rows.filter((row) => row.expertStatus === "qualified").length,
-    completed: rows.filter((row) => row.expertStatus === "completed").length,
-    calendly: rows.filter((row) => row.bookingSource === "calendly").length,
+    total,
+    onboarding,
+    topPgs,
+    topExperts,
   };
 }
 
@@ -683,31 +942,58 @@ export function buildExpertBookingStatsCards(currentRows = [], previousRows = []
   const metrics = [
     {
       key: "total",
-      label: "Total Bookings",
+      label: "Total Request",
       cardClass: "from-[#EEF2FC] to-[#f5f8ff]",
+      variant: "number",
     },
     {
-      key: "qualified",
-      label: "Qualified Leads",
+      key: "onboarding",
+      label: "Total Onboarding",
       cardClass: "from-[#ecfdf9] to-[#f2fcfa]",
+      variant: "number",
     },
     {
-      key: "completed",
-      label: "Completed Calls",
+      key: "topPgs",
+      label: "Top PG",
       cardClass: "from-[#ecfdf5] to-[#f3fdf8]",
+      variant: "rankedList",
+      sublabel: "5 names",
     },
     {
-      key: "calendly",
-      label: "Calendly Bookings",
+      key: "topExperts",
+      label: "Top Expert",
       cardClass: "from-[#eef0f8] to-[#f6f7fc]",
+      variant: "rankedList",
+      sublabel: "5 names",
     },
   ];
 
-  return metrics.map(({ key, label, cardClass }) => {
+  return metrics.map(({ key, label, cardClass, variant, sublabel }) => {
+    if (variant === "rankedList") {
+      const items = current[key] || [];
+      const prevItems = previous[key] || [];
+      const trend = calculatePercentChange(items.length, prevItems.length);
+
+      return {
+        label,
+        sublabel,
+        variant,
+        items,
+        value: items.length ? String(items.length) : "0",
+        trend: formatPercentTrend(trend),
+        trendDirection: trend.direction,
+        previousLabel: "vs previous period",
+        previousValue: String(prevItems.length),
+        cardClass,
+        emptyHint: "No data in this period",
+      };
+    }
+
     const trend = calculatePercentChange(current[key], previous[key]);
 
     return {
       label,
+      variant: "number",
       value: String(current[key]),
       trend: formatPercentTrend(trend),
       trendDirection: trend.direction,

@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
+    "dev:local": "USE_LOCAL_API=true LOCAL_API_URL=http://127.0.0.1:3001/api next dev --webpack",
+    "dev:live": "USE_LOCAL_API=false next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

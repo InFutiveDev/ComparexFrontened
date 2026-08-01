@@ -51,6 +51,29 @@ export function fetchPaymentGatewayById(id) {
   return authFetch(`/payment/${id}`);
 }
 
+export function fetchPgLeadFunnel({ pgId, leadType = "normal" } = {}) {
+  const params = new URLSearchParams();
+  params.set("pgId", pgId);
+  params.set("leadType", leadType);
+  return authFetch(`/payment/admin/pg-lead-funnel?${params.toString()}`);
+}
+
+export function fetchPgCommissionSummary({ from, to, model = "revenue" } = {}) {
+  const params = new URLSearchParams();
+  if (from) params.set("from", from instanceof Date ? from.toISOString() : String(from));
+  if (to) params.set("to", to instanceof Date ? to.toISOString() : String(to));
+  params.set("model", model);
+  return authFetch(`/payment/admin/commission-summary?${params.toString()}`);
+}
+
+export function fetchPaymentGatewayCommissionSummary(id, { from, to } = {}) {
+  const params = new URLSearchParams();
+  if (from) params.set("from", from instanceof Date ? from.toISOString() : String(from));
+  if (to) params.set("to", to instanceof Date ? to.toISOString() : String(to));
+  const query = params.toString();
+  return authFetch(`/payment/${id}/commission-summary${query ? `?${query}` : ""}`);
+}
+
 export function fetchMerchantSupport({ page = 1, limit = 50 } = {}) {
   return authFetch(`/support?${withPagination({ page, limit })}`);
 }
@@ -81,10 +104,14 @@ export function fetchExpertBookingById(id) {
   return authFetch(`/expert/${id}`);
 }
 
-export function updateExpertBookingStatus(id, status) {
+export function updateExpertBookingStatus(id, statusOrPayload) {
+  const body =
+    typeof statusOrPayload === "string"
+      ? { status: statusOrPayload }
+      : statusOrPayload;
   return authFetch(`/expert/${id}/status`, {
     method: "PATCH",
-    body: JSON.stringify({ status }),
+    body: JSON.stringify(body),
   });
 }
 
@@ -257,13 +284,21 @@ export function updateAdminMdrTiers(payload) {
   });
 }
 
-export function fetchAdminMdrAudit({ page = 1, limit = 50, scope } = {}) {
+export function fetchAdminMdrAudit({ page = 1, limit = 50, scope, status } = {}) {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
   });
   if (scope) params.set("scope", scope);
+  if (status) params.set("status", status);
   return authFetch(`/admin/mdr/audit?${params.toString()}`);
+}
+
+export function proposeAdminPgPublicMdr(payload) {
+  return authFetch("/admin/mdr/pg-public/propose", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 /** Master Admin — Users & role assignment */

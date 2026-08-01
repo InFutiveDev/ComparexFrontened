@@ -11,7 +11,7 @@ import {
   MerchantSupportContactModal,
   MerchantSupportEscalateModal,
 } from "@/components/dashboard/merchant-support/merchant-support-action-modals";
-import { CrmDataTable } from "@/components/dashboard/shared/crm-data-table";
+import { MerchantSupportListTable } from "@/components/dashboard/merchant-support/merchant-support-list-table";
 import { DashboardListState, useDashboardList } from "@/hooks/use-dashboard-list";
 import { ApiError } from "@/lib/api";
 import {
@@ -21,18 +21,6 @@ import {
 import { mapMerchantSupportListResponse } from "@/lib/dashboard-mappers";
 
 const actionItemClass = "text-[#13203F] hover:bg-slate-50";
-
-const merchantSupportLabels = {
-  search: "Search support requests",
-  empty: "No support requests found",
-  emptyHint: "Submissions from the merchant support desk will appear here.",
-  filterTitle: "Filter Support Requests",
-  filterDescription: "Refine requests by status, category, and more",
-  upload: "Upload Requests",
-  download: "Download requests",
-  assign: "Assign Request",
-  delete: "Delete Request",
-};
 
 export function MerchantSupportTable({ variant = "full", listState, refreshToken = 0 }) {
   const internalListState = useDashboardList(fetchMerchantSupport, mapMerchantSupportListResponse, {
@@ -79,7 +67,7 @@ export function MerchantSupportTable({ variant = "full", listState, refreshToken
     (row, { detailsHref }) => [
       {
         type: "link",
-        label: "View Details",
+        label: "View",
         icon: HiEye,
         href: detailsHref,
         className: actionItemClass,
@@ -95,7 +83,7 @@ export function MerchantSupportTable({ variant = "full", listState, refreshToken
       },
       {
         type: "button",
-        label: "Resolve",
+        label: "Resolved",
         icon: HiCheckCircle,
         disabled: row.supportStatus === "resolved" || isUpdating,
         onClick: () => handleResolve(row),
@@ -113,6 +101,17 @@ export function MerchantSupportTable({ variant = "full", listState, refreshToken
     ],
     [handleResolve, isUpdating],
   );
+
+  if (variant === "overview") {
+    return (
+      <MerchantSupportListTable
+        rows={data.slice(0, 5)}
+        isLoading={isLoading}
+        getRowActionItems={getRowActionItems}
+        detailsBasePath="/dashboard/merchant-support"
+      />
+    );
+  }
 
   return (
     <>
@@ -134,16 +133,11 @@ export function MerchantSupportTable({ variant = "full", listState, refreshToken
         onRetry={reload}
         emptyMessage="No support requests found"
       >
-        <CrmDataTable
-          data={data}
-          variant={variant}
-          labels={merchantSupportLabels}
-          searchType="merchant"
-          detailsBasePath="/dashboard/merchant-support"
-          detailsWorkType="Merchant Support"
-          showContactColumn={false}
-          showAssigneeColumn={false}
+        <MerchantSupportListTable
+          rows={data}
+          isLoading={isLoading}
           getRowActionItems={getRowActionItems}
+          detailsBasePath="/dashboard/merchant-support"
         />
       </DashboardListState>
 
