@@ -6,15 +6,6 @@ const defaultRowMeta = {
   assigneeColor: "#94a3b8",
 };
 
-const LEAD_STATUS_LABELS = {
-  new: "New",
-  in_review: "In Review",
-  qualified: "Qualified",
-  rejected: "Rejected",
-  assigned: "Assigned",
-  expert_booked: "Talk to Expert Booked",
-};
-
 const MERCHANT_SOURCE_LABELS = {
   merchant: "Website",
   "merchant-portal": "Merchant Portal",
@@ -56,9 +47,58 @@ function formatResellerCommissionType(partnershipModel) {
   return "—";
 }
 
+export function isTalkToExpertMerchantLead(item = {}) {
+  const source = item.sourceKey || item.source;
+  return (
+    source === "talk-to-expert" ||
+    source === "Talk to Expert" ||
+    item.leadStatus === "expert_booked" ||
+    Boolean(item.expertBookingId)
+  );
+}
+
+/** Live API may not allow leadStatus=demo_ready yet — persist via notes marker. */
+export const DEMO_READY_MARKER = "[pipeline:demo_ready]";
+
+export function hasDemoReadyMarker(notes = "") {
+  return String(notes).includes(DEMO_READY_MARKER);
+}
+
+export function stripDemoReadyMarker(notes = "") {
+  return String(notes)
+    .replace(/\[pipeline:demo_ready\]\s*/gi, "")
+    .trim();
+}
+
+export function withDemoReadyMarker(notes = "") {
+  const cleaned = stripDemoReadyMarker(notes);
+  return cleaned ? `${DEMO_READY_MARKER}\n${cleaned}` : DEMO_READY_MARKER;
+}
+
+export function isMerchantDemoReady(item = {}) {
+  return item.leadStatus === "demo_ready" || hasDemoReadyMarker(item.qualificationNotes);
+}
+
+/** Admin merchant list status: Raw / Talk to Expert by default, else Qualified / Demo ready. */
+export function formatMerchantListStatus(item = {}) {
+  const leadStatus = item.leadStatus || "new";
+
+  if (leadStatus === "qualified") return "Qualified";
+  if (isMerchantDemoReady(item)) return "Demo ready";
+  if (leadStatus === "rejected") return "Rejected";
+  if (leadStatus === "assigned") return "Assigned";
+
+  if (isTalkToExpertMerchantLead(item) || leadStatus === "expert_booked") {
+    return "Talk to Expert";
+  }
+
+  return "Raw";
+}
+
 export function mapMerchantToTableRow(item) {
   const leadStatus = item.leadStatus || "new";
   const assignee = item.assignedPgName || "Unassigned";
+  const sourceKey = item.source ?? null;
 
   return {
     ...defaultRowMeta,
@@ -68,6 +108,9 @@ export function mapMerchantToTableRow(item) {
     email: item.email,
     phone: item.phone,
     source: formatMerchantSource(item.source),
+    sourceKey,
+    industryKey: item.industry ?? null,
+    priorityKey: item.priority ?? null,
     priority: formatLabel(item.priority),
     leadType: formatLabel(item.priority) || "—",
     category: formatLabel(item.industry),
@@ -78,10 +121,18 @@ export function mapMerchantToTableRow(item) {
     createdAt: item.createdAt,
     leadStatus,
     pgLeadStatus: item.pgLeadStatus ?? null,
+    assignedPgId: item.assignedPgId ?? null,
     assignedPgName: item.assignedPgName ?? null,
+    expertBookingId: item.expertBookingId ?? null,
     qualificationNotes: item.qualificationNotes ?? "",
     flaggedForReview: Boolean(item.flaggedForReview),
-    status: LEAD_STATUS_LABELS[leadStatus] || formatLabel(leadStatus),
+    status: formatMerchantListStatus({
+      leadStatus,
+      source: sourceKey,
+      sourceKey,
+      expertBookingId: item.expertBookingId,
+      qualificationNotes: item.qualificationNotes ?? "",
+    }),
     assignee,
     assigneeInitials: assignee === "Unassigned" ? "—" : getInitials(assignee),
     assigneeColor: assignee === "Unassigned" ? "#94a3b8" : "#2D4CC8",
@@ -749,6 +800,125 @@ export function buildPgActivationLeaders(rows = [], limit = 8) {
       acceptedLeads: row.acceptedLeadCount ?? 0,
       activationRate: row.conversionRateLabel ?? formatConversionRate(row.conversionRate ?? 0),
     }));
+}
+
+const PG_BRAND_LOGOS = [
+  { match: /razorpay/i, src: "/images/brand-logos/Razorpay_logo.svg" },
+  { match: /cashfree/i, src: "/images/brand-logos/cashfree.png" },
+  { match: /payu/i, src: "/images/brand-logos/Payu.png" },
+  { match: /ccavenue|cc avenue/i, src: "/images/brand-logos/ccavenue.png" },
+  { match: /paytm/i, src: "/images/brand-logos/paytm.png" },
+  { match: /easebuzz/i, src: "/images/brand-logos/easebuzz.png" },
+  { match: /stripe/i, src: "/images/brand-logos/stripe.png" },
+  { match: /phonepe|phone pe/i, src: "/images/brand-logos/phonepe.png" },
+  { match: /amazon/i, src: "/images/brand-logos/amazon.jpg" },
+];
+
+export function resolvePgBrandLogo(name = "") {
+  const found = PG_BRAND_LOGOS.find((item) => item.match.test(String(name)));
+  return found?.src ?? null;
+}
+
+function startOfLocalDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function dayKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function formatDayLabel(date) {
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
+function isQualifiedLead(row) {
+  return ["qualified", "assigned", "expert_booked"].includes(row.leadStatus);
+}
+
+function isRejectedLead(row) {
+  return row.leadStatus === "rejected" || row.pgLeadStatus === "rejected";
+}
+
+function isOnboardedLead(row) {
+  return row.pgLeadStatus === "live";
+}
+
+function leadMatchesPgFilter(row, pgFilter) {
+  if (!pgFilter) return true;
+  const pgId = pgFilter.id;
+  const pgName = String(pgFilter.name || "").toLowerCase();
+  if (row.assignedPgId && pgId && String(row.assignedPgId) === String(pgId)) {
+    return true;
+  }
+  const assignedName = String(row.assignedPgName || row.assignee || "").toLowerCase();
+  return Boolean(pgName) && assignedName.includes(pgName);
+}
+
+/** Daily Total / Qualified / Rejected / Onboarded series for admin overview chart. */
+export function buildLeadsDailyTrend(rows = [], { days = 11, pgFilter = null } = {}) {
+  const today = startOfLocalDay(new Date());
+  const buckets = [];
+
+  for (let offset = days - 1; offset >= 0; offset -= 1) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - offset);
+    buckets.push({
+      key: dayKey(date),
+      date: formatDayLabel(date),
+      total: 0,
+      qualified: 0,
+      rejected: 0,
+      onboarded: 0,
+    });
+  }
+
+  const byKey = Object.fromEntries(buckets.map((bucket) => [bucket.key, bucket]));
+
+  for (const row of rows) {
+    if (!leadMatchesPgFilter(row, pgFilter)) continue;
+    if (!row.createdAt) continue;
+    const created = new Date(row.createdAt);
+    if (Number.isNaN(created.getTime())) continue;
+    const bucket = byKey[dayKey(startOfLocalDay(created))];
+    if (!bucket) continue;
+
+    bucket.total += 1;
+    if (isQualifiedLead(row)) bucket.qualified += 1;
+    if (isRejectedLead(row)) bucket.rejected += 1;
+    if (isOnboardedLead(row)) bucket.onboarded += 1;
+  }
+
+  return buckets.map(({ date, total, qualified, rejected, onboarded }) => ({
+    date,
+    total,
+    qualified,
+    rejected,
+    onboarded,
+  }));
+}
+
+/** Top PG vendors by total leads (fallback: onboarded). */
+export function buildTopPgVendors(rows = [], limit = 5) {
+  return [...rows]
+    .sort((a, b) => {
+      const totalDiff = (b.totalLeadCount ?? 0) - (a.totalLeadCount ?? 0);
+      if (totalDiff !== 0) return totalDiff;
+      return (b.onboardedLeadCount ?? 0) - (a.onboardedLeadCount ?? 0);
+    })
+    .slice(0, limit)
+    .map((row) => {
+      const name = row.name || row.company || "Payment Gateway";
+      return {
+        id: row.id,
+        name,
+        logoUrl: resolvePgBrandLogo(name),
+        totalLeadCount: row.totalLeadCount ?? 0,
+        onboardedLeadCount: row.onboardedLeadCount ?? 0,
+      };
+    });
 }
 
 function getSupportIssueCategory(row) {

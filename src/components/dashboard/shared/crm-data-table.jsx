@@ -94,6 +94,9 @@ const statusStyles = {
   Resolved: "bg-emerald-100 text-emerald-700",
   Escalated: "bg-violet-100 text-violet-700",
   "In Progress": "bg-amber-100 text-amber-700",
+  Raw: "bg-slate-100 text-slate-700",
+  "Talk to Expert": "bg-[#40C3CF]/15 text-[#0f766e]",
+  "Demo ready": "bg-amber-100 text-amber-800",
 };
 
 function matchesRowSearch(row, query) {
@@ -317,6 +320,8 @@ export function CrmDataTable({
   resultLabel = "records",
   onDeleteRow,
   getRowActionItems,
+  renderAssigneeCell,
+  renderStatusCell,
   rowActionsVariant = "menu",
 }) {
   const labels = { ...defaultLabels, ...labelsProp };
@@ -653,9 +658,11 @@ export function CrmDataTable({
                       <td className="px-3 py-3.5 text-slate-700">{row.leadType || "—"}</td>
                     ) : null}
                     {showAssigneeColumn ? (
-                      <td className="px-3 py-3.5">
+                      <td className="relative overflow-visible px-3 py-3.5">
                         {assigneeColumn === "totalLead" ? (
                           <span className="font-medium text-[#13203F]">{row.totalLead ?? 0}</span>
+                        ) : renderAssigneeCell ? (
+                          renderAssigneeCell(row)
                         ) : (
                           <div className="flex items-center gap-2">
                             <div
@@ -682,8 +689,8 @@ export function CrmDataTable({
                     {showWorkTypeColumn ? (
                     <td className="px-3 py-3.5 text-slate-700">{row.workType}</td>
                     ) : null}
-                    <td className="px-3 py-3.5">
-                      <StatusBadge status={row.status} />
+                    <td className="relative overflow-visible px-3 py-3.5">
+                      {renderStatusCell ? renderStatusCell(row) : <StatusBadge status={row.status} />}
                     </td>
                     {showConversionRate ? (
                       <td className="px-3 py-3.5">

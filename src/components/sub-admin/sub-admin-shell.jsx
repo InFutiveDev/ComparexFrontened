@@ -11,6 +11,7 @@ import {
   HiClipboardDocumentList,
   HiCloudArrowUp,
   HiDocumentChartBar,
+  HiFlag,
   HiSquares2X2,
   HiUserGroup,
 } from "react-icons/hi2";
@@ -23,6 +24,7 @@ const notificationsEnabled =
 const navItems = [
   { href: "/sub-admin-dashboard", label: "Overview", icon: HiSquares2X2 },
   { href: "/sub-admin-dashboard/leads", label: "Lead Qualification", icon: HiClipboardDocumentList },
+  { href: "/sub-admin-dashboard/leads/flagged", label: "Flagged for Review", icon: HiFlag },
   { href: "/sub-admin-dashboard/assign", label: "Lead Assignment", icon: HiUserGroup },
   { href: "/sub-admin-dashboard/expert-routing", label: "Expert Routing", icon: HiCalendarDays },
   ...(notificationsEnabled

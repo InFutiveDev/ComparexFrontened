@@ -7,6 +7,12 @@ const cards = [
     description: "Review incoming merchant leads, update status, and view activity history.",
   },
   {
+    href: "/sub-admin-dashboard/leads/flagged",
+    title: "Flagged for Review",
+    description:
+      "Shared queue of leads flagged by Admin or Sub Admin. Review, qualify, assign, or add notes.",
+  },
+  {
     href: "/sub-admin-dashboard/assign",
     title: "Lead Assignment",
     description: "Assign qualified leads to payment gateways or book Talk to Expert.",

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2";
+import { useMerchantLeadActions } from "@/components/dashboard/merchant/use-merchant-lead-actions";
+import { RowActionsMenu } from "@/components/dashboard/shared/row-actions-menu";
 import { ApiError } from "@/lib/api";
 import {
   LEAD_STATUS_OPTIONS,
@@ -20,6 +22,7 @@ function statusStyle(status) {
     new: "bg-blue-50 text-blue-700 ring-blue-200",
     in_review: "bg-amber-50 text-amber-700 ring-amber-200",
     qualified: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    demo_ready: "bg-amber-50 text-amber-800 ring-amber-200",
     rejected: "bg-red-50 text-red-700 ring-red-200",
     assigned: "bg-indigo-50 text-indigo-700 ring-indigo-200",
     expert_booked: "bg-violet-50 text-violet-700 ring-violet-200",
@@ -54,6 +57,7 @@ export function LeadsTableSection({
   title = "Lead Qualification",
   description = "Review and qualify incoming merchant leads.",
   defaultStatus = "",
+  defaultFlaggedOnly = false,
   assignedPgId = "",
   registeredViaResellerId = "",
   showAssignCta = true,
@@ -67,11 +71,13 @@ export function LeadsTableSection({
   const [perPage, setPerPage] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
   const [filters, setFilters] = useState({
     status: defaultStatus,
     industry: "",
     location: "",
     search: "",
+    flaggedOnly: defaultFlaggedOnly,
   });
 
   const totalPages = Math.max(1, Math.ceil(total / perPage));
@@ -85,7 +91,9 @@ export function LeadsTableSection({
       const data = await fetchSubAdminLeads({
         page,
         limit: perPage,
-        status: filters.status || undefined,
+        status:
+          filters.status ||
+          (filters.flaggedOnly ? "in_review" : undefined),
         industry: filters.industry || undefined,
         location: filters.location || undefined,
         assignedPgId: assignedPgId || undefined,
@@ -93,9 +101,21 @@ export function LeadsTableSection({
         search: filters.search || undefined,
         leadChannel:
           leadView === "tte" ? "tte" : leadView === "regular" ? "regular" : undefined,
+        flaggedForReview: filters.flaggedOnly || undefined,
       });
-      setLeads(data.leads || []);
-      setTotal(data.total || 0);
+
+      let nextLeads = data.leads || [];
+      // Live API may ignore flaggedForReview — filter client-side as fallback.
+      if (filters.flaggedOnly) {
+        nextLeads = nextLeads.filter((lead) => Boolean(lead.flaggedForReview));
+      }
+
+      setLeads(nextLeads);
+      setTotal(
+        filters.flaggedOnly
+          ? nextLeads.length
+          : data.total || 0,
+      );
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to load leads");
       setLeads([]);
@@ -104,6 +124,10 @@ export function LeadsTableSection({
       setIsLoading(false);
     }
   }, [assignedPgId, registeredViaResellerId, filters, page, perPage, leadView]);
+
+  const { getLeadActionItems, actionBanners, notesModal } = useMerchantLeadActions({
+    onReload: loadLeads,
+  });
 
   useEffect(() => {
     loadLeads();
@@ -139,7 +163,7 @@ export function LeadsTableSection({
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
               Status
@@ -155,6 +179,19 @@ export function LeadsTableSection({
                   {option.label}
                 </option>
               ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Flagged
+            </label>
+            <select
+              className={inputClass}
+              value={filters.flaggedOnly ? "flagged" : ""}
+              onChange={(e) => updateFilter("flaggedOnly", e.target.value === "flagged")}
+            >
+              <option value="">All leads</option>
+              <option value="flagged">Flagged for Review</option>
             </select>
           </div>
           <div>
@@ -202,6 +239,8 @@ export function LeadsTableSection({
         </div>
       </div>
 
+      {actionBanners}
+
       {error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -242,34 +281,58 @@ export function LeadsTableSection({
                   </td>
                 </tr>
               ) : null}
-              {leads.map((lead) => (
-                <tr key={lead.id} className="border-t border-slate-100 hover:bg-[#EEF2FC]/35">
-                  <td className="px-4 py-3">
-                    <p className="font-semibold text-[#13203F]">{lead.businessName}</p>
-                    <p className="text-xs text-slate-500">{lead.id}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="text-[#13203F]">{lead.email}</p>
-                    <p className="text-xs text-slate-500">{lead.phone}</p>
-                  </td>
-                  <td className="px-4 py-3 text-slate-700">{lead.industry || "—"}</td>
-                  <td className="px-4 py-3 text-slate-700">{lead.location || "—"}</td>
-                  <td className="px-4 py-3">
-                    <LeadStatusBadge status={lead.leadStatus} />
-                  </td>
-                  {hideAssignedPgColumn ? null : (
-                    <td className="px-4 py-3 text-slate-700">{lead.assignedPgName || "—"}</td>
-                  )}
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`${leadDetailBasePath}/${lead.id}`}
-                      className="font-semibold text-[#2D4CC8] hover:underline"
-                    >
-                      Review
-                    </Link>
-                  </td>
-                </tr>
-              ))}
+              {leads.map((lead) => {
+                const detailsHref = `${leadDetailBasePath}/${lead.id}`;
+                const menuItems = getLeadActionItems(lead);
+
+                return (
+                  <tr key={lead.id} className="border-t border-slate-100 hover:bg-[#EEF2FC]/35">
+                    <td className="px-4 py-3">
+                      <p className="font-semibold text-[#13203F]">{lead.businessName}</p>
+                      <p className="text-xs text-slate-500">{lead.id}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="text-[#13203F]">{lead.email}</p>
+                      <p className="text-xs text-slate-500">{lead.phone}</p>
+                    </td>
+                    <td className="px-4 py-3 text-slate-700">{lead.industry || "—"}</td>
+                    <td className="px-4 py-3 text-slate-700">{lead.location || "—"}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <LeadStatusBadge status={lead.leadStatus} />
+                        {lead.flaggedForReview ? (
+                          <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                            Flagged
+                          </span>
+                        ) : null}
+                      </div>
+                    </td>
+                    {hideAssignedPgColumn ? null : (
+                      <td className="px-4 py-3 text-slate-700">{lead.assignedPgName || "—"}</td>
+                    )}
+                    <td className="relative overflow-visible px-4 py-3">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={detailsHref}
+                          className="text-xs font-semibold text-[#2D4CC8] hover:underline"
+                        >
+                          Review
+                        </Link>
+                        <RowActionsMenu
+                          row={lead}
+                          menuItems={menuItems}
+                          isOpen={openMenuId === lead.id}
+                          onToggle={() =>
+                            setOpenMenuId((current) => (current === lead.id ? null : lead.id))
+                          }
+                          onClose={() => setOpenMenuId(null)}
+                          detailsHref={detailsHref}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -317,10 +380,10 @@ export function LeadsTableSection({
                       type="button"
                       disabled={isLoading}
                       onClick={() => setPage(pageNumber)}
-                      className={`min-w-8 cursor-pointer rounded-lg px-2.5 py-1.5 text-sm font-medium transition ${
-                        pageNumber === page
-                          ? "bg-[#25a36f]/15 text-[#25a36f]"
-                          : "text-slate-600 hover:bg-slate-50"
+                      className={`min-w-9 cursor-pointer rounded-lg px-2.5 py-1.5 text-sm font-semibold transition ${
+                        page === pageNumber
+                          ? "bg-[#2D4CC8] text-white"
+                          : "border border-slate-200 text-slate-600 hover:bg-slate-50"
                       }`}
                     >
                       {pageNumber}
@@ -331,7 +394,7 @@ export function LeadsTableSection({
 
               <button
                 type="button"
-                disabled={page >= totalPages || isLoading}
+                disabled={page === totalPages || isLoading}
                 onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
                 className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
@@ -342,6 +405,8 @@ export function LeadsTableSection({
           </div>
         ) : null}
       </div>
+
+      {notesModal}
     </div>
   );
 }

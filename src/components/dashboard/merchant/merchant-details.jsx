@@ -21,14 +21,16 @@ import {
 } from "@/components/dashboard/shared/record-details";
 import { fetchMerchantById } from "@/lib/dashboard-api";
 import { pickMerchantGateway } from "@/lib/dashboard-detail-pickers";
+import { stripDemoReadyMarker } from "@/lib/dashboard-mappers";
 
 const LEAD_STATUS_LABELS = {
-  new: "New",
+  new: "Raw",
   in_review: "In Review",
   qualified: "Qualified",
+  demo_ready: "Demo ready",
   rejected: "Rejected",
   assigned: "Assigned",
-  expert_booked: "Talk to Expert Booked",
+  expert_booked: "Talk to Expert",
 };
 
 const PG_LEAD_STATUS_LABELS = {
@@ -194,7 +196,9 @@ export function MerchantDetails({ id }) {
             </DetailField>
             <DetailField label="Expert Booking ID">{data.expertBookingId || "—"}</DetailField>
             <DetailField label="Location">{data.location || "—"}</DetailField>
-            <DetailField label="Qualification Notes">{data.qualificationNotes || "—"}</DetailField>
+            <DetailField label="Qualification Notes">
+              {stripDemoReadyMarker(data.qualificationNotes) || "—"}
+            </DetailField>
           </div>
         </InfoCard>
       </div>

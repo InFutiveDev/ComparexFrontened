@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import { HiXMark } from "react-icons/hi2";
 import { ApiError } from "@/lib/api";
 import { updateMerchantAdmin } from "@/lib/dashboard-api";
+import {
+  hasDemoReadyMarker,
+  stripDemoReadyMarker,
+  withDemoReadyMarker,
+} from "@/lib/dashboard-mappers";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-[#13203F] outline-none focus:border-[#40C3CF] focus:ring-2 focus:ring-[#40C3CF]/20";
@@ -36,12 +41,12 @@ function ModalShell({ title, onClose, children }) {
 }
 
 export function MerchantNotesModal({ row, onClose, onSaved }) {
-  const [notes, setNotes] = useState(row?.qualificationNotes || "");
+  const [notes, setNotes] = useState(stripDemoReadyMarker(row?.qualificationNotes || ""));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setNotes(row?.qualificationNotes || "");
+    setNotes(stripDemoReadyMarker(row?.qualificationNotes || ""));
     setError("");
   }, [row]);
 
@@ -53,7 +58,11 @@ export function MerchantNotesModal({ row, onClose, onSaved }) {
     setError("");
 
     try {
-      const result = await updateMerchantAdmin(row.id, { qualificationNotes: notes });
+      const keepDemoReady = hasDemoReadyMarker(row.qualificationNotes);
+      const qualificationNotes = keepDemoReady
+        ? withDemoReadyMarker(notes)
+        : notes.trim() || null;
+      const result = await updateMerchantAdmin(row.id, { qualificationNotes });
       onSaved?.(result.message || "Notes saved");
       onClose();
     } catch (err) {

@@ -1,5 +1,5 @@
+import { LeadsTrendSection } from "@/components/dashboard/overview/leads-trend-section";
 import { OverviewBarChart } from "@/components/dashboard/overview/overview-bar-chart";
-import { OverviewEntitiesTable } from "@/components/dashboard/overview/overview-entities-table";
 import { StatsCards } from "@/components/dashboard/overview/stats-cards";
 
 export function OverviewSection() {
@@ -7,7 +7,7 @@ export function OverviewSection() {
     <div className="space-y-5">
       <StatsCards />
       <OverviewBarChart />
-      <OverviewEntitiesTable />
+      <LeadsTrendSection />
     </div>
   );
 }

@@ -29,6 +29,7 @@ export function fetchSubAdminLeads({
   registeredViaResellerId,
   search,
   leadChannel,
+  flaggedForReview,
 } = {}) {
   return authFetch(
     `/sub-admin/leads${toQuery({
@@ -41,6 +42,7 @@ export function fetchSubAdminLeads({
       registeredViaResellerId,
       search,
       leadChannel,
+      flaggedForReview: flaggedForReview ? "true" : undefined,
     })}`
   );
 }
@@ -108,12 +110,13 @@ export async function bulkUploadLeadsToPg({ paymentGatewayId, file }) {
 }
 
 export const LEAD_STATUS_OPTIONS = [
-  { value: "new", label: "New" },
+  { value: "new", label: "Raw" },
   { value: "in_review", label: "In Review" },
   { value: "qualified", label: "Qualified" },
+  { value: "demo_ready", label: "Demo ready" },
   { value: "rejected", label: "Rejected" },
   { value: "assigned", label: "Assigned" },
-  { value: "expert_booked", label: "Talk to Expert Booked" },
+  { value: "expert_booked", label: "Talk to Expert" },
 ];
 
 export function formatLeadStatus(status) {
