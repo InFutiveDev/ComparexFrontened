@@ -139,26 +139,32 @@ export function mapMerchantToTableRow(item) {
   };
 }
 
+export function formatResellerListStatus(item = {}) {
+  const verificationStatus = item.verificationStatus || "incomplete";
+  const accountStatus = item.accountStatus || "inactive";
+
+  if (verificationStatus === "rejected") return "Blocked";
+  if (verificationStatus === "pending_review" || verificationStatus === "incomplete") {
+    return "In review";
+  }
+  if (accountStatus === "active") return "Active";
+  return "Inactive";
+}
+
 export function mapResellerToTableRow(item) {
   const verificationStatus = item.verificationStatus || "incomplete";
-  const statusLabel =
-    verificationStatus === "pending_review"
-      ? "Pending Review"
-      : verificationStatus === "approved"
-        ? "Approved"
-        : verificationStatus === "rejected"
-          ? "Rejected"
-          : "Incomplete";
+  const statusLabel = formatResellerListStatus(item);
 
   return {
     id: item.id,
-    name: item.fullName,
+    name: item.fullName || item.businessName,
     company: item.businessName,
     email: item.email,
     phone: item.phone,
     resellerType: formatResellerCommissionType(item.partnershipModel),
     totalLead: item.totalLeadCount ?? 0,
     qualifiedLead: item.qualifiedLeadCount ?? 0,
+    activatedLead: item.activatedLeadCount ?? 0,
     source: item.source || "Reseller Form",
     priority: formatLabel(item.partnershipModel) || formatLabel(item.paymentFamiliarity),
     category: formatLabel(item.partnerType),
@@ -561,6 +567,77 @@ export function getMerchantTimeRangeBounds(range) {
   return { start, end: now };
 }
 
+/** Calendar period bounds for Top Reseller M / Q / Y. */
+export function getResellerTopPeriodBounds(period) {
+  const now = new Date();
+  const key = String(period || "M").toUpperCase();
+
+  if (key === "Q" || key === "QUARTER") {
+    const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
+    const start = new Date(now.getFullYear(), quarterStartMonth, 1);
+    start.setHours(0, 0, 0, 0);
+    return { start, end: now };
+  }
+
+  if (key === "Y" || key === "YEAR") {
+    const start = new Date(now.getFullYear(), 0, 1);
+    start.setHours(0, 0, 0, 0);
+    return { start, end: now };
+  }
+
+  // Default: Month (calendar month)
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  start.setHours(0, 0, 0, 0);
+  return { start, end: now };
+}
+
+export function formatResellerRevenue(value) {
+  if (!Number.isFinite(Number(value)) || Number(value) <= 0) return "₹0";
+  const amount = Number(value);
+  if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(1)}Cr`;
+  if (amount >= 100000) return `₹${(amount / 100000).toFixed(1)}L`;
+  if (amount >= 1000) return `₹${(amount / 1000).toFixed(1)}K`;
+  return `₹${Math.round(amount).toLocaleString("en-IN")}`;
+}
+
+/** Fallback ranking from reseller list rows when GMV top API is unavailable. */
+export function buildTopResellersFromRows(rows = [], limit = 5) {
+  return [...rows]
+    .sort((a, b) => {
+      const leadDiff = (b.totalLead ?? 0) - (a.totalLead ?? 0);
+      if (leadDiff !== 0) return leadDiff;
+      return (b.qualifiedLead ?? 0) - (a.qualifiedLead ?? 0);
+    })
+    .slice(0, limit)
+    .map((row, index) => ({
+      rank: index + 1,
+      id: row.id,
+      name: row.name || row.company || "Reseller",
+      company: row.company || row.name || "Reseller",
+      totalGmv: null,
+      totalLeadCount: row.totalLead ?? 0,
+      qualifiedLeadCount: row.qualifiedLead ?? 0,
+      merchantCount: row.totalLead ?? 0,
+      metricLabel: `${row.totalLead ?? 0} leads`,
+      metricSubLabel: `${row.qualifiedLead ?? 0} qualified`,
+    }));
+}
+
+export function mapResellerTopLeadersResponse(response = {}) {
+  return (response.leaders ?? []).map((item, index) => ({
+    rank: item.rank ?? index + 1,
+    id: item.id,
+    name: item.name || item.company || "Reseller",
+    company: item.company || item.name || "Reseller",
+    totalGmv: item.totalGmv ?? 0,
+    totalLeadCount: item.totalLeadCount ?? 0,
+    qualifiedLeadCount: item.qualifiedLeadCount ?? 0,
+    merchantCount: item.merchantCount ?? 0,
+    metricLabel: formatResellerRevenue(item.totalGmv ?? 0),
+    metricSubLabel: `${item.merchantCount ?? 0} merchants`,
+  }));
+}
+
 export function getMerchantPreviousTimeRangeBounds(range) {
   const now = new Date();
 
@@ -631,15 +708,6 @@ export function buildMerchantStatsCardsForRange(rows = [], range) {
   );
 
   return buildMerchantStatsCards(currentRows, previousRows);
-}
-
-function formatResellerRevenue(amount) {
-  const value = Number(amount) || 0;
-  if (value <= 0) return "₹0";
-  if (value >= 10000000) return `₹${(value / 10000000).toFixed(1)}Cr`;
-  if (value >= 100000) return `₹${(value / 100000).toFixed(1)}L`;
-  if (value >= 1000) return `₹${(value / 1000).toFixed(1)}K`;
-  return `₹${Math.round(value).toLocaleString("en-IN")}`;
 }
 
 export function computeResellerStats(rows = [], totalGmv = 0) {

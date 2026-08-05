@@ -43,6 +43,19 @@ export function fetchResellerGmvSummary({ from, to } = {}) {
   return authFetch(`/reseller/admin/gmv-summary${query ? `?${query}` : ""}`);
 }
 
+export function fetchResellerTopLeaders({ from, to, limit = 5 } = {}) {
+  const params = new URLSearchParams();
+  if (from) {
+    params.set("from", from instanceof Date ? from.toISOString() : String(from));
+  }
+  if (to) {
+    params.set("to", to instanceof Date ? to.toISOString() : String(to));
+  }
+  params.set("limit", String(limit));
+
+  return authFetch(`/reseller/admin/top?${params.toString()}`);
+}
+
 export function fetchPaymentGateways({ page = 1, limit = 50 } = {}) {
   return authFetch(`/payment?${withPagination({ page, limit })}`);
 }

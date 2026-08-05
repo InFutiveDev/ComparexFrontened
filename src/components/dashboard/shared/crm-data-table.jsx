@@ -97,6 +97,10 @@ const statusStyles = {
   Raw: "bg-slate-100 text-slate-700",
   "Talk to Expert": "bg-[#40C3CF]/15 text-[#0f766e]",
   "Demo ready": "bg-amber-100 text-amber-800",
+  Active: "bg-emerald-100 text-emerald-700",
+  Inactive: "bg-slate-100 text-slate-600",
+  "In review": "bg-amber-100 text-amber-700",
+  Blocked: "bg-red-100 text-red-700",
 };
 
 function matchesRowSearch(row, query) {
